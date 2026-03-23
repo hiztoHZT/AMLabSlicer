@@ -22,6 +22,8 @@
 1. 克隆本项目到本地环境：
 ```bash
    git clone [https://github.com/hiztoHZT/AMLabSlicer.git](https://github.com/hiztoHZT/AMLabSlicer.git)
+```
+
 2. 使用 Visual Studio 打开 AMLabSlicer.sln 解决方案文件。
 
 3.在解决方案资源管理器中右键 -> 还原 NuGet 程序包（确保 Helix 等依赖项正确下载）。
