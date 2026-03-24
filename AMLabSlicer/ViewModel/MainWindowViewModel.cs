@@ -2,10 +2,10 @@
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
 using System.Windows;
-// 【引入下面这两个关键的 Helix 命名空间】
 using HelixToolkit.Wpf.SharpDX;
 using HelixToolkit.SharpDX.Assimp;
 using HelixToolkit.SharpDX;
+using SharpAssimp;
 
 namespace AMLabSlicer.ViewModel
 {
@@ -30,28 +30,46 @@ namespace AMLabSlicer.ViewModel
 
             if (openFileDialog.ShowDialog() == true)
             {
+                // 1. 必须先实例化 importer
+                // 1. 实例化 importer
                 var importer = new Importer();
+
+                // 2. 使用 SharpAssimp 的枚举来开启自动平滑和切线计算
+                importer.Configuration.AssimpPostProcessSteps =
+                    SharpAssimp.PostProcessSteps.JoinIdenticalVertices |
+                    SharpAssimp.PostProcessSteps.GenerateSmoothNormals |
+                    SharpAssimp.PostProcessSteps.CalculateTangentSpace;
+
+                // 3. 加载模型
                 var scene = importer.Load(openFileDialog.FileName);
 
                 if (scene != null && scene.Root != null)
                 {
-                    // 给模型刷上默认的材质
+                    // 1. 调配专业的“切片机哑光材质”
+                    var slicerMaterial = new HelixToolkit.SharpDX.Model.PhongMaterialCore()
+                    {
+                        DiffuseColor = new HelixToolkit.Maths.Color4(225f / 255f, 225f / 255f, 225f / 255f, 1f),
+                        AmbientColor = new HelixToolkit.Maths.Color4(220f / 255f, 220f / 255f, 220f / 255f, 1f),
+                        SpecularColor = new HelixToolkit.Maths.Color4(30f / 255f, 30f / 255f, 30f / 255f, 1f),
+                        SpecularShininess = 5f
+                    };
+
+                    // 2. 将材质刷给模型
                     foreach (var node in scene.Root.Traverse())
                     {
-                        // 【修复 CS0234 报错】：直接使用全路径指定 MeshNode 的位置
                         if (node is HelixToolkit.SharpDX.Model.Scene.MeshNode meshNode)
                         {
-                            meshNode.Material = PhongMaterials.LightGray;
+                            meshNode.Material = slicerMaterial;
                         }
                     }
 
-                    // 【核心逻辑】：把底层的 SceneNode 包装成 WPF 认识的 SceneNodeGroupModel3D
+                    // 6. 把底层的 SceneNode 包装成 WPF 认识的 SceneNodeGroupModel3D
                     var groupModel = new SceneNodeGroupModel3D();
                     groupModel.AddNode(scene.Root);
 
+                    // 7. 传递给界面显示
                     if (CurrentWorkspace is PrepareWorkspaceViewModel prepVM)
                     {
-                        // 把包装好的控件传给界面
                         prepVM.LoadedModel = groupModel;
                     }
                 }
