@@ -23,4 +23,8 @@
     <Resource Include="Assets\Images\AMLab_logo_rgb.svg" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Assets\新文件夹\" />
+  </ItemGroup>
+
 </Project>
