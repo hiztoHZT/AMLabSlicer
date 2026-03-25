@@ -25,7 +25,13 @@
 
             <hx:DirectionalLight3D Direction="{Binding Camera.LookDirection, ElementName=MainViewport}" 
                                    Color="#CCCCCC" />
+            <hx:LineGeometryModel3D Geometry="{Binding MinorGridGeometry}"
+                                    Color="#333333" 
+                                    Thickness="0.5" />
 
+            <hx:LineGeometryModel3D Geometry="{Binding MajorGridGeometry}"
+                                    Color="#666666" 
+                                    Thickness="1" />
             <hx:Element3DPresenter Content="{Binding LoadedModel}" />
 
         </hx:Viewport3DX>

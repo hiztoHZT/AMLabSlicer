@@ -1,0 +1,14 @@
+﻿<Window x:Class="AMLabSlicer.Views.PreferencesWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="首选项" Height="450" Width="600"
+        WindowStartupLocation="CenterOwner" 
+        ResizeMode="NoResize"
+        Background="#F0F0F0">
+    <Grid>
+        <TextBlock Text="这里是未来的首选项设置面板..." 
+                   HorizontalAlignment="Center" 
+                   VerticalAlignment="Center" 
+                   FontSize="16" Foreground="#666666"/>
+    </Grid>
+</Window>

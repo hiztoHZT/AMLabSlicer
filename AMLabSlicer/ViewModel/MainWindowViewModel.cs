@@ -5,6 +5,7 @@ using System.Windows;
 using HelixToolkit.Wpf.SharpDX;
 using HelixToolkit.SharpDX.Assimp;
 using HelixToolkit.SharpDX;
+using AMLabSlicer.Views;
 using SharpAssimp;
 
 namespace AMLabSlicer.ViewModel
@@ -30,22 +31,21 @@ namespace AMLabSlicer.ViewModel
 
             if (openFileDialog.ShowDialog() == true)
             {
-                // 1. 必须先实例化 importer
-                // 1. 实例化 importer
+                // 实例化 importer
                 var importer = new Importer();
 
-                // 2. 使用 SharpAssimp 的枚举来开启自动平滑和切线计算
+                // 使用 SharpAssimp 的枚举来开启自动平滑和切线计算
                 importer.Configuration.AssimpPostProcessSteps =
                     SharpAssimp.PostProcessSteps.JoinIdenticalVertices |
                     SharpAssimp.PostProcessSteps.GenerateSmoothNormals |
                     SharpAssimp.PostProcessSteps.CalculateTangentSpace;
 
-                // 3. 加载模型
+                // 加载模型
                 var scene = importer.Load(openFileDialog.FileName);
 
                 if (scene != null && scene.Root != null)
                 {
-                    // 1. 调配专业的“切片机哑光材质”
+                    // 调配专业的“切片机哑光材质”
                     var slicerMaterial = new HelixToolkit.SharpDX.Model.PhongMaterialCore()
                     {
                         DiffuseColor = new HelixToolkit.Maths.Color4(225f / 255f, 225f / 255f, 225f / 255f, 1f),
@@ -54,7 +54,7 @@ namespace AMLabSlicer.ViewModel
                         SpecularShininess = 5f
                     };
 
-                    // 2. 将材质刷给模型
+                    //将材质刷给模型
                     foreach (var node in scene.Root.Traverse())
                     {
                         if (node is HelixToolkit.SharpDX.Model.Scene.MeshNode meshNode)
@@ -63,11 +63,11 @@ namespace AMLabSlicer.ViewModel
                         }
                     }
 
-                    // 6. 把底层的 SceneNode 包装成 WPF 认识的 SceneNodeGroupModel3D
+                    //把底层的 SceneNode 包装成 WPF 认识的 SceneNodeGroupModel3D
                     var groupModel = new SceneNodeGroupModel3D();
                     groupModel.AddNode(scene.Root);
 
-                    // 7. 传递给界面显示
+                    //传递给界面显示
                     if (CurrentWorkspace is PrepareWorkspaceViewModel prepVM)
                     {
                         prepVM.LoadedModel = groupModel;
@@ -78,6 +78,14 @@ namespace AMLabSlicer.ViewModel
                     MessageBox.Show("模型加载失败或文件已损坏！", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
+        }
+
+        [RelayCommand]
+        private void OpenPreferences()
+        {
+            var prefWindow = new PreferencesWindow();
+            prefWindow.Owner = Application.Current.MainWindow;
+            prefWindow.ShowDialog();
         }
     }
 }
