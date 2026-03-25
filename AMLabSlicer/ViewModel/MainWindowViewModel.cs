@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
 using System.Windows;
@@ -15,9 +15,9 @@ namespace AMLabSlicer.ViewModel
         [ObservableProperty]
         private ObservableObject? _currentWorkspace;
 
-        public MainWindowViewModel()
+        public MainWindowViewModel(PrepareWorkspaceViewModel prepVM)
         {
-            CurrentWorkspace = new PrepareWorkspaceViewModel();
+            CurrentWorkspace = prepVM;
         }
 
         [RelayCommand]

@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Input;
 
 namespace AMLabSlicer.Views
 {
@@ -7,36 +8,32 @@ namespace AMLabSlicer.Views
         public MainWindow()
         {
             InitializeComponent();
+            
+        }
+        private void Border_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+            {
+                this.DragMove();
+            }
         }
 
-        // 最小化
         private void BtnMinimize_Click(object sender, RoutedEventArgs e)
         {
-            this.WindowState = WindowState.Minimized;
+            WindowState = WindowState.Minimized;
         }
 
-        // 最大化 / 向下还原
         private void BtnMaximize_Click(object sender, RoutedEventArgs e)
         {
-            if (this.WindowState == WindowState.Maximized)
-            {
-                this.WindowState = WindowState.Normal;
-            }
+            if (WindowState == WindowState.Normal)
+                WindowState = WindowState.Maximized;
             else
-            {
-                this.WindowState = WindowState.Maximized;
-            }
+                WindowState = WindowState.Normal;
         }
 
-        // 关闭软件
         private void BtnClose_Click(object sender, RoutedEventArgs e)
         {
             Application.Current.Shutdown();
-        }
-
-        private void MenuItem_Click(object sender, RoutedEventArgs e)
-        {
-
         }
     }
 }

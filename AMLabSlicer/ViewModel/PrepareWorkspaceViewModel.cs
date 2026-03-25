@@ -1,8 +1,10 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HelixToolkit.SharpDX;
 using HelixToolkit.Wpf.SharpDX;
 using System.Numerics; // 必须引入这个，用于 Vector3 三维坐标
+using System.Collections.ObjectModel;
+using AMLabSlicer.Core.Parameters;
 
 namespace AMLabSlicer.ViewModel
 {
@@ -20,8 +22,22 @@ namespace AMLabSlicer.ViewModel
         [ObservableProperty]
         private Geometry3D? _minorGridGeometry;
 
-        public PrepareWorkspaceViewModel()
+        // 暴露给 UI 绑定的参数集合
+        public ObservableCollection<SliceParameter> Parameters { get; }
+
+        private readonly IParameterStore _parameterStore;
+
+        public PrepareWorkspaceViewModel(IParameterStore parameterStore)
         {
+            _parameterStore = parameterStore;
+
+            // 这里可以初始化一些默认参数供测试
+            _parameterStore.RegisterParameter(new SliceParameter { Key = "LayerHeight", DisplayName = "层高 (mm)", Category = "基础", ParameterType = typeof(double), Value = 0.2 });
+            _parameterStore.RegisterParameter(new SliceParameter { Key = "InfillDensity", DisplayName = "填充密度 (%)", Category = "基础", ParameterType = typeof(double), Value = 20.0 });
+            _parameterStore.RegisterParameter(new SliceParameter { Key = "GenerateSupport", DisplayName = "生成支撑", Category = "支撑", ParameterType = typeof(bool), Value = true });
+
+            Parameters = new ObservableCollection<SliceParameter>(_parameterStore.GetAllParameters());
+
             // 在工作区初始化时，立刻生成切片平台网格
             GeneratePlatformGrid();
         }

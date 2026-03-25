@@ -9,6 +9,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Assets\新文件夹\**" />
+    <EmbeddedResource Remove="Assets\新文件夹\**" />
+    <None Remove="Assets\新文件夹\**" />
+    <Page Remove="Assets\新文件夹\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Assets\Images\AMLab_logo_rgb.svg" />
   </ItemGroup>
 
@@ -16,6 +23,7 @@
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="HelixToolkit.SharpDX.Assimp" Version="3.1.2" />
     <PackageReference Include="HelixToolkit.Wpf.SharpDX" Version="3.1.2" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="11.0.0-preview.2.26159.112" />
     <PackageReference Include="SharpVectors" Version="1.8.5" />
   </ItemGroup>
 
@@ -24,7 +32,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Assets\新文件夹\" />
+    <ProjectReference Include="..\AMLabSlicer.Core\AMLabSlicer.Core.csproj" />
+    <ProjectReference Include="..\AMLabSlicer.Slicing\AMLabSlicer.Slicing.csproj" />
   </ItemGroup>
 
 </Project>

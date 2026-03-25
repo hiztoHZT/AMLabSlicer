@@ -1,9 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35931.197 d17.13
+VisualStudioVersion = 17.13.35931.197
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AMLabSlicer", "AMLabSlicer\AMLabSlicer.csproj", "{67018C77-9FBF-4B32-B403-8FC2330ED4ED}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AMLabSlicer.UI", "AMLabSlicer\AMLabSlicer.UI.csproj", "{67018C77-9FBF-4B32-B403-8FC2330ED4ED}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AMLabSlicer.Core", "AMLabSlicer.Core\AMLabSlicer.Core.csproj", "{DF25D8C2-123B-48AB-8EBC-0DC187A67879}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AMLabSlicer.Slicing", "AMLabSlicer.Slicing\AMLabSlicer.Slicing.csproj", "{E281E886-7FA6-4579-B19A-E186F32FECCD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{67018C77-9FBF-4B32-B403-8FC2330ED4ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{67018C77-9FBF-4B32-B403-8FC2330ED4ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{67018C77-9FBF-4B32-B403-8FC2330ED4ED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF25D8C2-123B-48AB-8EBC-0DC187A67879}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF25D8C2-123B-48AB-8EBC-0DC187A67879}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF25D8C2-123B-48AB-8EBC-0DC187A67879}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF25D8C2-123B-48AB-8EBC-0DC187A67879}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E281E886-7FA6-4579-B19A-E186F32FECCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E281E886-7FA6-4579-B19A-E186F32FECCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E281E886-7FA6-4579-B19A-E186F32FECCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E281E886-7FA6-4579-B19A-E186F32FECCD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
