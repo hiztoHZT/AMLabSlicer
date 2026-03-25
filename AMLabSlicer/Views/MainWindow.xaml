@@ -93,15 +93,24 @@
             </Grid.ColumnDefinitions>
 
             <svg:SvgViewbox Source="/Assets/Images/AMLab_logo_rgb.svg" Width="25" Height="25" Margin="10 5 0 0"/>
-            <Menu Grid.Column="1" Background="Transparent" Foreground="White" VerticalAlignment="Center" Margin="10,0,0,0">
-            <MenuItem Header="文件">
-                <MenuItem Header="载入模型..." Command="{Binding LoadModelCommand}" />
-            </MenuItem>
+            <Menu Grid.Column="1" Background="Transparent" Foreground="White" FontSize="12" VerticalAlignment="Center" WindowChrome.IsHitTestVisibleInChrome="True" Margin="0 5 0 0">
 
-            <MenuItem Header="设置">
-                <MenuItem Header="首选项..." Command="{Binding OpenPreferencesCommand}" />
-            </MenuItem>
-        </Menu>
+                <MenuItem Padding="0">
+                    <MenuItem.Header>
+                        <TextBlock Text="文件" Width="50" TextAlignment="Center"/>
+                    </MenuItem.Header>
+
+                    <MenuItem Header="载入模型..." Command="{Binding LoadModelCommand}" Foreground="Black" Width="150" Padding="10,5"/>
+
+                </MenuItem>
+
+                <MenuItem Padding="0">
+                    <MenuItem.Header>
+                        <TextBlock Text="设置" Width="50" TextAlignment="Center"/>
+                    </MenuItem.Header>
+                    <MenuItem Header="首选项..." Command="{Binding OpenPreferencesCommand}" Foreground="Black" Width="150" Padding="10,5"/>
+                </MenuItem>
+            </Menu>
 
             <StackPanel Grid.Column="3" Orientation="Horizontal" WindowChrome.IsHitTestVisibleInChrome="True">
                 <Button Content="—" Width="45" Style="{StaticResource WindowButtonStyle}" Click="BtnMinimize_Click"/>
