@@ -22,6 +22,8 @@ namespace AMLabSlicer
                     services.AddTransient<PrepareWorkspaceViewModel>();                    
                     services.AddSingleton<MainWindow>();
                     services.AddSingleton<IParameterStore, ParameterStore>();
+                    services.AddSingleton<PreferencesViewModel>();
+                    services.AddTransient<PreferencesWindow>();
                 })
                 .Build();
         }

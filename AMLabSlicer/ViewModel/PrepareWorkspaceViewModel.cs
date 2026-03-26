@@ -26,10 +26,13 @@ namespace AMLabSlicer.ViewModel
         public ObservableCollection<SliceParameter> Parameters { get; }
 
         private readonly IParameterStore _parameterStore;
+        
+        public PreferencesViewModel AppPrefs { get; }
 
-        public PrepareWorkspaceViewModel(IParameterStore parameterStore)
+        public PrepareWorkspaceViewModel(IParameterStore parameterStore, PreferencesViewModel appPrefs)
         {
             _parameterStore = parameterStore;
+            AppPrefs = appPrefs;
 
             // 这里可以初始化一些默认参数供测试
             _parameterStore.RegisterParameter(new SliceParameter { Key = "LayerHeight", DisplayName = "层高 (mm)", Category = "基础", ParameterType = typeof(double), Value = 0.2 });
@@ -43,42 +46,43 @@ namespace AMLabSlicer.ViewModel
         }
 
         /// <summary>
-        /// 生成 255 x 255 的 3D 打印平台网格
         /// </summary>
         private void GeneratePlatformGrid()
         {
             var majorBuilder = new LineBuilder();
             var minorBuilder = new LineBuilder();
 
-            // 设定平台尺寸
-            int width = 255;
-            int depth = 255;
+            // 设定平台尺寸 225
+            int width = 225;
+            int depth = 225;
+            
+            int halfWidth = width / 2;
+            int halfDepth = depth / 2;
 
-            // 假设机床原点 (0,0,0) 在左前角，平台向 X 和 Y 的正方向延伸
-            // 1. 沿着 X 轴画线（平行于 Y 轴的线）
-            for (int x = 0; x <= width; x++)
+            // 1. 沿着 X 轴画线（平行于 Y 轴的线）以原点 0,0 居中对称
+            for (int x = -halfWidth; x <= halfWidth; x++)
             {
                 // 如果能被 10 整除，就是主线（粗线），否则是细线
                 if (x % 10 == 0)
                 {
-                    majorBuilder.AddLine(new Vector3(x, 0, 0), new Vector3(x, depth, 0));
+                    majorBuilder.AddLine(new Vector3(x, -halfDepth, 0), new Vector3(x, halfDepth, 0));
                 }
                 else
                 {
-                    minorBuilder.AddLine(new Vector3(x, 0, 0), new Vector3(x, depth, 0));
+                    minorBuilder.AddLine(new Vector3(x, -halfDepth, 0), new Vector3(x, halfDepth, 0));
                 }
             }
 
-            // 2. 沿着 Y 轴画线（平行于 X 轴的线）
-            for (int y = 0; y <= depth; y++)
+            // 2. 沿着 Y 轴画线（平行于 X 轴的线）以原点 0,0 居中对称
+            for (int y = -halfDepth; y <= halfDepth; y++)
             {
                 if (y % 10 == 0)
                 {
-                    majorBuilder.AddLine(new Vector3(0, y, 0), new Vector3(width, y, 0));
+                    majorBuilder.AddLine(new Vector3(-halfWidth, y, 0), new Vector3(halfWidth, y, 0));
                 }
                 else
                 {
-                    minorBuilder.AddLine(new Vector3(0, y, 0), new Vector3(width, y, 0));
+                    minorBuilder.AddLine(new Vector3(-halfWidth, y, 0), new Vector3(halfWidth, y, 0));
                 }
             }
 

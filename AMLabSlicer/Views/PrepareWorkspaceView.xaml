@@ -44,6 +44,6 @@
                       Background="{DynamicResource GridSplitterBrush}" ShowsPreview="True"
                       Visibility="{Binding IsParameterPanelOpen, Converter={StaticResource BoolToVis}}"/>
 
-        <views:ModelPreviewView Grid.Column="2" />
+        <views:ModelPreviewView x:Name="ModelPreview" Grid.Column="2" />
     </Grid>
 </UserControl>

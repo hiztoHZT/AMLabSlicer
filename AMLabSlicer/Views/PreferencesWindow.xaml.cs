@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,14 +11,16 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using AMLabSlicer.ViewModel;
 
 namespace AMLabSlicer.Views
 {
     public partial class PreferencesWindow : Window
     {
-        public PreferencesWindow()
+        public PreferencesWindow(PreferencesViewModel viewModel)
         {
             InitializeComponent();
+            DataContext = viewModel;
         }
     }
 }

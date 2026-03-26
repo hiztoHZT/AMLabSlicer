@@ -7,6 +7,7 @@ using HelixToolkit.SharpDX.Assimp;
 using HelixToolkit.SharpDX;
 using AMLabSlicer.Views;
 using SharpAssimp;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace AMLabSlicer.ViewModel
 {
@@ -83,7 +84,7 @@ namespace AMLabSlicer.ViewModel
         [RelayCommand]
         private void OpenPreferences()
         {
-            var prefWindow = new PreferencesWindow();
+            var prefWindow = App.AppHost!.Services.GetRequiredService<PreferencesWindow>();
             prefWindow.Owner = Application.Current.MainWindow;
             prefWindow.ShowDialog();
         }
