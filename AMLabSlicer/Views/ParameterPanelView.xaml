@@ -4,72 +4,158 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:views="clr-namespace:AMLabSlicer.Views"
-             MinWidth="300" MinHeight="400"
+             xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+             MinWidth="280"
              mc:Ignorable="d">
+
     <UserControl.Resources>
+        <!-- ═══ 分组排序 ═══ -->
+        <CollectionViewSource x:Key="GroupedParams" Source="{Binding Parameters}">
+            <CollectionViewSource.GroupDescriptions>
+                <PropertyGroupDescription PropertyName="Category"/>
+            </CollectionViewSource.GroupDescriptions>
+            <CollectionViewSource.SortDescriptions>
+                <scm:SortDescription PropertyName="Category"/>
+                <scm:SortDescription PropertyName="DisplayName"/>
+            </CollectionViewSource.SortDescriptions>
+        </CollectionViewSource>
+
+        <!-- ═══ DataTemplate Selector ═══ -->
         <views:ParameterTemplateSelector x:Key="ParamSelector">
+
+            <!-- Bool 开关 -->
             <views:ParameterTemplateSelector.BooleanTemplate>
                 <DataTemplate>
-                    <Grid Margin="0,5,0,5">
+                    <Grid Margin="4,3" ToolTip="{Binding Description}">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="150" />
-                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" />
-                        <CheckBox IsChecked="{Binding Value}" Grid.Column="1" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" 
+                                   Foreground="{DynamicResource SecondaryTextBrush}" FontSize="12"/>
+                        <CheckBox Grid.Column="1" IsChecked="{Binding Value}" VerticalAlignment="Center"/>
                     </Grid>
                 </DataTemplate>
             </views:ParameterTemplateSelector.BooleanTemplate>
+
+            <!-- 数值输入 -->
             <views:ParameterTemplateSelector.NumberTemplate>
                 <DataTemplate>
-                    <Grid Margin="0,5,0,5">
+                    <Grid Margin="4,3" ToolTip="{Binding Description}">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="150" />
-                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" />
-                        <TextBox Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" 
+                                   Foreground="{DynamicResource SecondaryTextBrush}" FontSize="12"/>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBox Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}" 
+                                     VerticalAlignment="Center" HorizontalContentAlignment="Left"
+                                     MinWidth="70" MaxWidth="100"/>
+                            <TextBlock Text="{Binding Unit}" Foreground="{DynamicResource SecondaryTextBrush}" 
+                                       FontSize="11" VerticalAlignment="Center" Margin="4,0,0,0"
+                                       Visibility="{Binding Unit, Converter={x:Static views:NullToCollapsedConverter.Instance}}"/>
+                        </StackPanel>
                     </Grid>
                 </DataTemplate>
             </views:ParameterTemplateSelector.NumberTemplate>
+
+            <!-- 滑块 (有 Min/Max 时) + 可编辑数值输入 -->
+            <views:ParameterTemplateSelector.SliderTemplate>
+                <DataTemplate>
+                    <Grid Margin="4,3" ToolTip="{Binding Description}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="140"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" 
+                                   Foreground="{DynamicResource SecondaryTextBrush}" FontSize="12"/>
+                        <DockPanel Grid.Column="1">
+                            <TextBox DockPanel.Dock="Right" Width="50" 
+                                     Text="{Binding Value, UpdateSourceTrigger=PropertyChanged, StringFormat={}{0:F1}}" 
+                                     HorizontalContentAlignment="Left" VerticalAlignment="Center"
+                                     Margin="4,0,0,0"/>
+                            <TextBlock DockPanel.Dock="Right" Text="{Binding Unit}" 
+                                       Foreground="{DynamicResource SecondaryTextBrush}" FontSize="10"
+                                       VerticalAlignment="Center" Margin="2,0,0,0"
+                                       Visibility="{Binding Unit, Converter={x:Static views:NullToCollapsedConverter.Instance}}"/>
+                            <Slider Minimum="{Binding MinValue}" Maximum="{Binding MaxValue}" 
+                                    Value="{Binding Value}" VerticalAlignment="Center"
+                                    TickFrequency="1" IsSnapToTickEnabled="False"/>
+                        </DockPanel>
+                    </Grid>
+                </DataTemplate>
+            </views:ParameterTemplateSelector.SliderTemplate>
+
+            <!-- 下拉选择 -->
             <views:ParameterTemplateSelector.EnumTemplate>
                 <DataTemplate>
-                    <Grid Margin="0,5,0,5">
+                    <Grid Margin="4,3" ToolTip="{Binding Description}">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="150" />
-                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="120"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" />
-                        <ComboBox ItemsSource="{Binding Options}" SelectedItem="{Binding Value}" Grid.Column="1" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" 
+                                   Foreground="{DynamicResource SecondaryTextBrush}" FontSize="12"/>
+                        <ComboBox Grid.Column="1" ItemsSource="{Binding Options}" 
+                                  SelectedItem="{Binding Value}" VerticalAlignment="Center"/>
                     </Grid>
                 </DataTemplate>
             </views:ParameterTemplateSelector.EnumTemplate>
+
+            <!-- 默认 (文本) -->
             <views:ParameterTemplateSelector.DefaultTemplate>
                 <DataTemplate>
-                    <Grid Margin="0,5,0,5">
+                    <Grid Margin="4,3" ToolTip="{Binding Description}">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="150" />
-                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="120"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" />
-                        <TextBox Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" 
+                                   Foreground="{DynamicResource SecondaryTextBrush}" FontSize="12"/>
+                        <TextBox Grid.Column="1" Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}" 
+                                 VerticalAlignment="Center"/>
                     </Grid>
                 </DataTemplate>
             </views:ParameterTemplateSelector.DefaultTemplate>
+
         </views:ParameterTemplateSelector>
     </UserControl.Resources>
 
     <Border Background="{DynamicResource ToolbarBackgroundBrush}">
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="40"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            <TextBlock Text="打印参数设置" FontSize="16" FontWeight="Bold" Margin="15,10" Grid.Row="0"/>
+        <DockPanel>
+            <!-- 标题 -->
+            <TextBlock DockPanel.Dock="Top" Text="参数设置" FontSize="14" FontWeight="Bold" 
+                       Foreground="{DynamicResource PrimaryTextBrush}" Margin="12,10,12,6"/>
 
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                <ItemsControl ItemsSource="{Binding Parameters}" ItemTemplateSelector="{StaticResource ParamSelector}" Margin="15,0,15,10" />
+            <!-- 按分类分组 -->
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="4,0">
+                <ItemsControl ItemsSource="{Binding Source={StaticResource GroupedParams}}">
+                    <ItemsControl.GroupStyle>
+                        <GroupStyle>
+                            <GroupStyle.ContainerStyle>
+                                <Style TargetType="GroupItem">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="GroupItem">
+                                                <Expander IsExpanded="True" Margin="4,0">
+                                                    <Expander.Header>
+                                                        <TextBlock Text="{Binding Name}" FontSize="12"/>
+                                                    </Expander.Header>
+                                                    <ItemsPresenter Margin="8,0,0,0"/>
+                                                </Expander>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </GroupStyle.ContainerStyle>
+                        </GroupStyle>
+                    </ItemsControl.GroupStyle>
+                    <ItemsControl.ItemTemplateSelector>
+                        <StaticResource ResourceKey="ParamSelector"/>
+                    </ItemsControl.ItemTemplateSelector>
+                </ItemsControl>
             </ScrollViewer>
-        </Grid>
+        </DockPanel>
     </Border>
 </UserControl>

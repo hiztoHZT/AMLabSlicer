@@ -34,10 +34,14 @@ namespace AMLabSlicer.ViewModel
             _parameterStore = parameterStore;
             AppPrefs = appPrefs;
 
-            // 这里可以初始化一些默认参数供测试
-            _parameterStore.RegisterParameter(new SliceParameter { Key = "LayerHeight", DisplayName = "层高 (mm)", Category = "基础", ParameterType = typeof(double), Value = 0.2 });
-            _parameterStore.RegisterParameter(new SliceParameter { Key = "InfillDensity", DisplayName = "填充密度 (%)", Category = "基础", ParameterType = typeof(double), Value = 20.0 });
-            _parameterStore.RegisterParameter(new SliceParameter { Key = "GenerateSupport", DisplayName = "生成支撑", Category = "支撑", ParameterType = typeof(bool), Value = true });
+            // 演示参数注册 —— 未来由切片算法自动注册，UI 模板自动匹配
+            _parameterStore.RegisterParameter(new SliceParameter { Key = "LayerHeight", DisplayName = "层高", Category = "基础", ParameterType = typeof(double), Value = 0.2, Unit = "mm", Description = "每层的打印厚度" });
+            _parameterStore.RegisterParameter(new SliceParameter { Key = "InfillDensity", DisplayName = "填充密度", Category = "基础", ParameterType = typeof(double), Value = 20.0, Unit = "%", MinValue = 0, MaxValue = 100, Description = "内部填充的密度百分比" });
+            _parameterStore.RegisterParameter(new SliceParameter { Key = "PrintSpeed", DisplayName = "打印速度", Category = "速度", ParameterType = typeof(double), Value = 60.0, Unit = "mm/s", MinValue = 10, MaxValue = 300, Description = "打印头移动速度" });
+            _parameterStore.RegisterParameter(new SliceParameter { Key = "PrintTemp", DisplayName = "喷嘴温度", Category = "温度", ParameterType = typeof(double), Value = 210.0, Unit = "°C", Description = "喷嘴加热温度" });
+            _parameterStore.RegisterParameter(new SliceParameter { Key = "BedTemp", DisplayName = "热床温度", Category = "温度", ParameterType = typeof(double), Value = 60.0, Unit = "°C", Description = "打印热床温度" });
+            _parameterStore.RegisterParameter(new SliceParameter { Key = "GenerateSupport", DisplayName = "生成支撑", Category = "支撑", ParameterType = typeof(bool), Value = true, Description = "是否自动生成支撑结构" });
+            _parameterStore.RegisterParameter(new SliceParameter { Key = "SupportType", DisplayName = "支撑类型", Category = "支撑", ParameterType = typeof(string), Value = "树状", Options = new object[] { "普通", "树状", "线性" }, Description = "支撑结构的生成方式" });
 
             Parameters = new ObservableCollection<SliceParameter>(_parameterStore.GetAllParameters());
 
