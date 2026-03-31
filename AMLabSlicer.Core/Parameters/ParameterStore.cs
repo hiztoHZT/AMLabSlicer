@@ -43,5 +43,15 @@ namespace AMLabSlicer.Core.Parameters
                 ParameterChanged?.Invoke(this, key);
             }
         }
+
+        public void ClearAll()
+        {
+            _parameters.Clear();
+        }
+
+        public SliceParameter? GetParameterRaw(string key)
+        {
+            return _parameters.TryGetValue(key, out var param) ? param : null;
+        }
     }
 }

@@ -4,6 +4,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:views="clr-namespace:AMLabSlicer.Views"
+             xmlns:selectors="clr-namespace:AMLabSlicer.Selectors"
              xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
              MinWidth="280"
              mc:Ignorable="d">
@@ -20,48 +21,48 @@
             </CollectionViewSource.SortDescriptions>
         </CollectionViewSource>
 
-        <!-- ═══ DataTemplate Selector ═══ -->
-        <views:ParameterTemplateSelector x:Key="ParamSelector">
+        <!-- ═══ Phase 3: XAML 数据模板与分发器 ═══ -->
+        <selectors:ParameterTemplateSelector x:Key="ParamSelector">
 
-            <!-- Bool 开关 -->
-            <views:ParameterTemplateSelector.BooleanTemplate>
+            <!-- CheckBox 模板 -->
+            <selectors:ParameterTemplateSelector.TplCheckBox>
                 <DataTemplate>
                     <Grid Margin="4,3" ToolTip="{Binding Description}">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="140"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" 
                                    Foreground="{DynamicResource SecondaryTextBrush}" FontSize="12"/>
                         <CheckBox Grid.Column="1" IsChecked="{Binding Value}" VerticalAlignment="Center"/>
                     </Grid>
                 </DataTemplate>
-            </views:ParameterTemplateSelector.BooleanTemplate>
+            </selectors:ParameterTemplateSelector.TplCheckBox>
 
-            <!-- 数值输入 -->
-            <views:ParameterTemplateSelector.NumberTemplate>
+            <!-- NumericBox (带单位左对齐数字输入) 模板 -->
+            <selectors:ParameterTemplateSelector.TplNumericBox>
                 <DataTemplate>
                     <Grid Margin="4,3" ToolTip="{Binding Description}">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="140"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" 
                                    Foreground="{DynamicResource SecondaryTextBrush}" FontSize="12"/>
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                             <TextBox Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}" 
                                      VerticalAlignment="Center" HorizontalContentAlignment="Left"
-                                     MinWidth="70" MaxWidth="100"/>
+                                     MinWidth="60" MaxWidth="90"/>
                             <TextBlock Text="{Binding Unit}" Foreground="{DynamicResource SecondaryTextBrush}" 
-                                       FontSize="11" VerticalAlignment="Center" Margin="4,0,0,0"
+                                       FontSize="11" VerticalAlignment="Center" Margin="6,0,0,0"
                                        Visibility="{Binding Unit, Converter={x:Static views:NullToCollapsedConverter.Instance}}"/>
                         </StackPanel>
                     </Grid>
                 </DataTemplate>
-            </views:ParameterTemplateSelector.NumberTemplate>
+            </selectors:ParameterTemplateSelector.TplNumericBox>
 
-            <!-- 滑块 (有 Min/Max 时) + 可编辑数值输入 -->
-            <views:ParameterTemplateSelector.SliderTemplate>
+            <!-- Slider (右侧带可输入 TextBox) 模板 -->
+            <selectors:ParameterTemplateSelector.TplSlider>
                 <DataTemplate>
                     <Grid Margin="4,3" ToolTip="{Binding Description}">
                         <Grid.ColumnDefinitions>
@@ -71,29 +72,31 @@
                         <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" 
                                    Foreground="{DynamicResource SecondaryTextBrush}" FontSize="12"/>
                         <DockPanel Grid.Column="1">
-                            <TextBox DockPanel.Dock="Right" Width="50" 
+                            <!-- 右侧的文字输入框 (与滑块双向绑定) -->
+                            <TextBox DockPanel.Dock="Right" Width="44" 
                                      Text="{Binding Value, UpdateSourceTrigger=PropertyChanged, StringFormat={}{0:F1}}" 
                                      HorizontalContentAlignment="Left" VerticalAlignment="Center"
-                                     Margin="4,0,0,0"/>
+                                     Margin="6,0,0,0"/>
                             <TextBlock DockPanel.Dock="Right" Text="{Binding Unit}" 
                                        Foreground="{DynamicResource SecondaryTextBrush}" FontSize="10"
                                        VerticalAlignment="Center" Margin="2,0,0,0"
                                        Visibility="{Binding Unit, Converter={x:Static views:NullToCollapsedConverter.Instance}}"/>
+                            <!-- 占据中间空间的滑块 -->
                             <Slider Minimum="{Binding MinValue}" Maximum="{Binding MaxValue}" 
                                     Value="{Binding Value}" VerticalAlignment="Center"
                                     TickFrequency="1" IsSnapToTickEnabled="False"/>
                         </DockPanel>
                     </Grid>
                 </DataTemplate>
-            </views:ParameterTemplateSelector.SliderTemplate>
+            </selectors:ParameterTemplateSelector.TplSlider>
 
-            <!-- 下拉选择 -->
-            <views:ParameterTemplateSelector.EnumTemplate>
+            <!-- ComboBox 下拉列表模板 -->
+            <selectors:ParameterTemplateSelector.TplComboBox>
                 <DataTemplate>
                     <Grid Margin="4,3" ToolTip="{Binding Description}">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="140"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" 
                                    Foreground="{DynamicResource SecondaryTextBrush}" FontSize="12"/>
@@ -101,15 +104,15 @@
                                   SelectedItem="{Binding Value}" VerticalAlignment="Center"/>
                     </Grid>
                 </DataTemplate>
-            </views:ParameterTemplateSelector.EnumTemplate>
+            </selectors:ParameterTemplateSelector.TplComboBox>
 
-            <!-- 默认 (文本) -->
-            <views:ParameterTemplateSelector.DefaultTemplate>
+            <!-- 默认/纯文本 TextBox 模板 -->
+            <selectors:ParameterTemplateSelector.TplTextBox>
                 <DataTemplate>
                     <Grid Margin="4,3" ToolTip="{Binding Description}">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="140"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" 
                                    Foreground="{DynamicResource SecondaryTextBrush}" FontSize="12"/>
@@ -117,45 +120,61 @@
                                  VerticalAlignment="Center"/>
                     </Grid>
                 </DataTemplate>
-            </views:ParameterTemplateSelector.DefaultTemplate>
+            </selectors:ParameterTemplateSelector.TplTextBox>
 
-        </views:ParameterTemplateSelector>
+        </selectors:ParameterTemplateSelector>
     </UserControl.Resources>
 
     <Border Background="{DynamicResource ToolbarBackgroundBrush}">
         <DockPanel>
-            <!-- 标题 -->
-            <TextBlock DockPanel.Dock="Top" Text="参数设置" FontSize="14" FontWeight="Bold" 
-                       Foreground="{DynamicResource PrimaryTextBrush}" Margin="12,10,12,6"/>
+            <!-- 算法选择器 -->
+            <StackPanel DockPanel.Dock="Top" Margin="8,8,8,4">
+                <Grid Margin="0,0,0,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="切片配置: " VerticalAlignment="Center" 
+                               Foreground="{DynamicResource SecondaryTextBrush}" FontSize="12" Margin="4,0,8,0"/>
+                    <ComboBox Grid.Column="1" 
+                              ItemsSource="{Binding SlicingAlgorithms}" 
+                              SelectedItem="{Binding SelectedAlgorithm, UpdateSourceTrigger=PropertyChanged}"/>
+                </Grid>
+            </StackPanel>
 
-            <!-- 按分类分组 -->
-            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="4,0">
-                <ItemsControl ItemsSource="{Binding Source={StaticResource GroupedParams}}">
-                    <ItemsControl.GroupStyle>
-                        <GroupStyle>
-                            <GroupStyle.ContainerStyle>
-                                <Style TargetType="GroupItem">
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="GroupItem">
-                                                <Expander IsExpanded="True" Margin="4,0">
-                                                    <Expander.Header>
-                                                        <TextBlock Text="{Binding Name}" FontSize="12"/>
-                                                    </Expander.Header>
-                                                    <ItemsPresenter Margin="8,0,0,0"/>
-                                                </Expander>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                            </GroupStyle.ContainerStyle>
-                        </GroupStyle>
-                    </ItemsControl.GroupStyle>
-                    <ItemsControl.ItemTemplateSelector>
-                        <StaticResource ResourceKey="ParamSelector"/>
-                    </ItemsControl.ItemTemplateSelector>
-                </ItemsControl>
-            </ScrollViewer>
+            <!-- 层级化参数 TabControl（按 Category 自动分组） -->
+            <TabControl Background="Transparent" BorderThickness="0" Margin="4,2,4,4"
+                        ItemsSource="{Binding Source={StaticResource GroupedParams}, Path=Groups}">
+                <TabControl.Resources>
+                    <Style TargetType="TabItem">
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
+                        <Setter Property="FontSize" Value="12"/>
+                        <Setter Property="Padding" Value="8,3"/>
+                        <Setter Property="BorderThickness" Value="0,0,0,2"/>
+                        <Setter Property="BorderBrush" Value="Transparent"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </TabControl.Resources>
+                <TabControl.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Name}" FontWeight="Medium"/>
+                    </DataTemplate>
+                </TabControl.ItemTemplate>
+                <TabControl.ContentTemplate>
+                    <DataTemplate>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="4,8" Background="Transparent">
+                            <ItemsControl ItemsSource="{Binding Items}" 
+                                          ItemTemplateSelector="{StaticResource ParamSelector}"/>
+                        </ScrollViewer>
+                    </DataTemplate>
+                </TabControl.ContentTemplate>
+            </TabControl>
         </DockPanel>
     </Border>
 </UserControl>

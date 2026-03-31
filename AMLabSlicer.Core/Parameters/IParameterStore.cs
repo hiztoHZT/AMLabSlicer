@@ -12,5 +12,7 @@ namespace AMLabSlicer.Core.Parameters
         IEnumerable<SliceParameter> GetParametersByCategory(string category);
         IEnumerable<SliceParameter> GetAllParameters();
         void RegisterParameter(SliceParameter parameter);
+        void ClearAll();
+        SliceParameter? GetParameterRaw(string key);
     }
 }

@@ -43,6 +43,13 @@
                 <MenuItem Header="设置" Style="{StaticResource TopLevelHeaderStyle}">
                     <MenuItem Header="首选项..." Command="{Binding OpenPreferencesCommand}" Style="{StaticResource SubmenuItemStyle}"/>
                 </MenuItem>
+
+                <MenuItem Header="编辑" Style="{StaticResource TopLevelHeaderStyle}">
+                    <MenuItem Header="撤销" InputGestureText="Ctrl+Z"
+                              Command="{Binding UndoCommand}" Style="{StaticResource SubmenuItemStyle}"/>
+                    <MenuItem Header="重做" InputGestureText="Ctrl+Shift+Z"
+                              Command="{Binding RedoCommand}" Style="{StaticResource SubmenuItemStyle}"/>
+                </MenuItem>
             </Menu>
 
             <StackPanel Grid.Column="3" Orientation="Horizontal" WindowChrome.IsHitTestVisibleInChrome="True">

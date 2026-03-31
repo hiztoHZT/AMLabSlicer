@@ -30,5 +30,21 @@ namespace AMLabSlicer.ViewModel
 
         [ObservableProperty]
         private bool _useOrthographic = false; // 使用正交视角
+
+        // ── 操作确认首选项 ──
+        [ObservableProperty]
+        private bool _enableDeleteConfirm = true;
+
+        [ObservableProperty]
+        private bool _enableArrangeConfirm = true;
+
+        [ObservableProperty]
+        private bool _enableSplitConfirm = true;
+
+        [ObservableProperty]
+        private bool _splitUndoable = false; // 拆分操作是否可撤销（默认关，占用内存较大）
+
+        [ObservableProperty]
+        private int _undoStackDepth = 25; // 撤销栈深度
     }
 }

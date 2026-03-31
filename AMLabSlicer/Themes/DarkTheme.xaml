@@ -115,9 +115,11 @@
                                PopupAnimation="Fade" HorizontalOffset="-1">
                             <Border Background="{DynamicResource MenuPopupBackgroundBrush}" 
                                     BorderBrush="{DynamicResource MenuPopupBorderBrush}" 
-                                    BorderThickness="1" Padding="0,4" CornerRadius="0"
+                                    BorderThickness="1" Padding="2" CornerRadius="2"
                                     SnapsToDevicePixels="True">
-                                <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle"/>
+                                <ScrollViewer CanContentScroll="True" VerticalScrollBarVisibility="Auto">
+                                    <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Cycle"/>
+                                </ScrollViewer>
                             </Border>
                         </Popup>
                     </Grid>
@@ -148,8 +150,8 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <ContentPresenter Grid.Column="0" ContentSource="Header" RecognizesAccessKey="True" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Column="1" Text="{TemplateBinding InputGestureText}" 
+                            <ContentPresenter x:Name="HeaderHost" Grid.Column="0" ContentSource="Header" RecognizesAccessKey="True" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="InputGestureText" Grid.Column="1" Text="{TemplateBinding InputGestureText}" 
                                        Foreground="{DynamicResource SecondaryTextBrush}" FontSize="12"
                                        Margin="30,0,0,0" VerticalAlignment="Center"/>
                         </Grid>

@@ -15,13 +15,13 @@
 
     <Grid x:Name="MainContainer">
         <Grid.ColumnDefinitions>
+            <!-- 左侧面板，可折叠 -->
             <ColumnDefinition>
                 <ColumnDefinition.Style>
                     <Style TargetType="ColumnDefinition">
                         <Setter Property="Width" Value="320"/>
                         <Setter Property="MinWidth" Value="320"/>
                         <Setter Property="MaxWidth" Value="{Binding ActualWidth, ElementName=MainContainer, Converter={StaticResource HalfWidthConv}}"/>
-
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding IsParameterPanelOpen}" Value="False">
                                 <Setter Property="Width" Value="0"/>
@@ -37,13 +37,28 @@
             <ColumnDefinition Width="*" MinWidth="320"/>
         </Grid.ColumnDefinitions>
 
-        <views:ParameterPanelView Grid.Column="0" 
-                                  Visibility="{Binding IsParameterPanelOpen, Converter={StaticResource BoolToVis}}"/>
+        <!-- 左侧整体容器：上=大纲，下=参数 -->
+        <DockPanel Grid.Column="0"
+                   Visibility="{Binding IsParameterPanelOpen, Converter={StaticResource BoolToVis}}">
 
-        <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Center" VerticalAlignment="Stretch" 
+            <!-- 对象大纲 (Outliner) — 固定高度，可用 GridSplitter 调整 -->
+            <views:OutlinerPanelView DockPanel.Dock="Top"  MinHeight="200"/>
+
+            <!-- 拖动分隔条 -->
+            <GridSplitter DockPanel.Dock="Top" Height="4"
+                          HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                          Background="{DynamicResource GridSplitterBrush}"
+                          ShowsPreview="True" Cursor="SizeNS"/>
+
+            <!-- 参数面板 -->
+            <views:ParameterPanelView/>
+        </DockPanel>
+
+        <GridSplitter Grid.Column="1" Width="5"
+                      HorizontalAlignment="Center" VerticalAlignment="Stretch" 
                       Background="{DynamicResource GridSplitterBrush}" ShowsPreview="True"
                       Visibility="{Binding IsParameterPanelOpen, Converter={StaticResource BoolToVis}}"/>
 
-        <views:ModelPreviewView x:Name="ModelPreview" Grid.Column="2" />
+        <views:ModelPreviewView x:Name="ModelPreview" Grid.Column="2"/>
     </Grid>
 </UserControl>
