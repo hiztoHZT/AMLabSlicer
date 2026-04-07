@@ -91,22 +91,11 @@ namespace AMLabSlicer.ViewModel
         }
 
         /// <summary>
-        /// 从 GroupNode 递归构建大纲树
+        /// 构建大纲树，目前仅保留物体顶层节点，后续动态添加面组作为子节点
         /// </summary>
         public static OutlinerNodeViewModel BuildTree(SceneNode rootNode, string name = "模型对象")
         {
             var vm = new OutlinerNodeViewModel(rootNode, name);
-            if (rootNode is GroupNode group)
-            {
-                int index = 1;
-                foreach (var child in group.Items)
-                {
-                    if (child is MeshNode || child is GroupNode)
-                    {
-                        vm.Children.Add(BuildTree(child, child.Name ?? $"子部件 {index++}"));
-                    }
-                }
-            }
             return vm;
         }
     }

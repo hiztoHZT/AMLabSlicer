@@ -21,9 +21,9 @@
                         <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
                         <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
                         <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
-                        <Setter Property="Padding" Value="2,2"/>
+                        <Setter Property="Padding" Value="2,4"/>
                         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                        <!-- 右键菜单 -->
+
                         <Setter Property="ContextMenu">
                             <Setter.Value>
                                 <ContextMenu>
@@ -32,23 +32,79 @@
                                 </ContextMenu>
                             </Setter.Value>
                         </Setter>
-                        <Style.Triggers>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter Property="Background" Value="{DynamicResource SelectionHighlightBrush}"/>
-                            </Trigger>
-                        </Style.Triggers>
+
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="TreeViewItem">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="*"/>
+                                        </Grid.RowDefinitions>
+
+                                        <Grid Grid.Row="0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="20"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <Border x:Name="Bd" Grid.ColumnSpan="2" Background="Transparent" Padding="{TemplateBinding Padding}"/>
+
+                                            <ToggleButton x:Name="Expander" Grid.Column="0" 
+                                          IsChecked="{Binding Path=IsExpanded, RelativeSource={RelativeSource TemplatedParent}}" 
+                                          ClickMode="Press">
+                                                <ToggleButton.Template>
+                                                    <ControlTemplate TargetType="ToggleButton">
+                                                        <Border Background="Transparent" Width="20" Height="20">
+                                                            <Path x:Name="Arrow" Fill="{TemplateBinding Foreground}" HorizontalAlignment="Center" VerticalAlignment="Center" 
+                                                  Data="M 0 0 L 4 4 L 0 8 Z" Opacity="0.7"/>
+                                                        </Border>
+                                                        <ControlTemplate.Triggers>
+                                                            <Trigger Property="IsChecked" Value="True">
+                                                                <Setter TargetName="Arrow" Property="Data" Value="M 0 0 L 8 0 L 4 4 Z"/>
+                                                            </Trigger>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter TargetName="Arrow" Property="Opacity" Value="1"/>
+                                                            </Trigger>
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </ToggleButton.Template>
+                                            </ToggleButton>
+
+                                            <ContentPresenter x:Name="PART_Header" Grid.Column="1" 
+                                              ContentSource="Header" 
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"/>
+                                        </Grid>
+
+                                        <ItemsPresenter x:Name="ItemsHost" Grid.Row="1" Margin="15,0,0,0" Visibility="Collapsed"/>
+                                    </Grid>
+
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsExpanded" Value="True">
+                                            <Setter TargetName="ItemsHost" Property="Visibility" Value="Visible"/>
+                                        </Trigger>
+                                        <Trigger Property="HasItems" Value="False">
+                                            <Setter TargetName="Expander" Property="Visibility" Value="Hidden"/>
+                                        </Trigger>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource SelectionHighlightBrush}"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
                     </Style>
                 </TreeView.ItemContainerStyle>
 
                 <TreeView.ItemTemplate>
                     <HierarchicalDataTemplate DataType="{x:Type vm:OutlinerNodeViewModel}"
                                               ItemsSource="{Binding Children}">
-                        <Grid>
+                        <Grid HorizontalAlignment="Stretch">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="20"/>
                                 <ColumnDefinition Width="*"/>
                                 <!-- 显示/隐藏复选框 -->
-                                <ColumnDefinition Width="20"/>
+                                <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
                             <!-- 面片组图标 or 普通图标 -->
@@ -71,7 +127,9 @@
                             <CheckBox Grid.Column="2"
                                       IsChecked="{Binding IsVisible, Mode=TwoWay}"
                                       ToolTip="显示/隐藏"
-                                      VerticalAlignment="Center"/>
+                                      VerticalAlignment="Center"
+                                      HorizontalAlignment="Right"
+                                      Margin="0,0,4,0"/>
                         </Grid>
                     </HierarchicalDataTemplate>
                 </TreeView.ItemTemplate>

@@ -4,6 +4,7 @@
     <!-- ════════════════════════════════════════════ -->
     <!--               Color Palette                 -->
     <!-- ════════════════════════════════════════════ -->
+    <SolidColorBrush x:Key="SelectionHighlightBrush" Color="#295D90" />
     <Color x:Key="PrimaryTextColor">#F1F1F1</Color>
 
     <SolidColorBrush x:Key="WindowBackgroundBrush" Color="#202020" />

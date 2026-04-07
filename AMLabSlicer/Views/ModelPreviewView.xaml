@@ -95,6 +95,30 @@
             <hx:LineGeometryModel3D Geometry="{Binding MinorGridGeometry}" Color="#2A2A2A" Thickness="0.5"/>
             <hx:LineGeometryModel3D Geometry="{Binding MajorGridGeometry}" Color="#555555" Thickness="1"/>
             <hx:Element3DPresenter Content="{Binding LoadedModel}"/>
+            <hx:LineGeometryModel3D Geometry="{Binding ObjectHighlightGeometry, ElementName=Me}"
+                                    Color="#2D9BFF"
+                                    Thickness="1.6"
+                                    Visibility="{Binding IsObjectHighlightVisible, ElementName=Me, Converter={StaticResource B2V}}"/>
+            <hx:LineGeometryModel3D Geometry="{Binding FaceWireframeGeometry, ElementName=Me}"
+                                    Color="#111111"
+                                    Thickness="0.6"
+                                    Visibility="{Binding IsFaceOverlayVisible, ElementName=Me, Converter={StaticResource B2V}}"/>
+            <hx:LineGeometryModel3D Geometry="{Binding FaceCenterDotGeometry, ElementName=Me}"
+                                    Color="#111111"
+                                    Thickness="0.8"
+                                    Visibility="{Binding IsFaceCenterDotVisible, ElementName=Me, Converter={StaticResource B2V}}"/>
+            <hx:MeshGeometryModel3D Geometry="{Binding FaceSelectionGeometry, ElementName=Me}"
+                                    CullMode="None"
+                                    IsTransparent="True"
+                                    Visibility="{Binding IsFaceSelectionVisible, ElementName=Me, Converter={StaticResource B2V}}">
+                <hx:MeshGeometryModel3D.Material>
+                    <hx:PhongMaterial DiffuseColor="#B22D9BFF" AmbientColor="#7A2D9BFF" SpecularColor="#00000000"/>
+                </hx:MeshGeometryModel3D.Material>
+            </hx:MeshGeometryModel3D>
+            <hx:LineGeometryModel3D Geometry="{Binding FaceSelectionEdgeGeometry, ElementName=Me}"
+                                    Color="#2D9BFF"
+                                    Thickness="1.6"
+                                    Visibility="{Binding IsFaceSelectionVisible, ElementName=Me, Converter={StaticResource B2V}}"/>
 
             <!-- Manipulator：绑定到 SelectedNode，尺寸适当放大 -->
             <hx:TransformManipulator3D x:Name="ObjectManipulator"
@@ -132,7 +156,7 @@
                     <Button x:Name="BtnSplit"  Content="B  拆分"   Style="{StaticResource TBBtn}" Click="ToolBtn_Click" Tag="B"/>
                     <Button x:Name="BtnDelete" Content="X  删除"   Style="{StaticResource TBBtn}" Click="ToolBtn_Click" Tag="X"/>
                     <Separator Style="{StaticResource Sep}"/>
-                    <Button Content="Tab ▶ 面模式" Style="{StaticResource TBBtnOn}" Click="ToolBtn_Click" Tag="Tab"/>
+                    <Button x:Name="BtnMode" Content="Tab ▶ 面模式" Style="{StaticResource TBBtn}" Click="ToolBtn_Click" Tag="Tab"/>
                 </StackPanel>
             </Border>
 
@@ -154,6 +178,25 @@
                     <Separator Style="{StaticResource Sep}"/>
                     <Button x:Name="FBtnXRay"   Content="T 透视"  Style="{StaticResource FBBtn}" Click="FaceTool_Click" Tag="T"/>
                     <Button x:Name="FBtnLinked" Content="L 连通"  Style="{StaticResource FBBtn}" Click="FaceTool_Click" Tag="L"/>
+                    <Separator Style="{StaticResource Sep}"/>
+                    <Border x:Name="BrushPanel" Background="#22000000" CornerRadius="4" Padding="6,2" Margin="2,0"
+                            Visibility="Collapsed">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="半径" Foreground="White" FontSize="11" Margin="0,0,4,0"/>
+                            <Slider x:Name="BrushSizeSlider" Width="90" Minimum="4" Maximum="60" Value="14"
+                                    SmallChange="1" LargeChange="4" ValueChanged="BrushSizeSlider_ValueChanged"/>
+                            <TextBlock x:Name="BrushSizeText" Text="14" Foreground="White" FontSize="11" Margin="6,0,0,0"/>
+                        </StackPanel>
+                    </Border>
+                    <Border x:Name="LinkedPanel" Background="#22000000" CornerRadius="4" Padding="6,2" Margin="2,0">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="模式" Foreground="White" FontSize="11" Margin="0,0,4,0"/>
+                            <ComboBox x:Name="LinkedModeCombo" Width="86" Height="22" SelectionChanged="LinkedModeCombo_SelectionChanged">
+                                <ComboBoxItem Content="连通面" IsSelected="True"/>
+                                <ComboBoxItem Content="连通对象"/>
+                            </ComboBox>
+                        </StackPanel>
+                    </Border>
                     <Separator Style="{StaticResource Sep}"/>
                     <Button Content="S 保存" Style="{StaticResource FBBtn}" Click="FaceTool_Click" Tag="S"/>
                     <Button Content="D 另存" Style="{StaticResource FBBtn}" Click="FaceTool_Click" Tag="D"/>
@@ -202,6 +245,43 @@
                 </StackPanel>
             </Border>
         </Grid>
+
+        <Border HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Margin="18,116,0,0"
+                Padding="8,6"
+                CornerRadius="4"
+                Background="#33000000"
+                IsHitTestVisible="False">
+            <StackPanel>
+                <TextBlock Text="{Binding ModeInfoText, ElementName=Me}"
+                           Foreground="#C8D8E8"
+                           FontSize="11"/>
+                <TextBlock Text="{Binding SelectionInfoText, ElementName=Me}"
+                           Foreground="#A7BDD2"
+                           FontSize="11"
+                           Margin="0,2,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <Canvas x:Name="FaceOverlayCanvas"
+                Background="Transparent"
+                IsHitTestVisible="False">
+            <Rectangle x:Name="FaceRectSelection"
+                       Visibility="Collapsed"
+                       Stroke="#DD55AAFF"
+                       StrokeThickness="1.2"
+                       Fill="#2255AAFF"/>
+            <Polyline x:Name="FaceLassoPath"
+                      Visibility="Collapsed"
+                      Stroke="#DD55AAFF"
+                      StrokeThickness="1.2"/>
+            <Ellipse x:Name="BrushPreviewCircle"
+                     Visibility="Collapsed"
+                     Stroke="#EE66BBFF"
+                     StrokeThickness="1.2"
+                     Fill="#223388FF"/>
+        </Canvas>
 
         <!-- 左侧面板折叠按钮 -->
         <Button Command="{Binding TogglePanelCommand}"
