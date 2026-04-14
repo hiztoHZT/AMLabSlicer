@@ -96,6 +96,7 @@
             <hx:LineGeometryModel3D Geometry="{Binding MajorGridGeometry}" Color="#555555" Thickness="1"/>
             <hx:Element3DPresenter Content="{Binding LoadedModel}"/>
             <hx:LineGeometryModel3D Geometry="{Binding ObjectHighlightGeometry, ElementName=Me}"
+                                    Transform="{Binding ObjectHighlightTransform, ElementName=Me}"
                                     Color="#2D9BFF"
                                     Thickness="1.6"
                                     Visibility="{Binding IsObjectHighlightVisible, ElementName=Me, Converter={StaticResource B2V}}"/>
@@ -120,14 +121,20 @@
                                     Thickness="1.6"
                                     Visibility="{Binding IsFaceSelectionVisible, ElementName=Me, Converter={StaticResource B2V}}"/>
 
-            <!-- Manipulator：绑定到 SelectedNode，尺寸适当放大 -->
+            <!-- GizmoAnchor 留作未来拓展或作为 3D 定位锚点，隐藏不显示 -->
+            <hx:GroupModel3D x:Name="GizmoAnchor" Visibility="Collapsed"/>
+
+            <!-- Manipulator 完全隐藏，使用 Blender 快捷键模式替代其视觉交互 -->
             <hx:TransformManipulator3D x:Name="ObjectManipulator"
-                                       Target="{Binding SelectedNode, ElementName=Me}"
-                                       EnableScaling="True"
-                                       EnableRotation="True"
-                                       EnableTranslation="True"
-                                       SizeScale="2.5"
-                                       Visibility="{Binding IsManipulatorVisible, ElementName=Me, Converter={StaticResource B2V}}"/>
+                                       Target="{Binding ElementName=GizmoAnchor}"
+                                       EnableScaling="False" EnableRotation="False" EnableTranslation="False"
+                                       Visibility="Collapsed"/>
+                                       
+            <!-- 添加约束辅助线 3D 渲染支持 -->
+            <hx:LineGeometryModel3D Geometry="{Binding ModalConstraintGeometry, ElementName=Me}"
+                                    Color="{Binding ModalConstraintColor, ElementName=Me, FallbackValue=Transparent}"
+                                    Thickness="2.0"
+                                    IsHitTestVisible="False"/>
         </hx:Viewport3DX>
 
         <!-- 顶部工具栏区域 -->
@@ -218,12 +225,12 @@
                                FontWeight="Bold" FontSize="13"
                                VerticalAlignment="Center" Margin="0,0,12,0"/>
                     <!-- X -->
-                    <TextBlock Text="X" FontWeight="Bold" Foreground="#FF6680"
+                    <TextBlock x:Name="LblX" Text="X" FontWeight="Bold" Foreground="#FF6680"
                                VerticalAlignment="Center" Margin="0,0,4,0"/>
                     <TextBox x:Name="TxfX" Width="64" Style="{StaticResource TxfStyle}"
                              TextChanged="TransformBox_Changed" KeyDown="TransformBox_KeyDown"/>
                     <!-- Y -->
-                    <TextBlock Text="Y" FontWeight="Bold" Foreground="#66FF88"
+                    <TextBlock x:Name="LblY" Text="Y" FontWeight="Bold" Foreground="#66FF88"
                                VerticalAlignment="Center" Margin="10,0,4,0"/>
                     <TextBox x:Name="TxfY" Width="64" Style="{StaticResource TxfStyle}"
                              TextChanged="TransformBox_Changed" KeyDown="TransformBox_KeyDown"/>

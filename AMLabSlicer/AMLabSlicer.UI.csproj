@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+	  <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,6 +18,10 @@
 
   <ItemGroup>
     <None Remove="Assets\Images\AMLab_logo_rgb.svg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Assets\ico\AMLAS.ico" />
   </ItemGroup>
 
   <ItemGroup>
@@ -36,4 +41,21 @@
     <ProjectReference Include="..\AMLabSlicer.Slicing\AMLabSlicer.Slicing.csproj" />
   </ItemGroup>
 
+  <!-- 将 AMLabSlicer.Engine.dll 及 OCCT 运行时 DLL 复制到输出目录 -->
+  <PropertyGroup>
+    <EngineOutputDir>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\AMLabSlicer.Engine\x64\$(Configuration)\'))</EngineOutputDir>
+    <NuGetAuditMode>all</NuGetAuditMode>
+    <ApplicationIcon>Assets\ico\AMLAS.ico</ApplicationIcon>
+  </PropertyGroup>
+  
+  <Target Name="CopyNativeEngine" AfterTargets="Build">
+    <ItemGroup>
+      <NativeEngineFiles Include="$(EngineOutputDir)*.dll" />
+    </ItemGroup>
+    <Copy SourceFiles="@(NativeEngineFiles)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" Condition="Exists('$(EngineOutputDir)')" />
+    <Message Text="Copied native engine DLLs from $(EngineOutputDir)" Importance="high" Condition="Exists('$(EngineOutputDir)')" />
+    <Warning Text="Native engine output not found at $(EngineOutputDir). Build AMLabSlicer.Engine (x64) first." Condition="!Exists('$(EngineOutputDir)')" />
+  </Target>
+
 </Project>
+

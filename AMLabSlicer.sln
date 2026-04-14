@@ -4,29 +4,56 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.13.35931.197
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AMLabSlicer.UI", "AMLabSlicer\AMLabSlicer.UI.csproj", "{67018C77-9FBF-4B32-B403-8FC2330ED4ED}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E7B1A9E9-B4A6-4D37-BEE3-7674766C3345} = {E7B1A9E9-B4A6-4D37-BEE3-7674766C3345}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AMLabSlicer.Core", "AMLabSlicer.Core\AMLabSlicer.Core.csproj", "{DF25D8C2-123B-48AB-8EBC-0DC187A67879}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AMLabSlicer.Slicing", "AMLabSlicer.Slicing\AMLabSlicer.Slicing.csproj", "{E281E886-7FA6-4579-B19A-E186F32FECCD}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AMLabSlicer.Engine", "AMLabSlicer.Engine\AMLabSlicer.Engine.vcxproj", "{E7B1A9E9-B4A6-4D37-BEE3-7674766C3345}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
 		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{67018C77-9FBF-4B32-B403-8FC2330ED4ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{67018C77-9FBF-4B32-B403-8FC2330ED4ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67018C77-9FBF-4B32-B403-8FC2330ED4ED}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{67018C77-9FBF-4B32-B403-8FC2330ED4ED}.Debug|Any CPU.Build.0 = Debug|x64
+		{67018C77-9FBF-4B32-B403-8FC2330ED4ED}.Debug|x64.ActiveCfg = Debug|x64
+		{67018C77-9FBF-4B32-B403-8FC2330ED4ED}.Debug|x64.Build.0 = Debug|x64
 		{67018C77-9FBF-4B32-B403-8FC2330ED4ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{67018C77-9FBF-4B32-B403-8FC2330ED4ED}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DF25D8C2-123B-48AB-8EBC-0DC187A67879}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DF25D8C2-123B-48AB-8EBC-0DC187A67879}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67018C77-9FBF-4B32-B403-8FC2330ED4ED}.Release|x64.ActiveCfg = Debug|x64
+		{67018C77-9FBF-4B32-B403-8FC2330ED4ED}.Release|x64.Build.0 = Debug|x64
+		{DF25D8C2-123B-48AB-8EBC-0DC187A67879}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{DF25D8C2-123B-48AB-8EBC-0DC187A67879}.Debug|Any CPU.Build.0 = Debug|x64
+		{DF25D8C2-123B-48AB-8EBC-0DC187A67879}.Debug|x64.ActiveCfg = Debug|x64
+		{DF25D8C2-123B-48AB-8EBC-0DC187A67879}.Debug|x64.Build.0 = Debug|x64
 		{DF25D8C2-123B-48AB-8EBC-0DC187A67879}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DF25D8C2-123B-48AB-8EBC-0DC187A67879}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E281E886-7FA6-4579-B19A-E186F32FECCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E281E886-7FA6-4579-B19A-E186F32FECCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF25D8C2-123B-48AB-8EBC-0DC187A67879}.Release|x64.ActiveCfg = Debug|x64
+		{DF25D8C2-123B-48AB-8EBC-0DC187A67879}.Release|x64.Build.0 = Debug|x64
+		{E281E886-7FA6-4579-B19A-E186F32FECCD}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{E281E886-7FA6-4579-B19A-E186F32FECCD}.Debug|Any CPU.Build.0 = Debug|x64
+		{E281E886-7FA6-4579-B19A-E186F32FECCD}.Debug|x64.ActiveCfg = Debug|x64
+		{E281E886-7FA6-4579-B19A-E186F32FECCD}.Debug|x64.Build.0 = Debug|x64
 		{E281E886-7FA6-4579-B19A-E186F32FECCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E281E886-7FA6-4579-B19A-E186F32FECCD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E281E886-7FA6-4579-B19A-E186F32FECCD}.Release|x64.ActiveCfg = Debug|Any CPU
+		{E281E886-7FA6-4579-B19A-E186F32FECCD}.Release|x64.Build.0 = Debug|Any CPU
+		{E7B1A9E9-B4A6-4D37-BEE3-7674766C3345}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{E7B1A9E9-B4A6-4D37-BEE3-7674766C3345}.Debug|Any CPU.Build.0 = Debug|x64
+		{E7B1A9E9-B4A6-4D37-BEE3-7674766C3345}.Debug|x64.ActiveCfg = Debug|x64
+		{E7B1A9E9-B4A6-4D37-BEE3-7674766C3345}.Debug|x64.Build.0 = Debug|x64
+		{E7B1A9E9-B4A6-4D37-BEE3-7674766C3345}.Release|Any CPU.ActiveCfg = Release|x64
+		{E7B1A9E9-B4A6-4D37-BEE3-7674766C3345}.Release|Any CPU.Build.0 = Release|x64
+		{E7B1A9E9-B4A6-4D37-BEE3-7674766C3345}.Release|x64.ActiveCfg = Debug|x64
+		{E7B1A9E9-B4A6-4D37-BEE3-7674766C3345}.Release|x64.Build.0 = Debug|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -2,11 +2,13 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
 using System.Windows;
+using System.Threading.Tasks;
 using HelixToolkit.Wpf.SharpDX;
 using HelixToolkit.SharpDX.Assimp;
 using HelixToolkit.SharpDX;
 using HelixToolkit.SharpDX.Model.Scene;
 using AMLabSlicer.Views;
+using AMLabSlicer.Slicing;
 using SharpAssimp;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
@@ -26,15 +28,9 @@ namespace AMLabSlicer.ViewModel
 
         private static Matrix4x4 GetWorldModelMatrix(SceneNode node)
         {
-            // node.ModelMatrix 为相对父节点的局部矩阵；
-            // 这里把父链逐层相乘，得到相对 scene.Root 的矩阵。
             var stack = new Stack<SceneNode>();
             SceneNode? cur = node;
-            while (cur != null)
-            {
-                stack.Push(cur);
-                cur = cur.Parent;
-            }
+            while (cur != null) { stack.Push(cur); cur = cur.Parent; }
 
             var m = Matrix4x4.Identity;
             while (stack.Count > 0)
@@ -42,54 +38,58 @@ namespace AMLabSlicer.ViewModel
             return m;
         }
 
+        // ── Task 2: 异步模型加载 ─────────────────────────────
+        // 使用 AsyncRelayCommand 确保文件对话框在主线程，IO/CPU 在后台线程
+
         [RelayCommand]
-        private void LoadModel()
+        private async Task LoadModelAsync()
         {
             OpenFileDialog openFileDialog = new OpenFileDialog
             {
-                Filter = "3D 模型文件 (*.stl;*.obj;*.3mf)|*.stl;*.obj;*.3mf|所有文件 (*.*)|*.*",
+                Filter = "3D 模型文件 (*.stl;*.obj;*.3mf;*.step;*.stp)|*.stl;*.obj;*.3mf;*.step;*.stp|" +
+                         "STEP 文件 (*.step;*.stp)|*.step;*.stp|" +
+                         "网格文件 (*.stl;*.obj;*.3mf)|*.stl;*.obj;*.3mf|" +
+                         "所有文件 (*.*)|*.*",
                 Title = "选择要切片的 3D 模型",
                 Multiselect = true
             };
 
             if (openFileDialog.ShowDialog() != true) return;
-
             if (CurrentWorkspace is not PrepareWorkspaceViewModel prepVM) return;
 
-            // 首次导入时创建全局 GroupModel（若已存在则复用）
+            // 首次导入时创建全局 GroupModel
             SceneNodeGroupModel3D? groupModel = prepVM.LoadedModel as SceneNodeGroupModel3D;
             bool isNewGroupModel = groupModel == null;
             if (isNewGroupModel)
                 groupModel = new SceneNodeGroupModel3D();
 
-            // 统计已存在的同名模型，用于自动编号
-            var existingNames = new System.Collections.Generic.HashSet<string>();
-            foreach (var filePath in openFileDialog.FileNames)
-            {
-                var importer = new Importer();
-                importer.Configuration.AssimpPostProcessSteps =
-                    SharpAssimp.PostProcessSteps.JoinIdenticalVertices |
-                    SharpAssimp.PostProcessSteps.GenerateSmoothNormals |
-                    SharpAssimp.PostProcessSteps.CalculateTangentSpace;
+            var existingNames = new HashSet<string>();
+            string[] filePaths = openFileDialog.FileNames;
 
-                var scene = importer.Load(filePath);
-                if (scene == null || scene.Root == null)
+            foreach (var filePath in filePaths)
+            {
+                // ── 后台线程执行耗时 IO / CPU 工作 ───────────
+                SceneNode? meshRootNode = null;
+                string fp = filePath; // capture for lambda
+
+                try
                 {
-                    MessageBox.Show($"模型加载失败：{System.IO.Path.GetFileName(filePath)}",
+                    meshRootNode = await Task.Run(() =>
+                        OcctInteropService.IsStepFile(fp)
+                            ? LoadStepFile(fp)
+                            : LoadMeshFileViaAssimp(fp)
+                    );
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"加载失败：{System.IO.Path.GetFileName(fp)}\n{ex.Message}",
                         "错误", MessageBoxButton.OK, MessageBoxImage.Warning);
                     continue;
                 }
 
-                // 应用材质
-                var mat = new HelixToolkit.SharpDX.Model.PhongMaterialCore()
-                {
-                    DiffuseColor  = new HelixToolkit.Maths.Color4(225f/255f, 225f/255f, 225f/255f, 1f),
-                    AmbientColor  = new HelixToolkit.Maths.Color4(220f/255f, 220f/255f, 220f/255f, 1f),
-                    SpecularColor = new HelixToolkit.Maths.Color4(30f/255f,  30f/255f,  30f/255f,  1f),
-                    SpecularShininess = 5f
-                };
-                foreach (var node in scene.Root.Traverse())
-                    if (node is HelixToolkit.SharpDX.Model.Scene.MeshNode mn2) mn2.Material = mat;
+                if (meshRootNode == null) continue;
+
+                // ── 以下代码回到主线程执行（await 后自动切回）──
 
                 // 自动命名
                 string baseName  = System.IO.Path.GetFileNameWithoutExtension(filePath);
@@ -99,65 +99,58 @@ namespace AMLabSlicer.ViewModel
                     modelName = $"{baseName} ({suffix++})";
                 existingNames.Add(modelName);
 
-                // ── 计算几何包围盒（从顶点直接算，不依赖渲染管线）──
-                // 注意：必须考虑 MeshNode 的父链变换，否则 pivot 中心会偏移。
+                // 计算几何包围盒（从顶点直接算）
                 float minX = float.MaxValue, maxX = float.MinValue;
                 float minY = float.MaxValue, maxY = float.MinValue;
                 float minZ = float.MaxValue, maxZ = float.MinValue;
-                foreach (var node in scene.Root.Traverse())
+
+                foreach (var node in meshRootNode.Traverse())
                 {
-                    if (node is HelixToolkit.SharpDX.Model.Scene.MeshNode mn3
-                        && mn3.Geometry?.Positions != null)
+                    if (node is MeshNode mn && mn.Geometry?.Positions != null)
                     {
-                        var worldM = GetWorldModelMatrix(mn3);
-                        foreach (var pos in mn3.Geometry.Positions)
+                        var worldM = GetWorldModelMatrix(mn);
+                        foreach (var pos in mn.Geometry.Positions)
                         {
-                            // 将顶点变换到 scene.Root 空间（考虑父链矩阵）
                             var wp = Vector3.Transform(pos, worldM);
-                            if (wp.X < minX) minX = wp.X;  if (wp.X > maxX) maxX = wp.X;
-                            if (wp.Y < minY) minY = wp.Y;  if (wp.Y > maxY) maxY = wp.Y;
-                            if (wp.Z < minZ) minZ = wp.Z;
-                            if (wp.Z > maxZ) maxZ = wp.Z;
+                            if (wp.X < minX) minX = wp.X; if (wp.X > maxX) maxX = wp.X;
+                            if (wp.Y < minY) minY = wp.Y; if (wp.Y > maxY) maxY = wp.Y;
+                            if (wp.Z < minZ) minZ = wp.Z; if (wp.Z > maxZ) maxZ = wp.Z;
                         }
                     }
                 }
+
                 float cx = (minX == float.MaxValue) ? 0f : (minX + maxX) * 0.5f;
                 float cy = (minY == float.MaxValue) ? 0f : (minY + maxY) * 0.5f;
-                if (minZ == float.MaxValue)
-                {
-                    minZ = 0f;
-                    maxZ = 0f;
-                }
-                float cz = (minZ + maxZ) * 0.5f;
+                if (minZ == float.MaxValue) { minZ = 0f; maxZ = 0f; }
+                float cz = (minZ + maxZ) * 0.5f;          // AABB 几何中心 Z
+                float halfH = (maxZ - minZ) * 0.5f;        // 模型半高
 
-                // ── 双层枢轴包装 ──
-                // 外层 pivot：放在“几何中心”（经过贴地后）的 World 位置 → Gizmo 跟随此节点
-                // 内层 offset：将 scene.Root 偏移使其局部原点 = 几何中心
-                //   world_vertex = pivot.ModelMatrix * offset.ModelMatrix * local_vertex
-                //                = Trans(cx,cy,cz-minZ) * Trans(-cx,-cy,-cz) * (vx,vy,vz)
-                //                = (vx, vy, vz - minZ)   ← 正确：底面贴地，且局部原点=几何中心
+                // ── Task 4: 初始摆放 —— 模型底面贴地，XY 居中在世界原点 ──
+                // pivotNode 的 Translation = AABB 几何中心 (0, 0, cz_world)
+                //   → TransformManipulator3D.Target = pivotNode 时，Gizmo 自动显示在几何中心
+                // meshRootNode 局部坐标: 将几何中心移到 pivotNode 的局部原点
+                //   → meshRootNode.LocalTranslation = (−cx, −cy, −cz)
+                // 底面贴地条件: pivotNode.Z = halfH (= cz when minZ=0)
                 var pivotNode = new GroupNode
                 {
                     Name        = modelName,
-                    ModelMatrix = System.Numerics.Matrix4x4.CreateTranslation(cx, cy, cz - minZ)
+                    // 将几何中心对齐世界 XY 中心，Z 移到 halfH 使底面贴 Z=0
+                    ModelMatrix = Matrix4x4.CreateTranslation(0f, 0f, halfH)
                 };
-                // 对 scene.Root 施加偏移（使几何中心成为局部原点）
-                // 这里用“预乘”，确保平移发生在 scene.Root 局部坐标系中，
-                // 避免 scene.Root 原有 ModelMatrix 不为 Identity 时导致中心不对齐。
-                scene.Root.ModelMatrix =
-                    System.Numerics.Matrix4x4.CreateTranslation(-cx, -cy, -cz) *
-                    scene.Root.ModelMatrix;
-                scene.Root.Name = modelName + "_mesh";
+                // 将几何中心移到 pivotNode 的局部原点
+                meshRootNode.ModelMatrix =
+                    Matrix4x4.CreateTranslation(-cx, -cy, -cz) * meshRootNode.ModelMatrix;
+                meshRootNode.Name = modelName + "_mesh";
 
-                pivotNode.AddChildNode(scene.Root);
+                pivotNode.AddChildNode(meshRootNode);
                 groupModel!.AddNode(pivotNode);
 
-                // 同步大纲（以 pivotNode 为根）
+                // 同步大纲
                 var outlinerNode = OutlinerNodeViewModel.BuildTree(pivotNode, modelName);
                 prepVM.OutlinerItems.Add(outlinerNode);
             }
 
-            // 首次导入：节点全部就绪后再绑定到视图
+            // 首次导入完成后绑定到视图
             if (isNewGroupModel)
                 prepVM.LoadedModel = groupModel;
         }
@@ -170,30 +163,78 @@ namespace AMLabSlicer.ViewModel
             prefWindow.ShowDialog();
         }
 
-        /// <summary>
-        /// 通过 PrepareWorkspaceViewModel 转发到视图的 CommandDispatcher。
-        /// 视图在 DataContextChanged 时将自身 CommandDispatcher 反注册到 VM（弱引用避免泄漏）。
-        /// 简单起见，此处通过查找视觉树获取 ModelPreviewView。
-        /// </summary>
         [RelayCommand]
-        private void Undo()
-        {
-            GetActiveViewport()?.CommandDispatcher.Undo();
-        }
+        private void Undo() => GetActiveViewport()?.CommandDispatcher.Undo();
 
         [RelayCommand]
-        private void Redo()
+        private void Redo() => GetActiveViewport()?.CommandDispatcher.Redo();
+
+        // ── STEP 文件加载 ────────────────────────────────────
+        // 在后台线程中调用，不得触碰任何 UI 对象
+
+        private static SceneNode? LoadStepFile(string filePath)
         {
-            GetActiveViewport()?.CommandDispatcher.Redo();
+            var occtService = new OcctInteropService();
+            // 使用推荐的细分参数：0.1mm 线性偏差，0.5rad 角度偏差
+            var meshGeometry = occtService.LoadStepModel(filePath, 0.1, 0.5);
+            if (meshGeometry == null) return null;
+
+            // 用 MeshGeometry3D 构造一个 MeshNode
+            var meshNode = new MeshNode
+            {
+                Name     = System.IO.Path.GetFileNameWithoutExtension(filePath),
+                Geometry = meshGeometry,
+                Material = CreateDefaultMaterial(),
+                CullMode = SharpDX.Direct3D11.CullMode.None,  // 双面渲染避免翻转时漏面
+            };
+
+            var rootGroup = new GroupNode { Name = meshNode.Name + "_root" };
+            rootGroup.AddChildNode(meshNode);
+            return rootGroup;
         }
 
-        private static AMLabSlicer.Views.ModelPreviewView? GetActiveViewport()
+        // ── Assimp 网格加载 ──────────────────────────────────
+
+        private static SceneNode? LoadMeshFileViaAssimp(string filePath)
+        {
+            var importer = new Importer();
+            importer.Configuration.AssimpPostProcessSteps =
+                PostProcessSteps.JoinIdenticalVertices |
+                PostProcessSteps.GenerateSmoothNormals |
+                PostProcessSteps.CalculateTangentSpace;
+
+            var scene = importer.Load(filePath);
+            if (scene == null || scene.Root == null)
+                return null;
+
+            var mat = CreateDefaultMaterial();
+            foreach (var node in scene.Root.Traverse())
+                if (node is MeshNode mn) mn.Material = mat;
+
+            return scene.Root;
+        }
+
+        // ── 材质工厂 ─────────────────────────────────────────
+
+        private static HelixToolkit.SharpDX.Model.PhongMaterialCore CreateDefaultMaterial()
+            => new HelixToolkit.SharpDX.Model.PhongMaterialCore
+            {
+                DiffuseColor      = new HelixToolkit.Maths.Color4(225f/255f, 225f/255f, 225f/255f, 1f),
+                AmbientColor      = new HelixToolkit.Maths.Color4(220f/255f, 220f/255f, 220f/255f, 1f),
+                SpecularColor     = new HelixToolkit.Maths.Color4(30f/255f,  30f/255f,  30f/255f,  1f),
+                SpecularShininess = 5f,
+            };
+
+        // ── Viewport 辅助 ────────────────────────────────────
+
+        private static ModelPreviewView? GetActiveViewport()
         {
             if (Application.Current.MainWindow is not Window w) return null;
-            return FindVisualChild<AMLabSlicer.Views.ModelPreviewView>(w);
+            return FindVisualChild<ModelPreviewView>(w);
         }
 
-        private static T? FindVisualChild<T>(System.Windows.DependencyObject parent) where T : System.Windows.DependencyObject
+        private static T? FindVisualChild<T>(System.Windows.DependencyObject parent)
+            where T : System.Windows.DependencyObject
         {
             for (int i = 0; i < System.Windows.Media.VisualTreeHelper.GetChildrenCount(parent); i++)
             {

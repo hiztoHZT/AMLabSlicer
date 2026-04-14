@@ -47,6 +47,16 @@ namespace AMLabSlicer.Views
             set => SetValue(IsManipulatorVisibleProperty, value);
         }
 
+        public static readonly DependencyProperty ObjectHighlightTransformProperty =
+            DependencyProperty.Register(nameof(ObjectHighlightTransform), typeof(System.Windows.Media.Media3D.Transform3D),
+                typeof(ModelPreviewView), new PropertyMetadata(System.Windows.Media.Media3D.Transform3D.Identity));
+
+        public System.Windows.Media.Media3D.Transform3D ObjectHighlightTransform
+        {
+            get => (System.Windows.Media.Media3D.Transform3D)GetValue(ObjectHighlightTransformProperty);
+            set => SetValue(ObjectHighlightTransformProperty, value);
+        }
+
         public static readonly DependencyProperty ObjectHighlightGeometryProperty =
             DependencyProperty.Register(nameof(ObjectHighlightGeometry), typeof(HxLine),
                 typeof(ModelPreviewView), new PropertyMetadata(null));
@@ -137,6 +147,26 @@ namespace AMLabSlicer.Views
             set => SetValue(IsFaceSelectionVisibleProperty, value);
         }
 
+        public static readonly DependencyProperty ModalConstraintGeometryProperty =
+            DependencyProperty.Register(nameof(ModalConstraintGeometry), typeof(HxLine),
+                typeof(ModelPreviewView), new PropertyMetadata(null));
+
+        public HxLine? ModalConstraintGeometry
+        {
+            get => (HxLine?)GetValue(ModalConstraintGeometryProperty);
+            set => SetValue(ModalConstraintGeometryProperty, value);
+        }
+
+        public static readonly DependencyProperty ModalConstraintColorProperty =
+            DependencyProperty.Register(nameof(ModalConstraintColor), typeof(System.Windows.Media.Color),
+                typeof(ModelPreviewView), new PropertyMetadata(System.Windows.Media.Colors.Transparent));
+
+        public System.Windows.Media.Color ModalConstraintColor
+        {
+            get => (System.Windows.Media.Color)GetValue(ModalConstraintColorProperty);
+            set => SetValue(ModalConstraintColorProperty, value);
+        }
+
         public static readonly DependencyProperty ModeInfoTextProperty =
             DependencyProperty.Register(nameof(ModeInfoText), typeof(string),
                 typeof(ModelPreviewView), new PropertyMetadata("模式：物体模式"));
@@ -170,31 +200,6 @@ namespace AMLabSlicer.Views
             v.IsManipulatorVisible = hasNode && v.GetVM()?.IsObjectMode == true;
             v.RefreshToolbarEnabled();
 
-            // 让 gizmo 大小跟随物体尺寸（避免“球太大/太小”）
-            if (hasNode && e.NewValue is SceneNode sn)
-            {
-                try
-                {
-                    if (TryComputeWorldAabb(sn, out var min, out var max))
-                    {
-                        float w = max.X - min.X;
-                        float h = max.Y - min.Y;
-                        float dZ = max.Z - min.Z;
-                        float maxDim = MathF.Max(w, MathF.Max(h, dZ));
-
-                        // 按 maxDim 做线性缩放；根据你的场景坐标大多在百毫米级别微调上下限
-                        v.ObjectManipulator.SizeScale = (float)Math.Clamp(maxDim / 60f, 0.6f, 6f);
-                    }
-                }
-                catch
-                {
-                    // bounds 暂时不可用：保持默认值
-                }
-            }
-            else
-            {
-                v.ObjectManipulator.SizeScale = 2.5f;
-            }
 
             // 选中新物体后，刷新输入栏到新物体的当前值（若输入栏当前不可见则忽略）
             if (hasNode && v.TransformInputBar.Visibility == Visibility.Visible)
@@ -215,12 +220,27 @@ namespace AMLabSlicer.Views
         private PreferencesViewModel? _prefs;
         private Point3D  _pivotPoint = new(0, 0, 0);
 
-        // ── 变换状态 ──
+        // ── Gizmo 位置跟踪 ──────────────────────────
+        private bool      _gizmoUpdating;              // 防止 SceneNode 矩阵赋值触发反向回调
+        private Matrix4x4 _gizmoLastMatrix = Matrix4x4.Identity; // 上次 GizmoAnchor SceneNode 矩阵
+        private bool      _inGizmoDrag;                // 是否正在拖拽 Gizmo
+
+
+        // ── Blender-style 模态状态 ──
+        private bool      _isModalTransformActive = false;
+        private string    _modalMode = "";           // "G", "R", "S"
+        private string    _modalAxis = "";           // "", "X", "Y", "Z"
+        private string    _modalInputBuffer = "";    // 用户敲击的数字缓冲区 "10", "-5.5"
+        private Point     _modalInitialMousePos;     // 进入模态时的鼠标位置
+        private Matrix4x4 _modalInitialMatrix;       // 进入模态前的物体初始矩阵快照
+        private Vector3   _modalPivotCenter;         // 进入模态前的固定几何中心（包围盒中心）
+        private Vector3   _modalInitialMouseWorld;   // 进入模态时鼠标在中心平面的世界投影
+
+        // ── UI 工具栏原变换状态 ──
         /// <summary>"G"/"R"/"S"，空字符串代表无活跃变换</summary>
         private string   _activeTransformKey = string.Empty;
-        /// <summary>进入 ActivateTransform 时的节点矩阵快照（供 Escape 还原 + Undo 差分）</summary>
+        /// <summary>进入 ActivateTransform 时的节点矩阵快照</summary>
         private Matrix4x4 _snapMatrix = Matrix4x4.Identity;
-        /// <summary>防止 TextChanged 回调与 PopulateInputBar 死循环</summary>
         private bool     _suppressInput;
 
         // ── 底面拾取 ──
@@ -258,8 +278,30 @@ namespace AMLabSlicer.Views
             SetPerspectiveCamera();
             UpdateStatusInfo();
             Focusable = true;
-            PreviewKeyDown      += OnPreviewKeyDown;
-            DataContextChanged  += OnDataContextChanged;
+            PreviewKeyDown     += OnPreviewKeyDown;
+            DataContextChanged += OnDataContextChanged;
+
+        }
+
+        /// <summary>
+        /// 将 GizmoAnchor.SceneNode 的当前矩阵与 _gizmoLastMatrix 的增量 delta 应用到 SelectedNode。
+        /// 用于 Gizmo 拖拽过程中的实时同步（每次 MouseMove 增量调用）。
+        /// </summary>
+        private void SyncGizmoToSelectedNode()
+        {
+            if (_gizmoUpdating) return;
+            if (SelectedNode == null) return;
+            if (GizmoAnchor.SceneNode is not { } anchorNode) return;
+
+            Matrix4x4 current = anchorNode.ModelMatrix;
+            if (!Matrix4x4.Invert(_gizmoLastMatrix, out var lastInv)) return;
+            Matrix4x4 delta = lastInv * current;
+            if (delta == Matrix4x4.Identity) return;
+
+            _gizmoUpdating = true;
+            SelectedNode.ModelMatrix = delta * SelectedNode.ModelMatrix;
+            _gizmoLastMatrix = current; // 增量更新，下次只计算新增的 delta
+            _gizmoUpdating = false;
         }
 
         private PrepareWorkspaceViewModel? GetVM() => DataContext as PrepareWorkspaceViewModel;
@@ -416,6 +458,14 @@ namespace AMLabSlicer.Views
                 e.Handled = true; return;
             }
 
+            // ── Blender 模态交互接管体系 ──
+            if (_isModalTransformActive)
+            {
+                HandleModalTransformKey(e);
+                if (!e.Handled) e.Handled = true; // 吞噬该状态下的所有残余按键
+                return;  
+            }
+
             // Tab 切换模式（不打断 TextBox 内部切焦点）
             if (e.Key == Key.Tab && e.OriginalSource is not TextBox)
             {
@@ -451,9 +501,9 @@ namespace AMLabSlicer.Views
 
             switch (e.Key)
             {
-                case Key.G:      ActivateTransform("G"); e.Handled = true; break;
-                case Key.R:      ActivateTransform("R"); e.Handled = true; break;
-                case Key.S:      ActivateTransform("S"); e.Handled = true; break;
+                case Key.G:      EnterModalTransform("G"); e.Handled = true; break;
+                case Key.R:      EnterModalTransform("R"); e.Handled = true; break;
+                case Key.S:      EnterModalTransform("S"); e.Handled = true; break;
                 case Key.Delete:
                 case Key.X:      ConfirmAndDelete();     e.Handled = true; break;
                 case Key.F:      EnterFacePickMode();    e.Handled = true; break;
@@ -533,6 +583,309 @@ namespace AMLabSlicer.Views
         private void LinkedModeCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             _linkedSelectObjectMode = LinkedModeCombo.SelectedIndex == 1;
+        }
+
+        // ══════════════════════════════════════
+        // Blender 风格模态变换逻辑 (G/R/S)
+        // ══════════════════════════════════════
+        private void EnterModalTransform(string mode)
+        {
+            if (SelectedNode == null) return;
+            // 进入模态前，若已有普通 UI 激活状态，先退出
+            if (!string.IsNullOrEmpty(_activeTransformKey))
+                DeactivateTransform(commit: true);
+
+            _isModalTransformActive = true;
+            _modalMode = mode;
+            _modalAxis = "";
+            _modalInputBuffer = "";
+            _modalInitialMatrix = SelectedNode.ModelMatrix;
+            
+            _modalPivotCenter = new Vector3(0, 0, 0);
+            if (TryComputeWorldAabb(SelectedNode, out var cmin, out var cmax))
+                _modalPivotCenter = (cmin + cmax) * 0.5f;
+                
+            _modalInitialMousePos = Mouse.GetPosition(MainViewport);
+            _modalInitialMouseWorld = GetMouseUnprojectedZPlane(_modalInitialMousePos, _modalPivotCenter.Z);
+            
+            // 改为十字星标
+            Mouse.OverrideCursor = Cursors.Cross;
+            MainViewport.CaptureMouse();
+            
+            UpdateModalStatusText();
+            UpdateOverlayCanvas();
+        }
+
+        private void HandleModalTransformKey(KeyEventArgs e)
+        {
+            // Escape: 取消
+            if (e.Key == Key.Escape)
+            {
+                ExitModalTransform(commit: false);
+                e.Handled = true;
+                return;
+            }
+            
+            // Enter 或 Space: 确认
+            if (e.Key == Key.Enter || e.Key == Key.Space)
+            {
+                ExitModalTransform(commit: true);
+                e.Handled = true;
+                return;
+            }
+            
+            // 轴约束 X/Y/Z
+            if (e.Key == Key.X || e.Key == Key.Y || e.Key == Key.Z)
+            {
+                if (_modalMode == "G" && e.Key == Key.Z) return; // 规则 1: 禁止 GZ 操作
+                
+                string axis = e.Key.ToString();
+                // 连按两次切换约束/取消约束？这里：如果相同则是取消约束
+                _modalAxis = _modalAxis == axis ? "" : axis;
+                UpdateModalTransform();
+                UpdateModalStatusText();
+                UpdateOverlayCanvas();
+                e.Handled = true;
+                return;
+            }
+
+            // 处理数字和符号
+            HandleModalBufferInput(e);
+        }
+
+        private void HandleModalBufferInput(KeyEventArgs e)
+        {
+            bool changed = false;
+            // 屏蔽字母干扰
+            if (e.Key >= Key.A && e.Key <= Key.Z) return; 
+
+            if (e.Key == Key.Back || e.Key == Key.Delete)
+            {
+                if (_modalInputBuffer.Length > 0)
+                {
+                    _modalInputBuffer = _modalInputBuffer.Substring(0, _modalInputBuffer.Length - 1);
+                    changed = true;
+                }
+            }
+            else if (e.Key == Key.OemMinus || e.Key == Key.Subtract)
+            {
+                if (_modalInputBuffer.StartsWith("-")) _modalInputBuffer = _modalInputBuffer.Substring(1);
+                else _modalInputBuffer = "-" + _modalInputBuffer;
+                changed = true;
+            }
+            else if (e.Key == Key.OemPeriod || e.Key == Key.Decimal)
+            {
+                if (!_modalInputBuffer.Contains('.')) { _modalInputBuffer += "."; changed = true; }
+            }
+            else
+            {
+                // D0-D9
+                if (e.Key >= Key.D0 && e.Key <= Key.D9)
+                {
+                    _modalInputBuffer += (e.Key - Key.D0).ToString();
+                    changed = true;
+                }
+                // NumPad0-NumPad9
+                else if (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9)
+                {
+                    _modalInputBuffer += (e.Key - Key.NumPad0).ToString();
+                    changed = true;
+                }
+            }
+
+            if (changed)
+            {
+                UpdateModalTransform();
+                UpdateModalStatusText();
+                e.Handled = true;
+            }
+        }
+        
+        private Vector3 GetMouseUnprojectedZPlane(Point mousePos, float targetZ)
+        {
+            var ray = MainViewport.UnProject(mousePos);
+            if (Math.Abs(ray.Direction.Z) < 1e-6f) return Vector3.Zero;
+            float t = (targetZ - ray.Position.Z) / ray.Direction.Z;
+            return ray.Position + t * ray.Direction;
+        }
+
+        private void UpdateModalTransform()
+        {
+            if (SelectedNode == null) return;
+            
+            double value = 0;
+            bool hasValidInput = false;
+            
+            if (!string.IsNullOrEmpty(_modalInputBuffer) && _modalInputBuffer != "-")
+            {
+                if (double.TryParse(_modalInputBuffer, out double parsed))
+                {
+                    value = parsed;
+                    hasValidInput = true;
+                }
+            }
+            
+            // 如果没有有效的数字输入，则使用鼠标相对位移！
+            Vector3 worldDelta = Vector3.Zero;
+            var curPos = Mouse.GetPosition(MainViewport);
+
+            if (!hasValidInput)
+            {
+                var curWorld = GetMouseUnprojectedZPlane(curPos, _modalPivotCenter.Z);
+                worldDelta = curWorld - _modalInitialMouseWorld;
+                
+                double dx = curPos.X - _modalInitialMousePos.X;
+                double dy = curPos.Y - _modalInitialMousePos.Y;
+                
+                if (_modalMode == "G")
+                {
+                    if (_modalAxis == "X") value = worldDelta.X;
+                    else if (_modalAxis == "Y") value = worldDelta.Y;
+                    else if (_modalAxis == "Z") value = 0; // 禁止 Z 使用
+                }
+                else if (_modalMode == "R")
+                {
+                    value = (dx - dy) * 0.5; // deg per pixel (用于带约束的旋转)
+                }
+                else if (_modalMode == "S")
+                {
+                    value = 1.0 + (dx - dy) * 0.005; 
+                }
+            }
+
+            // ============ 应用变换！============
+            Matrix4x4 newMat = _modalInitialMatrix;
+            Vector3 center = _modalPivotCenter;
+            
+            if (_modalMode == "G")
+            {
+                float mx = 0, my = 0, mz = 0;
+                if (_modalAxis == "X") mx = (float)value;
+                else if (_modalAxis == "Y") my = (float)value;
+                else if (_modalAxis == "Z") mz = (float)value;
+                else 
+                {
+                    // 无约束时：
+                    if (hasValidInput) { mx = (float)value; my = (float)value; }
+                    else { mx = worldDelta.X; my = worldDelta.Y; } // 映射到真实 XYZ 平面的平移
+                }
+                
+                newMat.Translation = _modalInitialMatrix.Translation + new Vector3(mx, my, mz);
+            }
+            else if (_modalMode == "R")
+            {
+                 float angleRad = (float)(value * Math.PI / 180.0);
+                 Matrix4x4 rot = Matrix4x4.Identity;
+                 
+                 if (_modalAxis == "X") rot = Matrix4x4.CreateRotationX(angleRad);
+                 else if (_modalAxis == "Y") rot = Matrix4x4.CreateRotationY(angleRad);
+                 else rot = Matrix4x4.CreateRotationZ(angleRad); // 默认数值或默认角
+                 
+                 newMat = _modalInitialMatrix * Matrix4x4.CreateTranslation(-center) * rot * Matrix4x4.CreateTranslation(center);
+            }
+            else if (_modalMode == "S")
+            {
+                 // 缩放
+                 float sval = (float)value;
+                 if (sval < 0.001f && sval > -0.001f) sval = 0.001f; // 防止缩放为 0 导致逆矩阵失效
+                 
+                 float sx = 1, sy = 1, sz = 1;
+                 if (_modalAxis == "X") sx = sval;
+                 else if (_modalAxis == "Y") sy = sval;
+                 else if (_modalAxis == "Z") sz = sval;
+                 else { sx = sy = sz = sval; }
+
+                 newMat = _modalInitialMatrix * Matrix4x4.CreateTranslation(-center) * Matrix4x4.CreateScale(sx, sy, sz) * Matrix4x4.CreateTranslation(center);
+            }
+
+            SelectedNode.ModelMatrix = newMat;
+            
+            UpdateObjectHighlightTransform(_modalInitialMatrix, newMat, SelectedNode);
+        }
+        
+        private void UpdateModalStatusText()
+        {
+            // 在原输入栏上显示
+            TransformInputBar.Visibility = Visibility.Visible;
+            string axisStr = string.IsNullOrEmpty(_modalAxis) ? "(自由)" : _modalAxis;
+            string dispStr = $"{_modalMode} {axisStr}: {_modalInputBuffer}";
+            TransformLabel.Text = dispStr;
+            // 隐藏实际的输入框，仅保留标签
+            LblX.Visibility = Visibility.Collapsed; TxfX.Visibility = Visibility.Collapsed;
+            LblY.Visibility = Visibility.Collapsed; TxfY.Visibility = Visibility.Collapsed;
+            LblZ.Visibility = Visibility.Collapsed; TxfZ.Visibility = Visibility.Collapsed;
+        }
+        
+        private void ExitModalTransform(bool commit)
+        {
+            _isModalTransformActive = false;
+            Mouse.OverrideCursor = null;
+            MainViewport.ReleaseMouseCapture();
+            
+            if (!commit)
+            {
+                SelectedNode.ModelMatrix = _modalInitialMatrix;
+            }
+            else
+            {
+                if (_modalInitialMatrix != SelectedNode.ModelMatrix)
+                {
+                    if (_modalMode == "G" || _modalMode == "S" || _modalMode == "R")
+                    {
+                        // 约束移动后检查贴地
+                        ApplyZFloor(SelectedNode); 
+                    }
+                    CommandDispatcher.Push(new TransformCommand(SelectedNode, _modalInitialMatrix, SelectedNode.ModelMatrix, $"模态 {_modalMode} 变换"));
+                }
+            }
+            
+            // 清理状态
+            ModalConstraintGeometry = null;
+            TransformInputBar.Visibility = Visibility.Collapsed;
+            // 恢复 UI 输入栏可见状态为正常
+            LblX.Visibility = Visibility.Visible; TxfX.Visibility = Visibility.Visible;
+            LblY.Visibility = Visibility.Visible; TxfY.Visibility = Visibility.Visible;
+            // Z 轴可见性在打开 ActivateTransform(...) 时重置
+            RefreshObjectHighlight();
+        }
+
+        private void UpdateOverlayCanvas()
+        {
+            if (!_isModalTransformActive || string.IsNullOrEmpty(_modalAxis) || SelectedNode == null) 
+            {
+                ModalConstraintGeometry = null;
+                return;
+            }
+
+            // 绘制横贯物体的 3D 辅助线，使用固定的进入模态时的几何中心
+            Vector3 center = _modalPivotCenter;
+
+            // 构造长线端点（±2000mm）
+            float length = 2000f;
+            Vector3 p1 = center, p2 = center;
+            System.Windows.Media.Color color = System.Windows.Media.Colors.White;
+
+            if (_modalAxis == "X") 
+            { 
+               p1.X -= length; p2.X += length; 
+               color = System.Windows.Media.Colors.Red; 
+            }
+            else if (_modalAxis == "Y") 
+            { 
+               p1.Y -= length; p2.Y += length; 
+               color = System.Windows.Media.Colors.LimeGreen; 
+            }
+            else if (_modalAxis == "Z") 
+            { 
+               p1.Z -= length; p2.Z += length; 
+               color = System.Windows.Media.Colors.DodgerBlue; 
+            }
+
+            var builder = new LineBuilder();
+            builder.AddLine(p1, p2);
+            
+            ModalConstraintGeometry = builder.ToLineGeometry3D();
+            ModalConstraintColor = color;
         }
 
         // ══════════════════════════════════════
@@ -695,7 +1048,7 @@ namespace AMLabSlicer.Views
                     break;
                 }
             }
-            RefreshObjectHighlight();
+            UpdateObjectHighlightTransform(_snapMatrix, SelectedNode.ModelMatrix, SelectedNode);
         }
 
         private void TransformBox_KeyDown(object sender, KeyEventArgs e)
@@ -737,8 +1090,8 @@ namespace AMLabSlicer.Views
             {
                 if (commit)
                 {
-                    // G 模式：贴地约束（Z 轴对齐地面）
-                    if (_activeTransformKey == "G") ApplyZFloor(SelectedNode);
+                    // 无论什么模式，修改完成确认后均对齐地面
+                    ApplyZFloor(SelectedNode);
                     var after = SelectedNode.ModelMatrix;
                     if (after != _snapMatrix)
                         CommandDispatcher.Push(new TransformCommand(
@@ -773,22 +1126,74 @@ namespace AMLabSlicer.Views
             BtnFace.Tag   = key == "F" ? "active" : null;
         }
 
-        private void RefreshObjectHighlight()
+        /// <summary>
+        /// 仅更新蓝色包围盒线框，不重置 GizmoAnchor.Transform。
+        /// 在 Gizmo 拖拽过程中的 MouseMove 里调用，避免复位 GizmoAnchor 干扰正在进行的拖拽。
+        /// </summary>
+        private void RefreshBoundingBoxOnly()
+        {
+            if (SelectedNode == null) return;
+            if (!TryComputeWorldAabb(SelectedNode, out var min, out var max, fast: true))
+            {
+                ObjectHighlightGeometry = null;
+                ObjectHighlightTransform = System.Windows.Media.Media3D.Transform3D.Identity;
+                IsObjectHighlightVisible = false;
+                return;
+            }
+
+            ObjectHighlightTransform = System.Windows.Media.Media3D.Transform3D.Identity;
+
+            var b = new LineBuilder();
+            var p000 = new Vector3(min.X, min.Y, min.Z); var p001 = new Vector3(min.X, min.Y, max.Z);
+            var p010 = new Vector3(min.X, max.Y, min.Z); var p011 = new Vector3(min.X, max.Y, max.Z);
+            var p100 = new Vector3(max.X, min.Y, min.Z); var p101 = new Vector3(max.X, min.Y, max.Z);
+            var p110 = new Vector3(max.X, max.Y, min.Z); var p111 = new Vector3(max.X, max.Y, max.Z);
+
+            b.AddLine(p000, p001); b.AddLine(p001, p011); b.AddLine(p011, p010); b.AddLine(p010, p000);
+            b.AddLine(p100, p101); b.AddLine(p101, p111); b.AddLine(p111, p110); b.AddLine(p110, p100);
+            b.AddLine(p000, p100); b.AddLine(p001, p101); b.AddLine(p010, p110); b.AddLine(p011, p111);
+
+            ObjectHighlightGeometry = b.ToLineGeometry3D();
+            IsObjectHighlightVisible = true;
+        }
+
+        private void UpdateObjectHighlightTransform(Matrix4x4 initialMatrix, Matrix4x4 newMatrix, SceneNode node)
+        {
+            var parentWorld = node.Parent != null ? GetWorldModelMatrix(node.Parent) : Matrix4x4.Identity;
+            Matrix4x4.Invert(parentWorld, out var invParent);
+            Matrix4x4.Invert(initialMatrix, out var invInitial);
+
+            var deltaM = invParent * invInitial * newMatrix * parentWorld;
+            ObjectHighlightTransform = new System.Windows.Media.Media3D.MatrixTransform3D(
+                new System.Windows.Media.Media3D.Matrix3D(
+                    deltaM.M11, deltaM.M12, deltaM.M13, deltaM.M14,
+                    deltaM.M21, deltaM.M22, deltaM.M23, deltaM.M24,
+                    deltaM.M31, deltaM.M32, deltaM.M33, deltaM.M34,
+                    deltaM.M41, deltaM.M42, deltaM.M43, deltaM.M44));
+        }
+
+        private void RefreshObjectHighlight(bool fast = false)
         {
             var vm = GetVM();
             if (SelectedNode == null || vm?.IsObjectMode != true)
             {
                 ObjectHighlightGeometry = null;
+                ObjectHighlightTransform = System.Windows.Media.Media3D.Transform3D.Identity;
+                IsObjectHighlightVisible = false;
+                IsManipulatorVisible = false;
+                _gizmoLastMatrix = Matrix4x4.Identity;
+                return;
+            }
+
+            if (!TryComputeWorldAabb(SelectedNode, out var min, out var max, fast: fast))
+            {
+                ObjectHighlightGeometry = null;
+                ObjectHighlightTransform = System.Windows.Media.Media3D.Transform3D.Identity;
                 IsObjectHighlightVisible = false;
                 return;
             }
 
-            if (!TryComputeWorldAabb(SelectedNode, out var min, out var max))
-            {
-                ObjectHighlightGeometry = null;
-                IsObjectHighlightVisible = false;
-                return;
-            }
+            ObjectHighlightTransform = System.Windows.Media.Media3D.Transform3D.Identity;
 
             var b = new LineBuilder();
             var p000 = new Vector3(min.X, min.Y, min.Z);
@@ -806,7 +1211,31 @@ namespace AMLabSlicer.Views
 
             ObjectHighlightGeometry = b.ToLineGeometry3D();
             IsObjectHighlightVisible = true;
+
+            // ── 将 GizmoAnchor 定位到 AABB 几何中心，TransformManipulator3D 会自动同步 ──
+            var center = (min + max) * 0.5f;
+            float w = max.X - min.X, h = max.Y - min.Y, d = max.Z - min.Z;
+            float maxDim = MathF.Max(w, MathF.Max(h, d));
+            double gizmoScale = Math.Clamp(maxDim / 4.0, 10.0, 80.0);
+
+            var tx = new System.Windows.Media.Media3D.MatrixTransform3D(
+                new System.Windows.Media.Media3D.Matrix3D(
+                    1, 0, 0, 0,
+                    0, 1, 0, 0,
+                    0, 0, 1, 0,
+                    center.X, center.Y, center.Z, 1));
+
+            _gizmoUpdating = true;
+            GizmoAnchor.Transform = tx;
+            _gizmoUpdating = false;
+
+            // 记录 GizmoAnchor SceneNode 当前矩阵，供松手后 delta 计算
+            if (GizmoAnchor.SceneNode is { } an)
+                _gizmoLastMatrix = an.ModelMatrix;
+
+            ObjectManipulator.SizeScale = gizmoScale;
         }
+
 
         private void RefreshFaceOverlay()
         {
@@ -911,11 +1340,14 @@ namespace AMLabSlicer.Views
         // ══════════════════════════════════════
         // Z 贴地约束
         // ══════════════════════════════════════
+        private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<object, Vector3[]> _geometryVertexCache = new();
+
         /// <summary>
         /// 避免 BoundsWithTransform 在某些状态下返回非有限值（NaN/Infinity）导致推飞模型。
-        /// 通过遍历网格顶点 + 自己计算 world AABB。
+        /// 开户 fast: true 模式时，仅对网格自身原本的 8 个本地包围盒角点进行矩阵变换并做极值提取(极快且适合渲染高亮边框，但多重旋转会虚胖)。
+        /// fast: false 时，通过缓存顶点极速遍历计算精确的 World AABB(适用贴地)。
         /// </summary>
-        private static bool TryComputeWorldAabb(SceneNode node, out Vector3 min, out Vector3 max)
+        private static bool TryComputeWorldAabb(SceneNode node, out Vector3 min, out Vector3 max, bool fast = false)
         {
             min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
             max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
@@ -927,18 +1359,50 @@ namespace AMLabSlicer.Views
             {
                 foreach (var n in node.Traverse())
                 {
-                    if (n is MeshNode mn && mn.Geometry?.Positions != null)
+                    if (n is MeshNode mn && mn.Geometry != null)
                     {
-                        // 只对该 MeshNode 计算一次 world matrix（后续顶点循环复用）
                         var worldM = GetWorldModelMatrix(mn);
-                        foreach (var p in mn.Geometry.Positions)
+                        
+                        if (fast)
                         {
-                            var wp = Vector3.Transform(p, worldM);
-                            if (wp.X < min.X) min.X = wp.X; if (wp.X > max.X) max.X = wp.X;
-                            if (wp.Y < min.Y) min.Y = wp.Y; if (wp.Y > max.Y) max.Y = wp.Y;
-                            if (wp.Z < min.Z) min.Z = wp.Z; if (wp.Z > max.Z) max.Z = wp.Z;
+                            var bound = mn.Geometry.Bound;
+                            Vector3[] corners = new Vector3[] {
+                                new Vector3(bound.Minimum.X, bound.Minimum.Y, bound.Minimum.Z),
+                                new Vector3(bound.Minimum.X, bound.Minimum.Y, bound.Maximum.Z),
+                                new Vector3(bound.Minimum.X, bound.Maximum.Y, bound.Minimum.Z),
+                                new Vector3(bound.Minimum.X, bound.Maximum.Y, bound.Maximum.Z),
+                                new Vector3(bound.Maximum.X, bound.Minimum.Y, bound.Minimum.Z),
+                                new Vector3(bound.Maximum.X, bound.Minimum.Y, bound.Maximum.Z),
+                                new Vector3(bound.Maximum.X, bound.Maximum.Y, bound.Minimum.Z),
+                                new Vector3(bound.Maximum.X, bound.Maximum.Y, bound.Maximum.Z)
+                            };
+                            for (int i = 0; i < 8; i++)
+                            {
+                                var wp = Vector3.Transform(corners[i], worldM);
+                                if (wp.X < min.X) min.X = wp.X; else if (wp.X > max.X) max.X = wp.X;
+                                if (wp.Y < min.Y) min.Y = wp.Y; else if (wp.Y > max.Y) max.Y = wp.Y;
+                                if (wp.Z < min.Z) min.Z = wp.Z; else if (wp.Z > max.Z) max.Z = wp.Z;
+                            }
+                            any = true;
                         }
-                        any = true;
+                        else
+                        {
+                            if (!_geometryVertexCache.TryGetValue(mn.Geometry, out Vector3[]? pts) || pts == null)
+                            {
+                                pts = mn.Geometry.Positions?.ToArray() ?? Array.Empty<Vector3>();
+                                _geometryVertexCache.Add(mn.Geometry, pts);
+                            }
+
+                            int count = pts.Length;
+                            for (int i = 0; i < count; i++)
+                            {
+                                var wp = Vector3.Transform(pts[i], worldM);
+                                if (wp.X < min.X) min.X = wp.X; else if (wp.X > max.X) max.X = wp.X;
+                                if (wp.Y < min.Y) min.Y = wp.Y; else if (wp.Y > max.Y) max.Y = wp.Y;
+                                if (wp.Z < min.Z) min.Z = wp.Z; else if (wp.Z > max.Z) max.Z = wp.Z;
+                            }
+                            if (count > 0) any = true;
+                        }
                     }
                 }
             }
@@ -985,10 +1449,10 @@ namespace AMLabSlicer.Views
                 if (Math.Abs(dz) > 1e5f) return; // 保护阈值，避免数值异常推飞
 
                 if (Math.Abs(dz) > 0.01f)
-                    // worldZ floor -> 用“预乘”在世界坐标系推移，避免对象已旋转时沿局部 z 推移导致不贴地
-                    node.ModelMatrix =
-                        Matrix4x4.CreateTranslation(0, 0, dz) *
-                        node.ModelMatrix;
+                // worldZ floor -> 用“后乘”在世界坐标系推移，因为矩阵是 RowMajor（node.ModelMatrix * T）
+                node.ModelMatrix =
+                    node.ModelMatrix *
+                    Matrix4x4.CreateTranslation(0, 0, dz);
             }
             catch { /* 边界未计算完成时忽略 */ }
         }
@@ -1418,18 +1882,30 @@ namespace AMLabSlicer.Views
         {
             this.Focus();
 
+            if (_isModalTransformActive)
+            {
+                if (e.ChangedButton == MouseButton.Left)
+                    ExitModalTransform(commit: true);
+                else if (e.ChangedButton == MouseButton.Right || e.ChangedButton == MouseButton.Middle)
+                    ExitModalTransform(commit: false);
+                e.Handled = true;
+                return;
+            }
+
             if (e.ChangedButton == MouseButton.Left)
             {
                 var pos = e.GetPosition(MainViewport);
 
                 if (_isFacePickMode) { ExecuteBottomFacePick(pos); e.Handled = true; return; }
 
-                // 判断是否点在 Manipulator 上（VisualTree 向上查找）
-                if (e.OriginalSource is DependencyObject src && IsDescendantOf(src, ObjectManipulator))
+                // ── 优先判断是否点击了 Gizmo ──
+                if (IsManipulatorVisible && IsGizmoHit(pos))
                 {
-                    // Manipulator 处理拖拽，记录变换前快照
+                    // Gizmo 命中：设置拖拽标志，记录 undo 快照，不做选择逻辑
+                    _inGizmoDrag = true;
                     if (SelectedNode != null) _snapMatrix = SelectedNode.ModelMatrix;
-                    return;
+                    if (GizmoAnchor.SceneNode is { } an) _gizmoLastMatrix = an.ModelMatrix;
+                    return; // 不设 Handled，让 WPF 事件继续传递给 Gizmo 的 Mouse3DDown
                 }
 
                 var vm = GetVM();
@@ -1457,19 +1933,39 @@ namespace AMLabSlicer.Views
                     return;
                 }
 
-                // 物体模式：点选
+                // 物体模式：点选（排除 Gizmo 子树，防止点 Gizmo 时清空 SelectedNode）
                 var hits = MainViewport.FindHits(pos);
-                SceneNode? newSel = null;
+                var manipRoot  = ObjectManipulator.SceneNode;
+                var anchorRoot = GizmoAnchor.SceneNode;
+                SceneNode? newSel      = null;
+                bool       hasGizmoHit = false; // FindHits 是否命中了 Gizmo（但 IsGizmoHit 漏检）
+
                 if (hits != null && hits.Count > 0)
                 {
                     foreach (var hit in hits)
                     {
-                        if (hit.ModelHit is SceneNode sn && (sn is MeshNode || sn is GroupNode))
+                        if (hit.ModelHit is not SceneNode sn) continue;
+
+                        // 跳过属于 Gizmo 或 GizmoAnchor 子树的命中
+                        bool isGizmoSN = (manipRoot  != null && IsInSceneNodeSubtree(sn, manipRoot)) ||
+                                         (anchorRoot != null && IsInSceneNodeSubtree(sn, anchorRoot));
+                        if (isGizmoSN) { hasGizmoHit = true; continue; }
+
+                        if (sn is MeshNode || sn is GroupNode)
                         {
                             newSel = FindRootNode(sn, vm?.LoadedModel as SceneNodeGroupModel3D);
                             if (newSel != null) break;
                         }
                     }
+                }
+
+                // 如果 FindHits 命中了 Gizmo（IsGizmoHit 漏检的情况），也当作 Gizmo 拖拽处理
+                if (newSel == null && hasGizmoHit && IsManipulatorVisible)
+                {
+                    _inGizmoDrag = true;
+                    if (SelectedNode != null) _snapMatrix = SelectedNode.ModelMatrix;
+                    if (GizmoAnchor.SceneNode is { } an) _gizmoLastMatrix = an.ModelMatrix;
+                    return;
                 }
 
                 if (SelectedNode != newSel)
@@ -1491,19 +1987,25 @@ namespace AMLabSlicer.Views
 
         private void MainViewport_PreviewMouseMove(object sender, MouseEventArgs e)
         {
-            // Manipulator 拖拽结束后记录 Undo
-            if (e.LeftButton == MouseButtonState.Released &&
-                !string.IsNullOrEmpty(_activeTransformKey) == false &&
-                SelectedNode != null)
+            // ── Blender 模态交互接管 ──
+            if (_isModalTransformActive)
             {
-                // 当 Manipulator 拖拽结束时（鼠标已松开），flush undo
-                var cur = SelectedNode.ModelMatrix;
-                if (cur != _snapMatrix && _activeTransformKey == string.Empty)
+                // 如果没有输入数字，则执行基于鼠标的相对位移！
+                if (string.IsNullOrEmpty(_modalInputBuffer) || _modalInputBuffer == "-")
                 {
-                    CommandDispatcher.Push(new TransformCommand(SelectedNode, _snapMatrix, cur, "Gizmo 拖拽"));
-                    _snapMatrix = cur;
-                    PopulateInputBar();
+                    UpdateModalTransform();
                 }
+                e.Handled = true;
+                return;
+            }
+
+            // ── Gizmo 拖拽：实时将 GizmoAnchor 的增量 delta 同步到 SelectedNode ──
+            if (_inGizmoDrag && e.LeftButton == MouseButtonState.Pressed)
+            {
+                SyncGizmoToSelectedNode();
+                // 实时更新蓝色包围盒（不重置 Gizmo 位置，避免干扰正在进行的拖拽）
+                RefreshBoundingBoxOnly();
+                // 不 return：后续相机/面模式逻辑仍需运行（但 _isDragging 为 false 时不进入相机逻辑）
             }
 
             var vm = GetVM();
@@ -1567,7 +2069,27 @@ namespace AMLabSlicer.Views
                 e.Handled = true;
             }
 
-            // Manipulator 放手后记录 Undo（无活跃文字输入栏时）
+            // ── Gizmo 拖拽结束：最终同步 + Z-Floor + Undo ──
+            if (_inGizmoDrag && e.ChangedButton == MouseButton.Left)
+            {
+                _inGizmoDrag = false;
+                SyncGizmoToSelectedNode(); // 最终同步一次（捕获 MouseMove 末帧可能遗漏的 delta）
+
+                if (SelectedNode != null && string.IsNullOrEmpty(_activeTransformKey))
+                {
+                    var cur = SelectedNode.ModelMatrix;
+                    if (cur != _snapMatrix)
+                    {
+                        ApplyZFloor(SelectedNode);  // 贴地：保持模型底面在 Z=0
+                        CommandDispatcher.Push(new TransformCommand(SelectedNode, _snapMatrix, SelectedNode.ModelMatrix, "Gizmo 变换"));
+                        _snapMatrix = SelectedNode.ModelMatrix;
+                    }
+                }
+                RefreshObjectHighlight(); // 重置 GizmoAnchor 到新 AABB 中心
+                return;
+            }
+
+            // 键盘变换（G/R/S）放手后记录 Undo
             if (e.ChangedButton == MouseButton.Left && SelectedNode != null &&
                 string.IsNullOrEmpty(_activeTransformKey))
             {
@@ -1575,7 +2097,7 @@ namespace AMLabSlicer.Views
                 if (cur != _snapMatrix)
                 {
                     ApplyZFloor(SelectedNode);
-                    CommandDispatcher.Push(new TransformCommand(SelectedNode, _snapMatrix, SelectedNode.ModelMatrix, "Gizmo 拖拽"));
+                    CommandDispatcher.Push(new TransformCommand(SelectedNode, _snapMatrix, SelectedNode.ModelMatrix, "键盘变换"));
                     _snapMatrix = SelectedNode.ModelMatrix;
                     RefreshObjectHighlight();
                 }
@@ -1979,6 +2501,48 @@ namespace AMLabSlicer.Views
                 cur = cur.Parent;
             }
             return null;
+        }
+
+        /// <summary>
+        /// 使用 3D 射线检测判断屏幕位置是否命中了 Gizmo（GizmoAnchor 或 ObjectManipulator 的子树）。
+        /// Gizmo 在 DirectX 里渲染，不在 WPF VisualTree 中，所以必须用 FindHits 来检测。
+        /// </summary>
+        private bool IsGizmoHit(Point screenPos)
+        {
+            // Gizmo 的命中测试根节点：ObjectManipulator 内部 AlwaysHitGroupNode + GizmoAnchor
+            var manipNode  = ObjectManipulator.SceneNode;
+            var anchorNode = GizmoAnchor.SceneNode;
+            if (manipNode == null && anchorNode == null) return false;
+
+            try
+            {
+                var hits = MainViewport.FindHits(screenPos);
+                if (hits == null || hits.Count == 0) return false;
+
+                foreach (var hit in hits)
+                {
+                    if (hit.ModelHit is not SceneNode sn) continue;
+                    if (manipNode  != null && IsInSceneNodeSubtree(sn, manipNode))  return true;
+                    if (anchorNode != null && IsInSceneNodeSubtree(sn, anchorNode)) return true;
+                }
+            }
+            catch { }
+
+            return false;
+        }
+
+        /// <summary>
+        /// 判断 node 是否在以 root 为根的 SceneNode 子树中（含 root 本身）。
+        /// </summary>
+        private static bool IsInSceneNodeSubtree(SceneNode node, SceneNode root)
+        {
+            var cur = node;
+            while (cur != null)
+            {
+                if (ReferenceEquals(cur, root)) return true;
+                cur = cur.Parent;
+            }
+            return false;
         }
 
         private static bool IsDescendantOf(DependencyObject child, DependencyObject ancestor)
