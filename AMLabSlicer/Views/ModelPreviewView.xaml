@@ -75,7 +75,8 @@
         <!-- 3D 视口 -->
         <hx:Viewport3DX x:Name="MainViewport"
                         BackgroundColor="#393939"
-                        ShowCoordinateSystem="{Binding AppPrefs.ShowCoordinateSystem}"
+                        ShowCoordinateSystem="False"
+                        ShowViewCube="False"
                         CoordinateSystemLabelForeground="{DynamicResource PrimaryTextColor}"
                         UseDefaultGestures="False"
                         IsInertiaEnabled="False"
@@ -152,18 +153,18 @@
                     CornerRadius="8" Padding="6,4"
                     Visibility="{Binding IsObjectMode, Converter={StaticResource B2V}}">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
-                    <Button x:Name="BtnMove"   Content="G  移动"   Style="{StaticResource TBBtn}" Click="ToolBtn_Click" Tag="G"/>
-                    <Button x:Name="BtnRotate" Content="R  旋转"   Style="{StaticResource TBBtn}" Click="ToolBtn_Click" Tag="R"/>
-                    <Button x:Name="BtnScale"  Content="S  缩放"   Style="{StaticResource TBBtn}" Click="ToolBtn_Click" Tag="S"/>
+                    <Button x:Name="BtnMove"   Content="G 移动"   Style="{StaticResource TBBtn}" Click="ToolBtn_Click" Tag="G"/>
+                    <Button x:Name="BtnRotate" Content="R 旋转"   Style="{StaticResource TBBtn}" Click="ToolBtn_Click" Tag="R"/>
+                    <Button x:Name="BtnScale"  Content="S 缩放"   Style="{StaticResource TBBtn}" Click="ToolBtn_Click" Tag="S"/>
                     <Separator Style="{StaticResource Sep}"/>
-                    <Button x:Name="BtnFace"   Content="F  底面"   Style="{StaticResource TBBtn}" Click="ToolBtn_Click" Tag="F"/>
+                    <Button x:Name="BtnFace"   Content="F 底面"   Style="{StaticResource TBBtn}" Click="ToolBtn_Click" Tag="F"/>
                     <Separator Style="{StaticResource Sep}"/>
-                    <Button x:Name="BtnArrange" Content="A  摆放"  Style="{StaticResource TBBtnOn}" Click="ToolBtn_Click" Tag="A"/>
+                    <Button x:Name="BtnArrange" Content="A 摆放"  Style="{StaticResource TBBtnOn}" Click="ToolBtn_Click" Tag="A"/>
                     <Separator Style="{StaticResource Sep}"/>
-                    <Button x:Name="BtnSplit"  Content="B  拆分"   Style="{StaticResource TBBtn}" Click="ToolBtn_Click" Tag="B"/>
-                    <Button x:Name="BtnDelete" Content="X  删除"   Style="{StaticResource TBBtn}" Click="ToolBtn_Click" Tag="X"/>
+                    <Button x:Name="BtnSplit"  Content="B 拆分"   Style="{StaticResource TBBtn}" Click="ToolBtn_Click" Tag="B"/>
+                    <Button x:Name="BtnDelete" Content="X 删除"   Style="{StaticResource TBBtn}" Click="ToolBtn_Click" Tag="X"/>
                     <Separator Style="{StaticResource Sep}"/>
-                    <Button x:Name="BtnMode" Content="Tab ▶ 面模式" Style="{StaticResource TBBtn}" Click="ToolBtn_Click" Tag="Tab"/>
+                    <Button x:Name="BtnMode" Content="Tab ▶ 分区模式，暂不可用" Style="{StaticResource TBBtn}" Click="ToolBtn_Click" Tag="Tab"/>
                 </StackPanel>
             </Border>
 
@@ -258,15 +259,15 @@
                 Margin="18,116,0,0"
                 Padding="8,6"
                 CornerRadius="4"
-                Background="#33000000"
+                Background="#CC222222"
                 IsHitTestVisible="False">
             <StackPanel>
                 <TextBlock Text="{Binding ModeInfoText, ElementName=Me}"
-                           Foreground="#C8D8E8"
-                           FontSize="11"/>
+                           Foreground="#DDDDDD"
+                           FontSize="15"/>
                 <TextBlock Text="{Binding SelectionInfoText, ElementName=Me}"
-                           Foreground="#A7BDD2"
-                           FontSize="11"
+                           Foreground="#DDDDDD"
+                           FontSize="15"
                            Margin="0,2,0,0"/>
             </StackPanel>
         </Border>
@@ -288,6 +289,18 @@
                      Stroke="#EE66BBFF"
                      StrokeThickness="1.2"
                      Fill="#223388FF"/>
+        </Canvas>
+
+        <!-- 2D 悬浮 ViewCube 小视口 -->
+        <Canvas x:Name="ViewCubeCanvas"
+                Width="100" Height="100"
+                HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                Margin="30, 0, 0, 60"
+                Background="#01000000"
+                IsHitTestVisible="True"
+                MouseLeftButtonDown="ViewCubeCanvas_MouseLeftButtonDown"
+                MouseMove="ViewCubeCanvas_MouseMove"
+                MouseLeave="ViewCubeCanvas_MouseLeave">
         </Canvas>
 
         <!-- 左侧面板折叠按钮 -->

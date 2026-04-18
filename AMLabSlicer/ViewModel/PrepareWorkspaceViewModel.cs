@@ -146,30 +146,30 @@ namespace AMLabSlicer.ViewModel
             int halfWidth = width / 2;
             int halfDepth = depth / 2;
 
-            // 1. 沿着 X 轴画线（平行于 Y 轴的线）以原点 0,0 居中对称
-            for (int x = -halfWidth; x <= halfWidth; x++)
+            // 1. 沿着 X 轴画线（平行于 Y 轴的线）
+            for (int x = 0; x <= width; x++)
             {
                 // 如果能被 10 整除，就是主线（粗线），否则是细线
                 if (x % 10 == 0)
                 {
-                    majorBuilder.AddLine(new Vector3(x, -halfDepth, 0), new Vector3(x, halfDepth, 0));
+                    majorBuilder.AddLine(new Vector3(x, 0, 0), new Vector3(x, depth, 0));
                 }
                 else
                 {
-                    minorBuilder.AddLine(new Vector3(x, -halfDepth, 0), new Vector3(x, halfDepth, 0));
+                    minorBuilder.AddLine(new Vector3(x, 0, 0), new Vector3(x, depth, 0));
                 }
             }
 
-            // 2. 沿着 Y 轴画线（平行于 X 轴的线）以原点 0,0 居中对称
-            for (int y = -halfDepth; y <= halfDepth; y++)
+            // 2. 沿着 Y 轴画线（平行于 X 轴的线）
+            for (int y = 0; y <= depth; y++)
             {
                 if (y % 10 == 0)
                 {
-                    majorBuilder.AddLine(new Vector3(-halfWidth, y, 0), new Vector3(halfWidth, y, 0));
+                    majorBuilder.AddLine(new Vector3(0, y, 0), new Vector3(width, y, 0));
                 }
                 else
                 {
-                    minorBuilder.AddLine(new Vector3(-halfWidth, y, 0), new Vector3(halfWidth, y, 0));
+                    minorBuilder.AddLine(new Vector3(0, y, 0), new Vector3(width, y, 0));
                 }
             }
 

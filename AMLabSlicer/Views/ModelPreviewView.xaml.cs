@@ -281,6 +281,7 @@ namespace AMLabSlicer.Views
             PreviewKeyDown     += OnPreviewKeyDown;
             DataContextChanged += OnDataContextChanged;
 
+            InitializeViewCube2D();
         }
 
         /// <summary>
@@ -926,7 +927,7 @@ namespace AMLabSlicer.Views
             SetActiveToolBtn(mode);
         }
 
-        /// <summary>把当前 SelectedNode 的值填入输入框（不触发回调）</summary>
+        // <summary>把当前 SelectedNode 的值填入输入框（不触发回调）</summary>
         private void PopulateInputBar()
         {
             if (SelectedNode == null || string.IsNullOrEmpty(_activeTransformKey)) return;
@@ -1976,6 +1977,14 @@ namespace AMLabSlicer.Views
             // 中键：相机控制
             if (e.ChangedButton == MouseButton.Middle)
             {
+                if (Keyboard.Modifiers.HasFlag(ModifierKeys.Alt))
+                {
+                    _altMiddleDownPos = e.GetPosition(MainViewport);
+                    _isAltMiddleActive = true;
+                    e.Handled = true;
+                    return;
+                }
+
                 _lastMousePos    = e.GetPosition(MainViewport);
                 _currentDragMode = Keyboard.Modifiers.HasFlag(ModifierKeys.Shift)
                     ? DragMode.Pan : DragMode.Rotate;
@@ -1984,6 +1993,9 @@ namespace AMLabSlicer.Views
                 e.Handled = true;
             }
         }
+
+        private Point _altMiddleDownPos;
+        private bool  _isAltMiddleActive;
 
         private void MainViewport_PreviewMouseMove(object sender, MouseEventArgs e)
         {
@@ -2059,13 +2071,28 @@ namespace AMLabSlicer.Views
 
             if (e.ChangedButton == MouseButton.Middle)
             {
+                if (_isAltMiddleActive)
+                {
+                    _isAltMiddleActive = false;
+                    var pos = e.GetPosition(MainViewport);
+                    var delta = pos - _altMiddleDownPos;
+                    if (delta.Length < 10)
+                    {
+                        // Task 3: 点击 (智能聚焦)
+                        SmartZoomExtents();
+                    }
+                    else
+                    {
+                        // Task 2: 滑动正交吸附
+                        SwipeToOrthographicView(delta);
+                    }
+                    e.Handled = true;
+                    return;
+                }
+
                 _isDragging      = false;
                 _currentDragMode = DragMode.None;
                 MainViewport.ReleaseMouseCapture();
-
-                // Alt + Middle = 对齐到最近标准视角
-                if (Keyboard.Modifiers.HasFlag(ModifierKeys.Alt))
-                    SnapToNearestCardinalView();
                 e.Handled = true;
             }
 
@@ -2421,22 +2448,22 @@ namespace AMLabSlicer.Views
         {
             MainViewport.Camera = new HxPersp
             {
-                Position = new Point3D(300, -300, 250), LookDirection = new Vector3D(-300, 300, -250),
+                Position = new Point3D(112.5 + 300, 112.5 - 300, 250), LookDirection = new Vector3D(-300, 300, -250),
                 UpDirection = new Vector3D(0, 0, 1), NearPlaneDistance = 0.5,
                 FarPlaneDistance = 5000, FieldOfView = 45
             };
-            _pivotPoint = new Point3D(0, 0, 0);
+            _pivotPoint = new Point3D(112.5, 112.5, 0);
         }
 
         private void SetOrthographicCamera()
         {
             MainViewport.Camera = new HxOrtho
             {
-                Position = new Point3D(300, -300, 250), LookDirection = new Vector3D(-300, 300, -250),
+                Position = new Point3D(112.5 + 300, 112.5 - 300, 250), LookDirection = new Vector3D(-300, 300, -250),
                 UpDirection = new Vector3D(0, 0, 1), NearPlaneDistance = 0.5,
                 FarPlaneDistance = 5000, Width = 400
             };
-            _pivotPoint = new Point3D(0, 0, 0);
+            _pivotPoint = new Point3D(112.5, 112.5, 0);
         }
 
         private void ApplyRotation(double dx, double dy)
@@ -2465,24 +2492,396 @@ namespace AMLabSlicer.Views
             _pivotPoint  = _pivotPoint  + delta;
         }
 
-        private void SnapToNearestCardinalView()
+        private void GetTargetCenterAndDistance(out Point3D centerPos, out double evalDistance)
         {
-            var cam  = MainViewport.Camera;
-            _pivotPoint = new Point3D(0, 0, 0);
-            var look = cam.LookDirection;
-            double len = look.Length;
-            if (len < 1e-6) return;
-            double nx = look.X/len, ny = look.Y/len, nz = look.Z/len, dist = 500;
-            double px = 0, py = 0, pz = 0;
-            Vector3D nl, nu;
-            if (Math.Abs(nx) >= Math.Abs(ny) && Math.Abs(nx) >= Math.Abs(nz))
-                { nl = nx>0 ? new(-1,0,0) : new(1,0,0); px = nx>0?dist:-dist; nu = new(0,0,1); }
-            else if (Math.Abs(ny) >= Math.Abs(nx) && Math.Abs(ny) >= Math.Abs(nz))
-                { nl = ny>0 ? new(0,-1,0) : new(0,1,0); py = ny>0?dist:-dist; nu = new(0,0,1); }
+            Vector3 minP, maxP;
+            if (SelectedNode != null)
+            {
+                var bb = SelectedNode.BoundsWithTransform;
+                minP = bb.Minimum;
+                maxP = bb.Maximum;
+            }
             else
-                { nl = nz>0 ? new(0,0,-1) : new(0,0,1); pz = nz>0?dist:-dist; nu = new(0,1,0); }
-            cam.Position = new Point3D(px, py, pz);
-            cam.LookDirection = nl; cam.UpDirection = nu;
+            {
+                // 此时0,0原点在左上/前左，平台尺寸依然为 225x225
+                minP = new Vector3(0f, 0f, 0f);
+                maxP = new Vector3(225f, 225f, 250f);
+            }
+
+            var center = (minP + maxP) / 2f;
+            var radius = (maxP - minP).Length() / 2f;
+
+            // 根据默认的 45度 FOV 计算完美框显视距 ( d = r / sin(fov/2) )
+            evalDistance = radius / Math.Sin(45.0 / 2.0 * Math.PI / 180.0);
+            centerPos = new Point3D(center.X, center.Y, center.Z);
+        }
+
+        private void SmartZoomExtents()
+        {
+            if (MainViewport.Camera == null) return;
+            GetTargetCenterAndDistance(out Point3D center, out double distance);
+
+            var look = MainViewport.Camera.LookDirection;
+            look.Normalize();
+            var up = MainViewport.Camera.UpDirection;
+            up.Normalize();
+
+            _pivotPoint = center;
+            AnimateCameraTo(look, up, _pivotPoint, distance);
+        }
+
+        private void SwipeToOrthographicView(System.Windows.Vector delta)
+        {
+            if (MainViewport.Camera == null) return;
+            var cam = MainViewport.Camera;
+            
+            var look = cam.LookDirection;
+            look.Normalize();
+            var up = cam.UpDirection;
+            up.Normalize();
+            var right = Vector3D.CrossProduct(look, up);
+            right.Normalize();
+
+            // Screen X is right, Screen Y is down.
+            // Map 2D swipe to 3D world direction.
+            var worldSwipe = right * delta.X + (-up) * delta.Y;
+            worldSwipe.Normalize();
+
+            // Define cardinal directions
+            var cardinals = new[] {
+                new Vector3D(1, 0, 0), new Vector3D(-1, 0, 0),
+                new Vector3D(0, 1, 0), new Vector3D(0, -1, 0),
+                new Vector3D(0, 0, 1), new Vector3D(0, 0, -1)
+            };
+
+            var bestAxis = cardinals.OrderByDescending(c => Vector3D.DotProduct(c, worldSwipe)).First();
+
+            // Swipe direction matches rotation intent.
+            var targetLook = bestAxis;
+            var targetUp = new Vector3D(0,0,1);
+            if (targetLook.X == 0 && targetLook.Y == 0)
+                targetUp = new Vector3D(0,1,0); // 顶视或底视图
+            else
+            {
+                var r = Vector3D.CrossProduct(targetLook, new Vector3D(0,0,1));
+                if (r.LengthSquared > 0.001)
+                {
+                    targetUp = Vector3D.CrossProduct(r, targetLook);
+                    targetUp.Normalize();
+                }
+            }
+
+            double distance = cam.LookDirection.Length;
+            if (distance < 1) distance = 250;
+            AnimateCameraTo(targetLook, targetUp, _pivotPoint, distance);
+        }
+
+        private void AnimateCameraTo(Vector3D targetLookDir, Vector3D targetUpDir, Point3D targetCenter, double targetDistance)
+        {
+            if (MainViewport.Camera is not HelixToolkit.Wpf.SharpDX.ProjectionCamera cam) return;
+
+            var newLook = targetLookDir * targetDistance;
+            var newPos = targetCenter - newLook;
+
+            var time = TimeSpan.FromMilliseconds(300);
+            var ease = new System.Windows.Media.Animation.CubicEase { EasingMode = System.Windows.Media.Animation.EasingMode.EaseInOut };
+
+            var lookAnim = new System.Windows.Media.Animation.Vector3DAnimation(newLook, time) { EasingFunction = ease };
+            var upAnim = new System.Windows.Media.Animation.Vector3DAnimation(targetUpDir, time) { EasingFunction = ease };
+            var posAnim = new System.Windows.Media.Animation.Point3DAnimation(newPos, time) { EasingFunction = ease };
+
+            lookAnim.Completed += (s, e) => {
+                cam.BeginAnimation(HelixToolkit.Wpf.SharpDX.ProjectionCamera.LookDirectionProperty, null);
+                cam.LookDirection = newLook;
+            };
+            upAnim.Completed += (s, e) => {
+                cam.BeginAnimation(HelixToolkit.Wpf.SharpDX.ProjectionCamera.UpDirectionProperty, null);
+                cam.UpDirection = targetUpDir;
+            };
+            posAnim.Completed += (s, e) => {
+                cam.BeginAnimation(HelixToolkit.Wpf.SharpDX.ProjectionCamera.PositionProperty, null);
+                cam.Position = newPos;
+            };
+
+            cam.BeginAnimation(HelixToolkit.Wpf.SharpDX.ProjectionCamera.LookDirectionProperty, lookAnim);
+            cam.BeginAnimation(HelixToolkit.Wpf.SharpDX.ProjectionCamera.UpDirectionProperty, upAnim);
+            cam.BeginAnimation(HelixToolkit.Wpf.SharpDX.ProjectionCamera.PositionProperty, posAnim);
+        }
+
+        // ==========================================
+        // 2D ViewCube 实现
+        // ==========================================
+        private class BaseFace
+        {
+            public Vector3D Normal;
+            public System.Windows.Shapes.Polygon Shape;
+            public Vector3D[] Corners;
+        }
+
+        private class ZonePoly
+        {
+            public Vector3D ZoneDir;
+            public System.Windows.Shapes.Polygon Shape;
+            public Vector3D[] Corners;
+        }
+
+        private List<BaseFace> _baseFaces = new();
+        private List<ZonePoly> _zonePolys = new();
+        private System.Windows.Shapes.Line _axisX, _axisY, _axisZ;
+        private TextBlock _lblX, _lblY, _lblZ;
+        private Dictionary<Vector3D, TextBlock> _faceTexts = new();
+
+        private void InitializeViewCube2D()
+        {
+            ViewCubeCanvas.Children.Clear();
+            _baseFaces.Clear();
+            _zonePolys.Clear();
+            _faceTexts.Clear();
+
+            // 1. 生成 6 个基础面（提供立方体的实体感和边缘线）
+            Vector3D[][] faceCorners = {
+                new Vector3D[] { new(-1,-1,1), new(1,-1,1), new(1,-1,-1), new(-1,-1,-1) }, // 前 (0,-1,0)
+                new Vector3D[] { new(1,1,1), new(-1,1,1), new(-1,1,-1), new(1,1,-1) }, // 后 (0,1,0)
+                new Vector3D[] { new(-1,-1,1), new(-1,1,1), new(1,1,1), new(1,-1,1) }, // 顶 (0,0,1)
+                new Vector3D[] { new(-1,1,-1), new(-1,-1,-1), new(1,-1,-1), new(1,1,-1) }, // 底 (0,0,-1)
+                new Vector3D[] { new(1,-1,1), new(1,1,1), new(1,1,-1), new(1,-1,-1) }, // 右 (1,0,0)
+                new Vector3D[] { new(-1,1,1), new(-1,-1,1), new(-1,-1,-1), new(-1,1,-1) }  // 左 (-1,0,0)
+            };
+            Vector3D[] faceNormals = {
+                new(0,-1,0), new(0,1,0), new(0,0,1), new(0,0,-1), new(1,0,0), new(-1,0,0)
+            };
+
+            for (int i = 0; i < 6; i++)
+            {
+                var basePoly = new System.Windows.Shapes.Polygon
+                {
+                    Fill = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(140, 140, 140)), // 不透明的亮灰色
+                    Stroke = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.White), // 纯白描边框线
+                    StrokeThickness = 1.0,
+                    StrokeLineJoin = PenLineJoin.Round, // 防止锐角产生突出毛刺
+                    IsHitTestVisible = false // 基础面不接收点击
+                };
+                _baseFaces.Add(new BaseFace { Normal = faceNormals[i], Shape = basePoly, Corners = faceCorners[i] });
+                ViewCubeCanvas.Children.Add(basePoly);
+            }
+
+            // 2. 生成 26 个交互热区（本身隐形，悬停时高亮）
+            double threshold = 0.65;
+            for (int x = -1; x <= 1; x++)
+            {
+                for (int y = -1; y <= 1; y++)
+                {
+                    for (int z = -1; z <= 1; z++)
+                    {
+                        if (x == 0 && y == 0 && z == 0) continue;
+
+                        var minX = x == 0 ? -threshold : (x == 1 ? threshold : -1);
+                        var maxX = x == 0 ?  threshold : (x == 1 ? 1 : -threshold);
+                        var minY = y == 0 ? -threshold : (y == 1 ? threshold : -1);
+                        var maxY = y == 0 ?  threshold : (y == 1 ? 1 : -threshold);
+                        var minZ = z == 0 ? -threshold : (z == 1 ? threshold : -1);
+                        var maxZ = z == 0 ?  threshold : (z == 1 ? 1 : -threshold);
+
+                        var corners = new Vector3D[] {
+                            new Vector3D(minX, minY, minZ), new Vector3D(maxX, minY, minZ),
+                            new Vector3D(minX, maxY, minZ), new Vector3D(maxX, maxY, minZ),
+                            new Vector3D(minX, minY, maxZ), new Vector3D(maxX, minY, maxZ),
+                            new Vector3D(minX, maxY, maxZ), new Vector3D(maxX, maxY, maxZ)
+                        };
+
+                        var poly = new System.Windows.Shapes.Polygon
+                        {
+                            Fill = System.Windows.Media.Brushes.Transparent, 
+                            Stroke = System.Windows.Media.Brushes.Transparent,
+                            StrokeThickness = 0,
+                            Cursor = Cursors.Hand,
+                            Tag = new Vector3D(x, y, z)
+                        };
+
+                        // 参考拓竹：悬停时赋予明显的蓝色高亮区
+                        poly.MouseEnter += (s, e) => { (s as System.Windows.Shapes.Polygon).Fill = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(100, 0, 119, 255)); };
+                        poly.MouseLeave += (s, e) => { (s as System.Windows.Shapes.Polygon).Fill = System.Windows.Media.Brushes.Transparent; };
+
+                        _zonePolys.Add(new ZonePoly { ZoneDir = new Vector3D(x, y, z), Shape = poly, Corners = corners });
+                        ViewCubeCanvas.Children.Add(poly);
+                    }
+                }
+            }
+
+            _axisX = new System.Windows.Shapes.Line { Stroke = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(255, 80, 80)), StrokeThickness = 2, IsHitTestVisible = false };
+            _axisY = new System.Windows.Shapes.Line { Stroke = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(80, 220, 80)), StrokeThickness = 2, IsHitTestVisible = false };
+            _axisZ = new System.Windows.Shapes.Line { Stroke = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(80, 150, 255)), StrokeThickness = 2, IsHitTestVisible = false };
+            ViewCubeCanvas.Children.Add(_axisX);
+            ViewCubeCanvas.Children.Add(_axisY);
+            ViewCubeCanvas.Children.Add(_axisZ);
+
+            TextBlock CreateLabel(string text, System.Windows.Media.Color c, bool bold = false)
+            {
+                var tb = new TextBlock { Text = text, Foreground = new System.Windows.Media.SolidColorBrush(c), FontSize = 12, IsHitTestVisible = false, TextAlignment = TextAlignment.Center };
+                if (bold) tb.FontWeight = FontWeights.Bold;
+                ViewCubeCanvas.Children.Add(tb);
+                return tb;
+            }
+
+            _lblX = CreateLabel("X", System.Windows.Media.Color.FromRgb(255, 80, 80), true);
+            _lblY = CreateLabel("Y", System.Windows.Media.Color.FromRgb(80, 200, 80), true);
+            _lblZ = CreateLabel("Z", System.Windows.Media.Color.FromRgb(80, 150, 255), true);
+
+            var faceColor = System.Windows.Media.Colors.White;
+            _faceTexts[new Vector3D(1, 0, 0)] = CreateLabel("右面", faceColor, true);
+            _faceTexts[new Vector3D(-1, 0, 0)] = CreateLabel("左面", faceColor, true);
+            _faceTexts[new Vector3D(0, 1, 0)] = CreateLabel("后面", faceColor, true);
+            _faceTexts[new Vector3D(0, -1, 0)] = CreateLabel("前面", faceColor, true);
+            _faceTexts[new Vector3D(0, 0, 1)] = CreateLabel("顶部", faceColor, true);
+            _faceTexts[new Vector3D(0, 0, -1)] = CreateLabel("底部", faceColor, true);
+
+            CompositionTarget.Rendering += UpdateViewCubeCanvas;
+        }
+
+        private void UpdateViewCubeCanvas(object sender, EventArgs e)
+        {
+            if (MainViewport.Camera == null) return;
+            var look = MainViewport.Camera.LookDirection;
+            look.Normalize();
+            var up = MainViewport.Camera.UpDirection;
+            up.Normalize();
+            var right = Vector3D.CrossProduct(look, up);
+            if (right.LengthSquared > 0.001) right.Normalize();
+
+            // 完美正交化屏幕的 Y 轴（修正透视畸变）
+            var trueUp = Vector3D.CrossProduct(right, look);
+            if (trueUp.LengthSquared > 0.001) trueUp.Normalize();
+            else trueUp = up;
+
+            double scale = 22.0; 
+            double cx = 50.0, cy = 50.0; 
+
+            // 沿完美的正交相机坐标系进行二维投影
+            Point Project(Vector3D w) => new Point(cx + scale * Vector3D.DotProduct(right, w), cy - scale * Vector3D.DotProduct(trueUp, w));
+
+            // 1. 渲染基础面（实体感与外框线）
+            foreach (var bf in _baseFaces)
+            {
+                double dot = Vector3D.DotProduct(bf.Normal, look);
+                if (dot > -0.001)
+                {
+                    bf.Shape.Visibility = Visibility.Collapsed;
+                    continue;
+                }
+                bf.Shape.Visibility = Visibility.Visible;
+                Canvas.SetZIndex(bf.Shape, (int)(-dot * 100)); // 底层
+
+                var pts = new List<Point>();
+                foreach (var c in bf.Corners) pts.Add(Project(c));
+                bf.Shape.Points = ConvexHull2D(pts);
+            }
+
+            // 2. 渲染交互热区（26 区网格）
+            foreach (var zp in _zonePolys)
+            {
+                double dot = Vector3D.DotProduct(zp.ZoneDir, look);
+                if (dot > -0.001) // 同步隐藏判定
+                {
+                    zp.Shape.Visibility = Visibility.Collapsed;
+                    continue;
+                }
+                zp.Shape.Visibility = Visibility.Visible;
+                Canvas.SetZIndex(zp.Shape, (int)(-dot * 100) + 10); // 浮在基础面上
+
+                var pts = new List<Point>();
+                foreach (var c in zp.Corners) pts.Add(Project(c));
+                zp.Shape.Points = ConvexHull2D(pts);
+            }
+
+            // 在画布的左下角独立绘制小型 XYZ 坐标系（不参与立方体交叠防视觉错乱）
+            double cx2 = 20, cy2 = 85, scale2 = 14;
+            Point ProjectAxis(Vector3D w) => new Point(cx2 + scale2 * Vector3D.DotProduct(right, w), cy2 - scale2 * Vector3D.DotProduct(trueUp, w));
+            
+            _axisX.X1 = cx2; _axisX.Y1 = cy2; var px = ProjectAxis(new Vector3D(1, 0, 0)); _axisX.X2 = px.X; _axisX.Y2 = px.Y;
+            _axisY.X1 = cx2; _axisY.Y1 = cy2; var py = ProjectAxis(new Vector3D(0, 1, 0)); _axisY.X2 = py.X; _axisY.Y2 = py.Y;
+            _axisZ.X1 = cx2; _axisZ.Y1 = cy2; var pz = ProjectAxis(new Vector3D(0, 0, 1)); _axisZ.X2 = pz.X; _axisZ.Y2 = pz.Y;
+            
+            Canvas.SetZIndex(_axisX, 1000); Canvas.SetZIndex(_axisY, 1000); Canvas.SetZIndex(_axisZ, 1000);
+
+            void MoveLbl(TextBlock t, Vector3D v) { var p = ProjectAxis(v); Canvas.SetLeft(t, p.X - 5); Canvas.SetTop(t, p.Y - 8); Canvas.SetZIndex(t, 1001); }
+            MoveLbl(_lblX, new Vector3D(1.4, 0, 0));
+            MoveLbl(_lblY, new Vector3D(0, 1.4, 0));
+            MoveLbl(_lblZ, new Vector3D(0, 0, 1.4));
+
+            foreach (var kvp in _faceTexts)
+            {
+                double dot = Vector3D.DotProduct(kvp.Key, look);
+                if (dot > -0.001)
+                {
+                    kvp.Value.Visibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    kvp.Value.Visibility = Visibility.Visible;
+                    var p = Project(kvp.Key * 1.05);
+                    Canvas.SetLeft(kvp.Value, p.X - 6);
+                    Canvas.SetTop(kvp.Value, p.Y - 8);
+                    Canvas.SetZIndex(kvp.Value, (int)(-dot * 100) + 20); // 确保在图形之上
+                }
+            }
+        }
+
+        private PointCollection ConvexHull2D(List<Point> points)
+        {
+            if (points.Count <= 3) return new PointCollection(points);
+            points = points.OrderBy(p => p.X).ThenBy(p => p.Y).ToList();
+            var lower = new List<Point>();
+            foreach (var p in points)
+            {
+                while (lower.Count >= 2 && Cross(lower[lower.Count - 2], lower[lower.Count - 1], p) <= 0) lower.RemoveAt(lower.Count - 1);
+                lower.Add(p);
+            }
+            var upper = new List<Point>();
+            for (int i = points.Count - 1; i >= 0; i--)
+            {
+                var p = points[i];
+                while (upper.Count >= 2 && Cross(upper[upper.Count - 2], upper[upper.Count - 1], p) <= 0) upper.RemoveAt(upper.Count - 1);
+                upper.Add(p);
+            }
+            lower.RemoveAt(lower.Count - 1);
+            upper.RemoveAt(upper.Count - 1);
+            lower.AddRange(upper);
+            return new PointCollection(lower);
+        }
+
+        private double Cross(Point o, Point a, Point b) => (a.X - o.X) * (b.Y - o.Y) - (a.Y - o.Y) * (b.X - o.X);
+
+        private void ViewCubeCanvas_MouseMove(object sender, MouseEventArgs e) { }
+        private void ViewCubeCanvas_MouseLeave(object sender, MouseEventArgs e) { }
+
+        private void ViewCubeCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.OriginalSource is System.Windows.Shapes.Polygon poly && poly.Tag is Vector3D zone)
+            {
+                var targetLook = new Vector3D(-zone.X, -zone.Y, -zone.Z);
+                targetLook.Normalize();
+
+                var targetUp = new Vector3D(0, 0, 1);
+                if (zone.X == 0 && zone.Y == 0) 
+                    targetUp = new Vector3D(0, 1, 0);
+                else
+                {
+                    var r = Vector3D.CrossProduct(targetLook, new Vector3D(0,0,1));
+                    if (r.LengthSquared > 0.001)
+                    {
+                        targetUp = Vector3D.CrossProduct(r, targetLook);
+                        targetUp.Normalize();
+                    }
+                }
+                
+                // 获取基于全局模型或选区的完美框显中心点和视距
+                GetTargetCenterAndDistance(out Point3D targetCenter, out double distance);
+                _pivotPoint = targetCenter;
+                
+                AnimateCameraTo(targetLook, targetUp, _pivotPoint, distance);
+                
+                e.Handled = true;
+            }
         }
 
         // ══════════════════════════════════════
