@@ -1977,6 +1977,13 @@ namespace AMLabSlicer.Views
             // 中键：相机控制
             if (e.ChangedButton == MouseButton.Middle)
             {
+                if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
+                {
+                    SmartZoomDiagonal();
+                    e.Handled = true;
+                    return;
+                }
+
                 if (Keyboard.Modifiers.HasFlag(ModifierKeys.Alt))
                 {
                     _altMiddleDownPos = e.GetPosition(MainViewport);
@@ -2492,14 +2499,13 @@ namespace AMLabSlicer.Views
             _pivotPoint  = _pivotPoint  + delta;
         }
 
-        private void GetTargetCenterAndDistance(out Point3D centerPos, out double evalDistance)
+        private void GetTargetCenterAndDistance(out Point3D centerPos, out double evalDistance, out double evalWidth)
         {
             Vector3 minP, maxP;
-            if (SelectedNode != null)
+            if (SelectedNode != null && TryComputeWorldAabb(SelectedNode, out var min, out var max))
             {
-                var bb = SelectedNode.BoundsWithTransform;
-                minP = bb.Minimum;
-                maxP = bb.Maximum;
+                minP = min;
+                maxP = max;
             }
             else
             {
@@ -2513,13 +2519,31 @@ namespace AMLabSlicer.Views
 
             // 根据默认的 45度 FOV 计算完美框显视距 ( d = r / sin(fov/2) )
             evalDistance = radius / Math.Sin(45.0 / 2.0 * Math.PI / 180.0);
+            if (evalDistance < 20) evalDistance = 20;
+
+            evalWidth = radius * 2.2;
+            if (evalWidth < 10) evalWidth = 10;
+
             centerPos = new Point3D(center.X, center.Y, center.Z);
+        }
+
+        private void SmartZoomDiagonal()
+        {
+            if (MainViewport.Camera == null) return;
+            GetTargetCenterAndDistance(out Point3D center, out double distance, out double width);
+
+            var targetLook = new Vector3D(-1, 1, -1);
+            targetLook.Normalize();
+            var targetUp = new Vector3D(0, 0, 1);
+
+            _pivotPoint = center;
+            AnimateCameraTo(targetLook, targetUp, _pivotPoint, distance, width);
         }
 
         private void SmartZoomExtents()
         {
             if (MainViewport.Camera == null) return;
-            GetTargetCenterAndDistance(out Point3D center, out double distance);
+            GetTargetCenterAndDistance(out Point3D center, out double distance, out double width);
 
             var look = MainViewport.Camera.LookDirection;
             look.Normalize();
@@ -2527,7 +2551,7 @@ namespace AMLabSlicer.Views
             up.Normalize();
 
             _pivotPoint = center;
-            AnimateCameraTo(look, up, _pivotPoint, distance);
+            AnimateCameraTo(look, up, _pivotPoint, distance, width);
         }
 
         private void SwipeToOrthographicView(System.Windows.Vector delta)
@@ -2571,12 +2595,12 @@ namespace AMLabSlicer.Views
                 }
             }
 
-            double distance = cam.LookDirection.Length;
-            if (distance < 1) distance = 250;
-            AnimateCameraTo(targetLook, targetUp, _pivotPoint, distance);
+            GetTargetCenterAndDistance(out Point3D targetCenter, out double targetDistance, out double targetWidth);
+            _pivotPoint = targetCenter;
+            AnimateCameraTo(targetLook, targetUp, _pivotPoint, targetDistance, targetWidth);
         }
 
-        private void AnimateCameraTo(Vector3D targetLookDir, Vector3D targetUpDir, Point3D targetCenter, double targetDistance)
+        private void AnimateCameraTo(Vector3D targetLookDir, Vector3D targetUpDir, Point3D targetCenter, double targetDistance, double targetWidth)
         {
             if (MainViewport.Camera is not HelixToolkit.Wpf.SharpDX.ProjectionCamera cam) return;
 
@@ -2606,6 +2630,16 @@ namespace AMLabSlicer.Views
             cam.BeginAnimation(HelixToolkit.Wpf.SharpDX.ProjectionCamera.LookDirectionProperty, lookAnim);
             cam.BeginAnimation(HelixToolkit.Wpf.SharpDX.ProjectionCamera.UpDirectionProperty, upAnim);
             cam.BeginAnimation(HelixToolkit.Wpf.SharpDX.ProjectionCamera.PositionProperty, posAnim);
+
+            if (cam is HelixToolkit.Wpf.SharpDX.OrthographicCamera ortho)
+            {
+                var widthAnim = new System.Windows.Media.Animation.DoubleAnimation(targetWidth, time) { EasingFunction = ease };
+                widthAnim.Completed += (s, e) => {
+                    ortho.BeginAnimation(HelixToolkit.Wpf.SharpDX.OrthographicCamera.WidthProperty, null);
+                    ortho.Width = targetWidth;
+                };
+                ortho.BeginAnimation(HelixToolkit.Wpf.SharpDX.OrthographicCamera.WidthProperty, widthAnim);
+            }
         }
 
         // ==========================================
@@ -2885,10 +2919,10 @@ namespace AMLabSlicer.Views
                 }
                 
                 // 获取基于全局模型或选区的完美框显中心点和视距
-                GetTargetCenterAndDistance(out Point3D targetCenter, out double distance);
+                GetTargetCenterAndDistance(out Point3D targetCenter, out double distance, out double width);
                 _pivotPoint = targetCenter;
                 
-                AnimateCameraTo(targetLook, targetUp, _pivotPoint, distance);
+                AnimateCameraTo(targetLook, targetUp, _pivotPoint, distance, width);
                 
                 e.Handled = true;
             }
