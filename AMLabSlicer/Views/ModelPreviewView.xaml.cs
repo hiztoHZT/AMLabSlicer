@@ -2655,7 +2655,7 @@ namespace AMLabSlicer.Views
             {
                 var basePoly = new System.Windows.Shapes.Polygon
                 {
-                    Fill = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(140, 140, 140)), // 不透明的亮灰色
+                    Fill = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(120, 240, 240, 240)), // 半透明偏白材质
                     Stroke = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.White), // 纯白描边框线
                     StrokeThickness = 1.0,
                     StrokeLineJoin = PenLineJoin.Round, // 防止锐角产生突出毛刺
@@ -2717,7 +2717,7 @@ namespace AMLabSlicer.Views
 
             TextBlock CreateLabel(string text, System.Windows.Media.Color c, bool bold = false)
             {
-                var tb = new TextBlock { Text = text, Foreground = new System.Windows.Media.SolidColorBrush(c), FontSize = 12, IsHitTestVisible = false, TextAlignment = TextAlignment.Center };
+                var tb = new TextBlock { Text = text, Foreground = new System.Windows.Media.SolidColorBrush(c), FontSize = 12, IsHitTestVisible = false, TextAlignment = TextAlignment.Center, Width = 40, Height = 16 };
                 if (bold) tb.FontWeight = FontWeights.Bold;
                 ViewCubeCanvas.Children.Add(tb);
                 return tb;
@@ -2793,20 +2793,29 @@ namespace AMLabSlicer.Views
                 zp.Shape.Points = ConvexHull2D(pts);
             }
 
-            // 在画布的左下角独立绘制小型 XYZ 坐标系（不参与立方体交叠防视觉错乱）
-            double cx2 = 20, cy2 = 85, scale2 = 14;
-            Point ProjectAxis(Vector3D w) => new Point(cx2 + scale2 * Vector3D.DotProduct(right, w), cy2 - scale2 * Vector3D.DotProduct(trueUp, w));
+            // 将 XYZ 坐标系彻底依附于 ViewCube 真实映射的 3D 原点 (-1, -1, -1)
+            var origin3D = new Vector3D(-1, -1, -1);
             
-            _axisX.X1 = cx2; _axisX.Y1 = cy2; var px = ProjectAxis(new Vector3D(1, 0, 0)); _axisX.X2 = px.X; _axisX.Y2 = px.Y;
-            _axisY.X1 = cx2; _axisY.Y1 = cy2; var py = ProjectAxis(new Vector3D(0, 1, 0)); _axisY.X2 = py.X; _axisY.Y2 = py.Y;
-            _axisZ.X1 = cx2; _axisZ.Y1 = cy2; var pz = ProjectAxis(new Vector3D(0, 0, 1)); _axisZ.X2 = pz.X; _axisZ.Y2 = pz.Y;
+            _axisX.Visibility = _axisY.Visibility = _axisZ.Visibility = Visibility.Visible;
+            _lblX.Visibility = _lblY.Visibility = _lblZ.Visibility = Visibility.Visible;
             
-            Canvas.SetZIndex(_axisX, 1000); Canvas.SetZIndex(_axisY, 1000); Canvas.SetZIndex(_axisZ, 1000);
+            var pO = Project(origin3D);
+            _axisX.X1 = pO.X; _axisX.Y1 = pO.Y; 
+            _axisY.X1 = pO.X; _axisY.Y1 = pO.Y; 
+            _axisZ.X1 = pO.X; _axisZ.Y1 = pO.Y; 
+            
+            // 线条稍微长出魔方边缘（魔方跨度为 -1 到 1，此处设 1.2 起到突出的参考线效果）
+            var pX = Project(new Vector3D(1.2, -1, -1)); _axisX.X2 = pX.X; _axisX.Y2 = pX.Y;
+            var pY = Project(new Vector3D(-1, 1.2, -1)); _axisY.X2 = pY.X; _axisY.Y2 = pY.Y;
+            var pZ = Project(new Vector3D(-1, -1, 1.2)); _axisZ.X2 = pZ.X; _axisZ.Y2 = pZ.Y;
 
-            void MoveLbl(TextBlock t, Vector3D v) { var p = ProjectAxis(v); Canvas.SetLeft(t, p.X - 5); Canvas.SetTop(t, p.Y - 8); Canvas.SetZIndex(t, 1001); }
-            MoveLbl(_lblX, new Vector3D(1.4, 0, 0));
-            MoveLbl(_lblY, new Vector3D(0, 1.4, 0));
-            MoveLbl(_lblZ, new Vector3D(0, 0, 1.4));
+            // ZIndex 绝对固定：基础面最大不到 100，这里将坐标轴设定在基础面之上，文字图层之下
+            Canvas.SetZIndex(_axisX, 150); Canvas.SetZIndex(_axisY, 150); Canvas.SetZIndex(_axisZ, 150);
+
+            void MoveLbl(TextBlock t, Vector3D v) { var p = Project(v); Canvas.SetLeft(t, p.X - 20); Canvas.SetTop(t, p.Y - 8); Canvas.SetZIndex(t, 151); }
+            MoveLbl(_lblX, new Vector3D(1.5, -1, -1));
+            MoveLbl(_lblY, new Vector3D(-1, 1.5, -1));
+            MoveLbl(_lblZ, new Vector3D(-1, -1, 1.5));
 
             foreach (var kvp in _faceTexts)
             {
@@ -2819,9 +2828,10 @@ namespace AMLabSlicer.Views
                 {
                     kvp.Value.Visibility = Visibility.Visible;
                     var p = Project(kvp.Key * 1.05);
-                    Canvas.SetLeft(kvp.Value, p.X - 6);
+                    Canvas.SetLeft(kvp.Value, p.X - 20);
                     Canvas.SetTop(kvp.Value, p.Y - 8);
-                    Canvas.SetZIndex(kvp.Value, (int)(-dot * 100) + 20); // 确保在图形之上
+                    // 完全确保所有文本悬浮在坐标轴之上
+                    Canvas.SetZIndex(kvp.Value, (int)(-dot * 100) + 300); 
                 }
             }
         }
