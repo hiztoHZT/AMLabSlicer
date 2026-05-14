@@ -8,7 +8,7 @@ using HelixToolkit.SharpDX.Assimp;
 using HelixToolkit.SharpDX;
 using HelixToolkit.SharpDX.Model.Scene;
 using AMLabSlicer.Views;
-using AMLabSlicer.Slicing;
+using AMLabSlicer.Occt;
 using SharpAssimp;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;

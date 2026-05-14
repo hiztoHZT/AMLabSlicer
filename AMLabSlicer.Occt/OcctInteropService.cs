@@ -3,18 +3,18 @@ using System.Numerics;
 using HelixToolkit;
 using HelixToolkit.SharpDX;
 
-namespace AMLabSlicer.Slicing
+namespace AMLabSlicer.Occt
 {
     /// <summary>
     /// OCCT 引擎互操作层。
-    /// 通过 P/Invoke 调用 AMLabSlicer.Engine.dll 中的 C-API 函数，
+    /// 通过 P/Invoke 调用 AMLabSlicer.Occt.Native.dll 中的 C-API 函数，
     /// 实现 STEP 文件加载与曲面细分，返回 HelixToolkit 可直接渲染的 MeshGeometry3D。
     /// </summary>
     public class OcctInteropService
     {
         // ── Native C-API 声明 ────────────────────────────────
 
-        [DllImport("AMLabSlicer.Engine.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+        [DllImport("AMLabSlicer.Occt.Native.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         [return: MarshalAs(UnmanagedType.I1)]
         private static extern bool LoadStepAndTessellate(
             [MarshalAs(UnmanagedType.LPStr)] string filePath,
@@ -27,10 +27,10 @@ namespace AMLabSlicer.Slicing
             out int    outIndexCount
         );
 
-        [DllImport("AMLabSlicer.Engine.dll", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("AMLabSlicer.Occt.Native.dll", CallingConvention = CallingConvention.Cdecl)]
         private static extern void FreeMeshData(IntPtr vertices, IntPtr normals, IntPtr indices);
 
-        [DllImport("AMLabSlicer.Engine.dll", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("AMLabSlicer.Occt.Native.dll", CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr GetLastEngineError();
 
         // ── 默认细分参数 ─────────────────────────────────────

@@ -10,10 +10,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Assets\新文件夹\**" />
-    <EmbeddedResource Remove="Assets\新文件夹\**" />
-    <None Remove="Assets\新文件夹\**" />
-    <Page Remove="Assets\新文件夹\**" />
+    <Compile Remove="Assets\鏂版枃浠跺す\**" />
+    <EmbeddedResource Remove="Assets\鏂版枃浠跺す\**" />
+    <None Remove="Assets\鏂版枃浠跺す\**" />
+    <Page Remove="Assets\鏂版枃浠跺す\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -26,10 +26,20 @@
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="Google.Protobuf" Version="3.35.0-rc1" />
+    <PackageReference Include="Grpc.Net.Client" Version="2.80.0-pre1" />
+    <PackageReference Include="Grpc.Tools" Version="2.80.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="HelixToolkit.SharpDX.Assimp" Version="3.1.2" />
     <PackageReference Include="HelixToolkit.Wpf.SharpDX" Version="3.1.2" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="11.0.0-preview.2.26159.112" />
     <PackageReference Include="SharpVectors" Version="1.8.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="..\Protos\slicer.proto" GrpcServices="Client" />
   </ItemGroup>
 
   <ItemGroup>
@@ -38,12 +48,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AMLabSlicer.Core\AMLabSlicer.Core.csproj" />
-    <ProjectReference Include="..\AMLabSlicer.Slicing\AMLabSlicer.Slicing.csproj" />
+    <ProjectReference Include="..\AMLabSlicer.Occt\AMLabSlicer.Occt.csproj" />
   </ItemGroup>
 
-  <!-- 将 AMLabSlicer.Engine.dll 及 OCCT 运行时 DLL 复制到输出目录 -->
+  <!-- 灏?AMLabSlicer.Engine.dll 鍙?OCCT 杩愯鏃?DLL 澶嶅埗鍒拌緭鍑虹洰褰?-->
   <PropertyGroup>
-    <EngineOutputDir>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\AMLabSlicer.Engine\x64\$(Configuration)\'))</EngineOutputDir>
+    <EngineOutputDir>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\x64\$(Configuration)\'))</EngineOutputDir>
     <NuGetAuditMode>all</NuGetAuditMode>
     <ApplicationIcon>Assets\ico\AMLAS.ico</ApplicationIcon>
   </PropertyGroup>
@@ -54,7 +64,7 @@
     </ItemGroup>
     <Copy SourceFiles="@(NativeEngineFiles)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" Condition="Exists('$(EngineOutputDir)')" />
     <Message Text="Copied native engine DLLs from $(EngineOutputDir)" Importance="high" Condition="Exists('$(EngineOutputDir)')" />
-    <Warning Text="Native engine output not found at $(EngineOutputDir). Build AMLabSlicer.Engine (x64) first." Condition="!Exists('$(EngineOutputDir)')" />
+    <Warning Text="Native engine output not found at $(EngineOutputDir). Build AMLabSlicer.Occt.Native (x64) first." Condition="!Exists('$(EngineOutputDir)')" />
   </Target>
 
 </Project>

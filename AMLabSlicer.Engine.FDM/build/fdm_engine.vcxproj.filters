@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="F:\2026.3\AMLabSlicer\AMLabSlicer\AMLabSlicer.Engine.FDM\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="F:\2026.3\AMLabSlicer\AMLabSlicer\AMLabSlicer.Engine.FDM\slicer_grpc_server.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="F:\2026.3\AMLabSlicer\AMLabSlicer\AMLabSlicer.Engine.FDM\slicer\FdmSlicer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="F:\2026.3\AMLabSlicer\AMLabSlicer\AMLabSlicer.Engine.FDM\slicer\MeshCutter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="F:\2026.3\AMLabSlicer\AMLabSlicer\AMLabSlicer.Engine.FDM\slicer\Infill.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="F:\2026.3\AMLabSlicer\AMLabSlicer\AMLabSlicer.Engine.FDM\slicer\GCodeWriter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="F:\2026.3\AMLabSlicer\AMLabSlicer\AMLabSlicer.Engine.FDM\build\generated\slicer.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="F:\2026.3\AMLabSlicer\AMLabSlicer\AMLabSlicer.Engine.FDM\build\generated\slicer.grpc.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="F:\2026.3\AMLabSlicer\AMLabSlicer\AMLabSlicer.Engine.FDM\build\CMakeFiles\66cfb345e2ab039e75b652f4bd35d48a\slicer.pb.cc.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="F:\2026.3\AMLabSlicer\AMLabSlicer\AMLabSlicer.Engine.FDM\build\CMakeFiles\66cfb345e2ab039e75b652f4bd35d48a\slicer.grpc.pb.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="F:\2026.3\AMLabSlicer\AMLabSlicer\AMLabSlicer.Engine.FDM\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{56128599-B950-3625-9B3D-A984C90413F6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{D059AABF-4A29-38AF-9A31-108F48560593}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{FF924809-AA8E-3180-B4E1-8CFAE7728856}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

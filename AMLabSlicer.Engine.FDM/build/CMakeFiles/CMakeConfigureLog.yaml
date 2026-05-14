@@ -1,0 +1,369 @@
+
+---
+events:
+  -
+    kind: "message-v1"
+    backtrace:
+      - "D:/VS TOOL/vcpkg/downloads/tools/cmake-3.31.10-windows/cmake-3.31.10-windows-x86_64/share/cmake-3.31/Modules/CMakeDetermineSystem.cmake:205 (message)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      The system is: Windows - 10.0.19045 - AMD64
+  -
+    kind: "message-v1"
+    backtrace:
+      - "D:/VS TOOL/vcpkg/downloads/tools/cmake-3.31.10-windows/cmake-3.31.10-windows-x86_64/share/cmake-3.31/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "D:/VS TOOL/vcpkg/downloads/tools/cmake-3.31.10-windows/cmake-3.31.10-windows-x86_64/share/cmake-3.31/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "D:/VS TOOL/vcpkg/downloads/tools/cmake-3.31.10-windows/cmake-3.31.10-windows-x86_64/share/cmake-3.31/Modules/CMakeDetermineCXXCompiler.cmake:126 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+      Compiler:  
+      Build flags: 
+      Id flags:  
+      
+      The output was:
+      0
+      适用于 .NET Framework MSBuild 版本 17.14.23+b0019275e
+      生成启动时间为 2026/5/7 15:16:43。
+      
+      节点 1 上的项目“F:\\2026.3\\AMLabSlicer\\AMLabSlicer\\AMLabSlicer.Engine.FDM\\build\\CMakeFiles\\3.31.10\\CompilerIdCXX\\CompilerIdCXX.vcxproj”(默认目标)。
+      PrepareForBuild:
+        正在创建目录“Debug\\”。
+        已启用结构化输出。编译器诊断的格式设置将反映错误层次结构。有关详细信息，请参阅 https://aka.ms/cpp/structured-output。
+        正在创建目录“Debug\\CompilerIdCXX.tlog\\”。
+      InitializeBuildStatus:
+        正在创建“Debug\\CompilerIdCXX.tlog\\unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+        正在对“Debug\\CompilerIdCXX.tlog\\unsuccessfulbuild”执行 Touch 任务。
+      VcpkgTripletSelection:
+        Using triplet "x64-windows" from "F:\\vcpkg\\installed\\x64-windows\\"
+        Using normalized configuration "Release"
+      ClCompile:
+        C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /I"F:\\vcpkg\\installed\\x64-windows\\include" /nologo /W0 /WX- /diagnostics:column /Od /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\\\" /Fd"Debug\\vc143.pdb" /external:W0 /Gd /TP /FC /errorReport:queue CMakeCXXCompilerId.cpp
+        CMakeCXXCompilerId.cpp
+      Link:
+        C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:".\\CompilerIdCXX.exe" /INCREMENTAL:NO /NOLOGO /LIBPATH:"F:\\vcpkg\\installed\\x64-windows\\lib" /LIBPATH:"F:\\vcpkg\\installed\\x64-windows\\lib\\manual-link" kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib "F:\\vcpkg\\installed\\x64-windows\\lib\\*.lib" /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:".\\CompilerIdCXX.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:".\\CompilerIdCXX.lib" /MACHINE:X64 Debug\\CMakeCXXCompilerId.obj
+        CompilerIdCXX.vcxproj -> F:\\2026.3\\AMLabSlicer\\AMLabSlicer\\AMLabSlicer.Engine.FDM\\build\\CMakeFiles\\3.31.10\\CompilerIdCXX\\CompilerIdCXX.exe
+      AppLocalFromInstalled:
+        pwsh.exe -ExecutionPolicy Bypass -noprofile -File "F:\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "F:\\2026.3\\AMLabSlicer\\AMLabSlicer\\AMLabSlicer.Engine.FDM\\build\\CMakeFiles\\3.31.10\\CompilerIdCXX\\CompilerIdCXX.exe" "F:\\vcpkg\\installed\\x64-windows\\bin" "Debug\\CompilerIdCXX.tlog\\CompilerIdCXX.write.1u.tlog" "Debug\\vcpkg.applocal.log"
+        'pwsh.exe' 不是内部或外部命令，也不是可运行的程序
+        或批处理文件。
+        命令“pwsh.exe -ExecutionPolicy Bypass -noprofile -File "F:\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "F:\\2026.3\\AMLabSlicer\\AMLabSlicer\\AMLabSlicer.Engine.FDM\\build\\CMakeFiles\\3.31.10\\CompilerIdCXX\\CompilerIdCXX.exe" "F:\\vcpkg\\installed\\x64-windows\\bin" "Debug\\CompilerIdCXX.tlog\\CompilerIdCXX.write.1u.tlog" "Debug\\vcpkg.applocal.log"”已退出，代码为 9009。
+        "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -ExecutionPolicy Bypass -noprofile -File "F:\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "F:\\2026.3\\AMLabSlicer\\AMLabSlicer\\AMLabSlicer.Engine.FDM\\build\\CMakeFiles\\3.31.10\\CompilerIdCXX\\CompilerIdCXX.exe" "F:\\vcpkg\\installed\\x64-windows\\bin" "Debug\\CompilerIdCXX.tlog\\CompilerIdCXX.write.1u.tlog" "Debug\\vcpkg.applocal.log"
+      PostBuildEvent:
+        for %%i in (cl.exe) do @echo CMAKE_CXX_COMPILER=%%~$PATH:i
+        :VCEnd
+        CMAKE_CXX_COMPILER=C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe
+      FinalizeBuildStatus:
+        正在删除文件“Debug\\CompilerIdCXX.tlog\\unsuccessfulbuild”。
+        正在对“Debug\\CompilerIdCXX.tlog\\CompilerIdCXX.lastbuildstate”执行 Touch 任务。
+      已完成生成项目“F:\\2026.3\\AMLabSlicer\\AMLabSlicer\\AMLabSlicer.Engine.FDM\\build\\CMakeFiles\\3.31.10\\CompilerIdCXX\\CompilerIdCXX.vcxproj”(默认目标)的操作。
+      
+      已成功生成。
+          0 个警告
+          0 个错误
+      
+      已用时间 00:00:06.36
+      
+      
+      Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CompilerIdCXX.exe"
+      
+      Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CompilerIdCXX.vcxproj"
+      
+      The CXX compiler identification is MSVC, found in:
+        F:/2026.3/AMLabSlicer/AMLabSlicer/AMLabSlicer.Engine.FDM/build/CMakeFiles/3.31.10/CompilerIdCXX/CompilerIdCXX.exe
+      
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "D:/VS TOOL/vcpkg/downloads/tools/cmake-3.31.10-windows/cmake-3.31.10-windows-x86_64/share/cmake-3.31/Modules/CMakeDetermineCompilerABI.cmake:74 (try_compile)"
+      - "D:/VS TOOL/vcpkg/downloads/tools/cmake-3.31.10-windows/cmake-3.31.10-windows-x86_64/share/cmake-3.31/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:2 (project)"
+    checks:
+      - "Detecting CXX compiler ABI info"
+    directories:
+      source: "F:/2026.3/AMLabSlicer/AMLabSlicer/AMLabSlicer.Engine.FDM/build/CMakeFiles/CMakeScratch/TryCompile-dn3php"
+      binary: "F:/2026.3/AMLabSlicer/AMLabSlicer/AMLabSlicer.Engine.FDM/build/CMakeFiles/CMakeScratch/TryCompile-dn3php"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "/DWIN32 /D_WINDOWS /EHsc"
+      CMAKE_CXX_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
+      CMAKE_CXX_SCAN_FOR_MODULES: "OFF"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      VCPKG_INSTALLED_DIR: "F:/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-windows"
+      Z_VCPKG_ROOT_DIR: "F:/vcpkg"
+    buildResult:
+      variable: "CMAKE_CXX_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: 'F:/2026.3/AMLabSlicer/AMLabSlicer/AMLabSlicer.Engine.FDM/build/CMakeFiles/CMakeScratch/TryCompile-dn3php'
+        
+        Run Build Command(s): "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_1df21.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        适用于 .NET Framework MSBuild 版本 17.14.23+b0019275e
+        生成启动时间为 2026/5/7 15:16:51。
+        
+        节点 1 上的项目“F:\\2026.3\\AMLabSlicer\\AMLabSlicer\\AMLabSlicer.Engine.FDM\\build\\CMakeFiles\\CMakeScratch\\TryCompile-dn3php\\cmTC_1df21.vcxproj”(默认目标)。
+        PrepareForBuild:
+          正在创建目录“cmTC_1df21.dir\\Debug\\”。
+          已启用结构化输出。编译器诊断的格式设置将反映错误层次结构。有关详细信息，请参阅 https://aka.ms/cpp/structured-output。
+          正在创建目录“F:\\2026.3\\AMLabSlicer\\AMLabSlicer\\AMLabSlicer.Engine.FDM\\build\\CMakeFiles\\CMakeScratch\\TryCompile-dn3php\\Debug\\”。
+          正在创建目录“cmTC_1df21.dir\\Debug\\cmTC_1df21.tlog\\”。
+        InitializeBuildStatus:
+          正在创建“cmTC_1df21.dir\\Debug\\cmTC_1df21.tlog\\unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+          正在对“cmTC_1df21.dir\\Debug\\cmTC_1df21.tlog\\unsuccessfulbuild”执行 Touch 任务。
+        ClCompile:
+          C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_1df21.dir\\Debug\\\\" /Fd"cmTC_1df21.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue "D:\\VS TOOL\\vcpkg\\downloads\\tools\\cmake-3.31.10-windows\\cmake-3.31.10-windows-x86_64\\share\\cmake-3.31\\Modules\\CMakeCXXCompilerABI.cpp"
+          用于 x64 的 Microsoft (R) C/C++ 优化编译器 19.44.35222 版
+          版权所有(C) Microsoft Corporation。保留所有权利。
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_1df21.dir\\Debug\\\\" /Fd"cmTC_1df21.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue "D:\\VS TOOL\\vcpkg\\downloads\\tools\\cmake-3.31.10-windows\\cmake-3.31.10-windows-x86_64\\share\\cmake-3.31\\Modules\\CMakeCXXCompilerABI.cpp"
+          CMakeCXXCompilerABI.cpp
+        Link:
+          C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"F:\\2026.3\\AMLabSlicer\\AMLabSlicer\\AMLabSlicer.Engine.FDM\\build\\CMakeFiles\\CMakeScratch\\TryCompile-dn3php\\Debug\\cmTC_1df21.exe" /INCREMENTAL /ILK:"cmTC_1df21.dir\\Debug\\cmTC_1df21.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"F:/2026.3/AMLabSlicer/AMLabSlicer/AMLabSlicer.Engine.FDM/build/CMakeFiles/CMakeScratch/TryCompile-dn3php/Debug/cmTC_1df21.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"F:/2026.3/AMLabSlicer/AMLabSlicer/AMLabSlicer.Engine.FDM/build/CMakeFiles/CMakeScratch/TryCompile-dn3php/Debug/cmTC_1df21.lib" /MACHINE:X64  /machine:x64 cmTC_1df21.dir\\Debug\\CMakeCXXCompilerABI.obj
+          cmTC_1df21.vcxproj -> F:\\2026.3\\AMLabSlicer\\AMLabSlicer\\AMLabSlicer.Engine.FDM\\build\\CMakeFiles\\CMakeScratch\\TryCompile-dn3php\\Debug\\cmTC_1df21.exe
+        FinalizeBuildStatus:
+          正在删除文件“cmTC_1df21.dir\\Debug\\cmTC_1df21.tlog\\unsuccessfulbuild”。
+          正在对“cmTC_1df21.dir\\Debug\\cmTC_1df21.tlog\\cmTC_1df21.lastbuildstate”执行 Touch 任务。
+        已完成生成项目“F:\\2026.3\\AMLabSlicer\\AMLabSlicer\\AMLabSlicer.Engine.FDM\\build\\CMakeFiles\\CMakeScratch\\TryCompile-dn3php\\cmTC_1df21.vcxproj”(默认目标)的操作。
+        
+        已成功生成。
+            0 个警告
+            0 个错误
+        
+        已用时间 00:00:02.63
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "D:/VS TOOL/vcpkg/downloads/tools/cmake-3.31.10-windows/cmake-3.31.10-windows-x86_64/share/cmake-3.31/Modules/CMakeDetermineCompilerABI.cmake:218 (message)"
+      - "D:/VS TOOL/vcpkg/downloads/tools/cmake-3.31.10-windows/cmake-3.31.10-windows-x86_64/share/cmake-3.31/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Parsed CXX implicit link information:
+        link line regex: [^( *|.*[/\\])(ld[0-9]*(\\.[a-z]+)?|link\\.exe|lld-link(\\.exe)?|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        linker tool regex: [^[ 	]*(->|")?[ 	]*(([^"]*[/\\])?(ld[0-9]*(\\.[a-z]+)?|link\\.exe|lld-link(\\.exe)?))("|,| |$)]
+        linker tool for 'CXX': C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/HostX64/x64/link.exe
+        implicit libs: []
+        implicit objs: []
+        implicit dirs: []
+        implicit fwks: []
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "D:/VS TOOL/vcpkg/downloads/tools/cmake-3.31.10-windows/cmake-3.31.10-windows-x86_64/share/cmake-3.31/Modules/Internal/CMakeDetermineLinkerId.cmake:40 (message)"
+      - "D:/VS TOOL/vcpkg/downloads/tools/cmake-3.31.10-windows/cmake-3.31.10-windows-x86_64/share/cmake-3.31/Modules/CMakeDetermineCompilerABI.cmake:255 (cmake_determine_linker_id)"
+      - "D:/VS TOOL/vcpkg/downloads/tools/cmake-3.31.10-windows/cmake-3.31.10-windows-x86_64/share/cmake-3.31/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Running the CXX compiler's linker: "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/HostX64/x64/link.exe" "-v"
+      Microsoft (R) Incremental Linker Version 14.44.35222.0
+      Copyright (C) Microsoft Corporation.  All rights reserved.
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "D:/VS TOOL/vcpkg/downloads/tools/cmake-3.31.10-windows/cmake-3.31.10-windows-x86_64/share/cmake-3.31/Modules/Internal/CheckSourceCompiles.cmake:108 (try_compile)"
+      - "D:/VS TOOL/vcpkg/downloads/tools/cmake-3.31.10-windows/cmake-3.31.10-windows-x86_64/share/cmake-3.31/Modules/CheckCXXSourceCompiles.cmake:58 (cmake_check_source_compiles)"
+      - "D:/VS TOOL/vcpkg/downloads/tools/cmake-3.31.10-windows/cmake-3.31.10-windows-x86_64/share/cmake-3.31/Modules/FindThreads.cmake:99 (CHECK_CXX_SOURCE_COMPILES)"
+      - "D:/VS TOOL/vcpkg/downloads/tools/cmake-3.31.10-windows/cmake-3.31.10-windows-x86_64/share/cmake-3.31/Modules/FindThreads.cmake:163 (_threads_check_libc)"
+      - "F:/vcpkg/scripts/buildsystems/vcpkg.cmake:908 (_find_package)"
+      - "D:/VS TOOL/vcpkg/downloads/tools/cmake-3.31.10-windows/cmake-3.31.10-windows-x86_64/share/cmake-3.31/Modules/CMakeFindDependencyMacro.cmake:76 (find_package)"
+      - "F:/vcpkg/installed/x64-windows/share/absl/abslConfig.cmake:4 (find_dependency)"
+      - "F:/vcpkg/scripts/buildsystems/vcpkg.cmake:908 (_find_package)"
+      - "F:/vcpkg/installed/x64-windows/share/protobuf/protobuf-config.cmake:7 (find_package)"
+      - "F:/vcpkg/installed/x64-windows/share/protobuf/vcpkg-cmake-wrapper.cmake:3 (_find_package)"
+      - "F:/vcpkg/scripts/buildsystems/vcpkg.cmake:862 (include)"
+      - "CMakeLists.txt:7 (find_package)"
+    checks:
+      - "Performing Test CMAKE_HAVE_LIBC_PTHREAD"
+    directories:
+      source: "F:/2026.3/AMLabSlicer/AMLabSlicer/AMLabSlicer.Engine.FDM/build/CMakeFiles/CMakeScratch/TryCompile-fpnhwd"
+      binary: "F:/2026.3/AMLabSlicer/AMLabSlicer/AMLabSlicer.Engine.FDM/build/CMakeFiles/CMakeScratch/TryCompile-fpnhwd"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "/DWIN32 /D_WINDOWS /EHsc"
+      CMAKE_CXX_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      VCPKG_INSTALLED_DIR: "F:/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-windows"
+      Z_VCPKG_ROOT_DIR: "F:/vcpkg"
+    buildResult:
+      variable: "CMAKE_HAVE_LIBC_PTHREAD"
+      cached: true
+      stdout: |
+        Change Dir: 'F:/2026.3/AMLabSlicer/AMLabSlicer/AMLabSlicer.Engine.FDM/build/CMakeFiles/CMakeScratch/TryCompile-fpnhwd'
+        
+        Run Build Command(s): "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_e9255.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        适用于 .NET Framework MSBuild 版本 17.14.23+b0019275e
+        生成启动时间为 2026/5/7 15:16:56。
+        
+        节点 1 上的项目“F:\\2026.3\\AMLabSlicer\\AMLabSlicer\\AMLabSlicer.Engine.FDM\\build\\CMakeFiles\\CMakeScratch\\TryCompile-fpnhwd\\cmTC_e9255.vcxproj”(默认目标)。
+        PrepareForBuild:
+          正在创建目录“cmTC_e9255.dir\\Debug\\”。
+          已启用结构化输出。编译器诊断的格式设置将反映错误层次结构。有关详细信息，请参阅 https://aka.ms/cpp/structured-output。
+          正在创建目录“F:\\2026.3\\AMLabSlicer\\AMLabSlicer\\AMLabSlicer.Engine.FDM\\build\\CMakeFiles\\CMakeScratch\\TryCompile-fpnhwd\\Debug\\”。
+          正在创建目录“cmTC_e9255.dir\\Debug\\cmTC_e9255.tlog\\”。
+        InitializeBuildStatus:
+          正在创建“cmTC_e9255.dir\\Debug\\cmTC_e9255.tlog\\unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+          正在对“cmTC_e9255.dir\\Debug\\cmTC_e9255.tlog\\unsuccessfulbuild”执行 Touch 任务。
+        ClCompile:
+          C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CMAKE_HAVE_LIBC_PTHREAD /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++17 /Fo"cmTC_e9255.dir\\Debug\\\\" /Fd"cmTC_e9255.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue "F:\\2026.3\\AMLabSlicer\\AMLabSlicer\\AMLabSlicer.Engine.FDM\\build\\CMakeFiles\\CMakeScratch\\TryCompile-fpnhwd\\src.cxx"
+          用于 x64 的 Microsoft (R) C/C++ 优化编译器 19.44.35222 版
+          版权所有(C) Microsoft Corporation。保留所有权利。
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CMAKE_HAVE_LIBC_PTHREAD /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++17 /Fo"cmTC_e9255.dir\\Debug\\\\" /Fd"cmTC_e9255.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue "F:\\2026.3\\AMLabSlicer\\AMLabSlicer\\AMLabSlicer.Engine.FDM\\build\\CMakeFiles\\CMakeScratch\\TryCompile-fpnhwd\\src.cxx"
+          src.cxx
+        F:\\2026.3\\AMLabSlicer\\AMLabSlicer\\AMLabSlicer.Engine.FDM\\build\\CMakeFiles\\CMakeScratch\\TryCompile-fpnhwd\\src.cxx(1,10): error C1083: 无法打开包括文件: “pthread.h”: No such file or directory [F:\\2026.3\\AMLabSlicer\\AMLabSlicer\\AMLabSlicer.Engine.FDM\\build\\CMakeFiles\\CMakeScratch\\TryCompile-fpnhwd\\cmTC_e9255.vcxproj]
+        已完成生成项目“F:\\2026.3\\AMLabSlicer\\AMLabSlicer\\AMLabSlicer.Engine.FDM\\build\\CMakeFiles\\CMakeScratch\\TryCompile-fpnhwd\\cmTC_e9255.vcxproj”(默认目标)的操作 - 失败。
+        
+        生成失败。
+        
+        “F:\\2026.3\\AMLabSlicer\\AMLabSlicer\\AMLabSlicer.Engine.FDM\\build\\CMakeFiles\\CMakeScratch\\TryCompile-fpnhwd\\cmTC_e9255.vcxproj”(默认目标) (1) ->
+        (ClCompile 目标) -> 
+          F:\\2026.3\\AMLabSlicer\\AMLabSlicer\\AMLabSlicer.Engine.FDM\\build\\CMakeFiles\\CMakeScratch\\TryCompile-fpnhwd\\src.cxx(1,10): error C1083: 无法打开包括文件: “pthread.h”: No such file or directory [F:\\2026.3\\AMLabSlicer\\AMLabSlicer\\AMLabSlicer.Engine.FDM\\build\\CMakeFiles\\CMakeScratch\\TryCompile-fpnhwd\\cmTC_e9255.vcxproj]
+        
+            0 个警告
+            1 个错误
+        
+        已用时间 00:00:02.29
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "D:/VS TOOL/vcpkg/downloads/tools/cmake-3.31.10-windows/cmake-3.31.10-windows-x86_64/share/cmake-3.31/Modules/CheckLibraryExists.cmake:78 (try_compile)"
+      - "D:/VS TOOL/vcpkg/downloads/tools/cmake-3.31.10-windows/cmake-3.31.10-windows-x86_64/share/cmake-3.31/Modules/FindThreads.cmake:112 (CHECK_LIBRARY_EXISTS)"
+      - "D:/VS TOOL/vcpkg/downloads/tools/cmake-3.31.10-windows/cmake-3.31.10-windows-x86_64/share/cmake-3.31/Modules/FindThreads.cmake:175 (_threads_check_lib)"
+      - "F:/vcpkg/scripts/buildsystems/vcpkg.cmake:908 (_find_package)"
+      - "D:/VS TOOL/vcpkg/downloads/tools/cmake-3.31.10-windows/cmake-3.31.10-windows-x86_64/share/cmake-3.31/Modules/CMakeFindDependencyMacro.cmake:76 (find_package)"
+      - "F:/vcpkg/installed/x64-windows/share/absl/abslConfig.cmake:4 (find_dependency)"
+      - "F:/vcpkg/scripts/buildsystems/vcpkg.cmake:908 (_find_package)"
+      - "F:/vcpkg/installed/x64-windows/share/protobuf/protobuf-config.cmake:7 (find_package)"
+      - "F:/vcpkg/installed/x64-windows/share/protobuf/vcpkg-cmake-wrapper.cmake:3 (_find_package)"
+      - "F:/vcpkg/scripts/buildsystems/vcpkg.cmake:862 (include)"
+      - "CMakeLists.txt:7 (find_package)"
+    checks:
+      - "Looking for pthread_create in pthreads"
+    directories:
+      source: "F:/2026.3/AMLabSlicer/AMLabSlicer/AMLabSlicer.Engine.FDM/build/CMakeFiles/CMakeScratch/TryCompile-fc9uz2"
+      binary: "F:/2026.3/AMLabSlicer/AMLabSlicer/AMLabSlicer.Engine.FDM/build/CMakeFiles/CMakeScratch/TryCompile-fc9uz2"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "/DWIN32 /D_WINDOWS /EHsc"
+      CMAKE_CXX_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      VCPKG_INSTALLED_DIR: "F:/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-windows"
+      Z_VCPKG_ROOT_DIR: "F:/vcpkg"
+    buildResult:
+      variable: "CMAKE_HAVE_PTHREADS_CREATE"
+      cached: true
+      stdout: |
+        Change Dir: 'F:/2026.3/AMLabSlicer/AMLabSlicer/AMLabSlicer.Engine.FDM/build/CMakeFiles/CMakeScratch/TryCompile-fc9uz2'
+        
+        Run Build Command(s): "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_abd83.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        适用于 .NET Framework MSBuild 版本 17.14.23+b0019275e
+        生成启动时间为 2026/5/7 15:17:00。
+        
+        节点 1 上的项目“F:\\2026.3\\AMLabSlicer\\AMLabSlicer\\AMLabSlicer.Engine.FDM\\build\\CMakeFiles\\CMakeScratch\\TryCompile-fc9uz2\\cmTC_abd83.vcxproj”(默认目标)。
+        PrepareForBuild:
+          正在创建目录“cmTC_abd83.dir\\Debug\\”。
+          已启用结构化输出。编译器诊断的格式设置将反映错误层次结构。有关详细信息，请参阅 https://aka.ms/cpp/structured-output。
+          正在创建目录“F:\\2026.3\\AMLabSlicer\\AMLabSlicer\\AMLabSlicer.Engine.FDM\\build\\CMakeFiles\\CMakeScratch\\TryCompile-fc9uz2\\Debug\\”。
+          正在创建目录“cmTC_abd83.dir\\Debug\\cmTC_abd83.tlog\\”。
+        InitializeBuildStatus:
+          正在创建“cmTC_abd83.dir\\Debug\\cmTC_abd83.tlog\\unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+          正在对“cmTC_abd83.dir\\Debug\\cmTC_abd83.tlog\\unsuccessfulbuild”执行 Touch 任务。
+        ClCompile:
+          C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=pthread_create /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++17 /Fo"cmTC_abd83.dir\\Debug\\\\" /Fd"cmTC_abd83.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue "F:\\2026.3\\AMLabSlicer\\AMLabSlicer\\AMLabSlicer.Engine.FDM\\build\\CMakeFiles\\CMakeScratch\\TryCompile-fc9uz2\\CheckFunctionExists.cxx"
+          用于 x64 的 Microsoft (R) C/C++ 优化编译器 19.44.35222 版
+          版权所有(C) Microsoft Corporation。保留所有权利。
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=pthread_create /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++17 /Fo"cmTC_abd83.dir\\Debug\\\\" /Fd"cmTC_abd83.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue "F:\\2026.3\\AMLabSlicer\\AMLabSlicer\\AMLabSlicer.Engine.FDM\\build\\CMakeFiles\\CMakeScratch\\TryCompile-fc9uz2\\CheckFunctionExists.cxx"
+          CheckFunctionExists.cxx
+        Link:
+          C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"F:\\2026.3\\AMLabSlicer\\AMLabSlicer\\AMLabSlicer.Engine.FDM\\build\\CMakeFiles\\CMakeScratch\\TryCompile-fc9uz2\\Debug\\cmTC_abd83.exe" /INCREMENTAL /ILK:"cmTC_abd83.dir\\Debug\\cmTC_abd83.ilk" /NOLOGO pthreads.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"F:/2026.3/AMLabSlicer/AMLabSlicer/AMLabSlicer.Engine.FDM/build/CMakeFiles/CMakeScratch/TryCompile-fc9uz2/Debug/cmTC_abd83.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"F:/2026.3/AMLabSlicer/AMLabSlicer/AMLabSlicer.Engine.FDM/build/CMakeFiles/CMakeScratch/TryCompile-fc9uz2/Debug/cmTC_abd83.lib" /MACHINE:X64  /machine:x64 cmTC_abd83.dir\\Debug\\CheckFunctionExists.obj
+        LINK : fatal error LNK1104: 无法打开文件“pthreads.lib” [F:\\2026.3\\AMLabSlicer\\AMLabSlicer\\AMLabSlicer.Engine.FDM\\build\\CMakeFiles\\CMakeScratch\\TryCompile-fc9uz2\\cmTC_abd83.vcxproj]
+        已完成生成项目“F:\\2026.3\\AMLabSlicer\\AMLabSlicer\\AMLabSlicer.Engine.FDM\\build\\CMakeFiles\\CMakeScratch\\TryCompile-fc9uz2\\cmTC_abd83.vcxproj”(默认目标)的操作 - 失败。
+        
+        生成失败。
+        
+        “F:\\2026.3\\AMLabSlicer\\AMLabSlicer\\AMLabSlicer.Engine.FDM\\build\\CMakeFiles\\CMakeScratch\\TryCompile-fc9uz2\\cmTC_abd83.vcxproj”(默认目标) (1) ->
+        (Link 目标) -> 
+          LINK : fatal error LNK1104: 无法打开文件“pthreads.lib” [F:\\2026.3\\AMLabSlicer\\AMLabSlicer\\AMLabSlicer.Engine.FDM\\build\\CMakeFiles\\CMakeScratch\\TryCompile-fc9uz2\\cmTC_abd83.vcxproj]
+        
+            0 个警告
+            1 个错误
+        
+        已用时间 00:00:02.29
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "D:/VS TOOL/vcpkg/downloads/tools/cmake-3.31.10-windows/cmake-3.31.10-windows-x86_64/share/cmake-3.31/Modules/CheckLibraryExists.cmake:78 (try_compile)"
+      - "D:/VS TOOL/vcpkg/downloads/tools/cmake-3.31.10-windows/cmake-3.31.10-windows-x86_64/share/cmake-3.31/Modules/FindThreads.cmake:112 (CHECK_LIBRARY_EXISTS)"
+      - "D:/VS TOOL/vcpkg/downloads/tools/cmake-3.31.10-windows/cmake-3.31.10-windows-x86_64/share/cmake-3.31/Modules/FindThreads.cmake:176 (_threads_check_lib)"
+      - "F:/vcpkg/scripts/buildsystems/vcpkg.cmake:908 (_find_package)"
+      - "D:/VS TOOL/vcpkg/downloads/tools/cmake-3.31.10-windows/cmake-3.31.10-windows-x86_64/share/cmake-3.31/Modules/CMakeFindDependencyMacro.cmake:76 (find_package)"
+      - "F:/vcpkg/installed/x64-windows/share/absl/abslConfig.cmake:4 (find_dependency)"
+      - "F:/vcpkg/scripts/buildsystems/vcpkg.cmake:908 (_find_package)"
+      - "F:/vcpkg/installed/x64-windows/share/protobuf/protobuf-config.cmake:7 (find_package)"
+      - "F:/vcpkg/installed/x64-windows/share/protobuf/vcpkg-cmake-wrapper.cmake:3 (_find_package)"
+      - "F:/vcpkg/scripts/buildsystems/vcpkg.cmake:862 (include)"
+      - "CMakeLists.txt:7 (find_package)"
+    checks:
+      - "Looking for pthread_create in pthread"
+    directories:
+      source: "F:/2026.3/AMLabSlicer/AMLabSlicer/AMLabSlicer.Engine.FDM/build/CMakeFiles/CMakeScratch/TryCompile-zgl5ta"
+      binary: "F:/2026.3/AMLabSlicer/AMLabSlicer/AMLabSlicer.Engine.FDM/build/CMakeFiles/CMakeScratch/TryCompile-zgl5ta"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "/DWIN32 /D_WINDOWS /EHsc"
+      CMAKE_CXX_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      VCPKG_INSTALLED_DIR: "F:/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-windows"
+      Z_VCPKG_ROOT_DIR: "F:/vcpkg"
+    buildResult:
+      variable: "CMAKE_HAVE_PTHREAD_CREATE"
+      cached: true
+      stdout: |
+        Change Dir: 'F:/2026.3/AMLabSlicer/AMLabSlicer/AMLabSlicer.Engine.FDM/build/CMakeFiles/CMakeScratch/TryCompile-zgl5ta'
+        
+        Run Build Command(s): "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_08850.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        适用于 .NET Framework MSBuild 版本 17.14.23+b0019275e
+        生成启动时间为 2026/5/7 15:17:04。
+        
+        节点 1 上的项目“F:\\2026.3\\AMLabSlicer\\AMLabSlicer\\AMLabSlicer.Engine.FDM\\build\\CMakeFiles\\CMakeScratch\\TryCompile-zgl5ta\\cmTC_08850.vcxproj”(默认目标)。
+        PrepareForBuild:
+          正在创建目录“cmTC_08850.dir\\Debug\\”。
+          已启用结构化输出。编译器诊断的格式设置将反映错误层次结构。有关详细信息，请参阅 https://aka.ms/cpp/structured-output。
+          正在创建目录“F:\\2026.3\\AMLabSlicer\\AMLabSlicer\\AMLabSlicer.Engine.FDM\\build\\CMakeFiles\\CMakeScratch\\TryCompile-zgl5ta\\Debug\\”。
+          正在创建目录“cmTC_08850.dir\\Debug\\cmTC_08850.tlog\\”。
+        InitializeBuildStatus:
+          正在创建“cmTC_08850.dir\\Debug\\cmTC_08850.tlog\\unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+          正在对“cmTC_08850.dir\\Debug\\cmTC_08850.tlog\\unsuccessfulbuild”执行 Touch 任务。
+        ClCompile:
+          C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=pthread_create /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++17 /Fo"cmTC_08850.dir\\Debug\\\\" /Fd"cmTC_08850.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue "F:\\2026.3\\AMLabSlicer\\AMLabSlicer\\AMLabSlicer.Engine.FDM\\build\\CMakeFiles\\CMakeScratch\\TryCompile-zgl5ta\\CheckFunctionExists.cxx"
+          用于 x64 的 Microsoft (R) C/C++ 优化编译器 19.44.35222 版
+          版权所有(C) Microsoft Corporation。保留所有权利。
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=pthread_create /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++17 /Fo"cmTC_08850.dir\\Debug\\\\" /Fd"cmTC_08850.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue "F:\\2026.3\\AMLabSlicer\\AMLabSlicer\\AMLabSlicer.Engine.FDM\\build\\CMakeFiles\\CMakeScratch\\TryCompile-zgl5ta\\CheckFunctionExists.cxx"
+          CheckFunctionExists.cxx
+        Link:
+          C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"F:\\2026.3\\AMLabSlicer\\AMLabSlicer\\AMLabSlicer.Engine.FDM\\build\\CMakeFiles\\CMakeScratch\\TryCompile-zgl5ta\\Debug\\cmTC_08850.exe" /INCREMENTAL /ILK:"cmTC_08850.dir\\Debug\\cmTC_08850.ilk" /NOLOGO pthread.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"F:/2026.3/AMLabSlicer/AMLabSlicer/AMLabSlicer.Engine.FDM/build/CMakeFiles/CMakeScratch/TryCompile-zgl5ta/Debug/cmTC_08850.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"F:/2026.3/AMLabSlicer/AMLabSlicer/AMLabSlicer.Engine.FDM/build/CMakeFiles/CMakeScratch/TryCompile-zgl5ta/Debug/cmTC_08850.lib" /MACHINE:X64  /machine:x64 cmTC_08850.dir\\Debug\\CheckFunctionExists.obj
+        LINK : fatal error LNK1104: 无法打开文件“pthread.lib” [F:\\2026.3\\AMLabSlicer\\AMLabSlicer\\AMLabSlicer.Engine.FDM\\build\\CMakeFiles\\CMakeScratch\\TryCompile-zgl5ta\\cmTC_08850.vcxproj]
+        已完成生成项目“F:\\2026.3\\AMLabSlicer\\AMLabSlicer\\AMLabSlicer.Engine.FDM\\build\\CMakeFiles\\CMakeScratch\\TryCompile-zgl5ta\\cmTC_08850.vcxproj”(默认目标)的操作 - 失败。
+        
+        生成失败。
+        
+        “F:\\2026.3\\AMLabSlicer\\AMLabSlicer\\AMLabSlicer.Engine.FDM\\build\\CMakeFiles\\CMakeScratch\\TryCompile-zgl5ta\\cmTC_08850.vcxproj”(默认目标) (1) ->
+        (Link 目标) -> 
+          LINK : fatal error LNK1104: 无法打开文件“pthread.lib” [F:\\2026.3\\AMLabSlicer\\AMLabSlicer\\AMLabSlicer.Engine.FDM\\build\\CMakeFiles\\CMakeScratch\\TryCompile-zgl5ta\\cmTC_08850.vcxproj]
+        
+            0 个警告
+            1 个错误
+        
+        已用时间 00:00:02.37
+        
+      exitCode: 1
+...

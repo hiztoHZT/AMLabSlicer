@@ -1,0 +1,196 @@
+syntax = "proto3";
+
+package amlabslicer.proto;
+
+option csharp_namespace = "AMLabSlicer.Grpc";
+
+// =====================================================================
+// AMLabSlicer 切片通信协议
+// 
+// 架构:
+//   C# 前端 UI (gRPC Client)
+//       ↕ gRPC (本协议)
+//   C# EngineHost (gRPC Server 面向前端 + gRPC Client 面向引擎)
+//       ↕ gRPC (本协议，复用)
+//   C++ 三轴引擎 / C++ 五轴引擎 / ... (各自为独立 gRPC Server)
+//
+// 每个引擎进程也实现 SlicerService，EngineHost 做请求转发。
+// =====================================================================
+
+service SlicerService {
+    // 获取该服务支持的算法列表
+    // EngineHost: 汇总所有已注册引擎的名称
+    // 引擎进程:  只返回自己的算法名
+    rpc GetAvailableAlgorithms(Empty) returns (AlgorithmList);
+
+    // 获取特定算法的完整参数模板
+    rpc GetAlgorithmParameters(AlgorithmRequest) returns (ParameterTemplateList);
+
+    // 执行切片（双向流）
+    rpc Slice(stream SliceClientMessage) returns (stream SliceServerMessage);
+}
+
+message Empty {}
+
+message AlgorithmList {
+    repeated string algorithms = 1;
+}
+
+message AlgorithmRequest {
+    string algorithm_name = 1;
+}
+
+// =====================================================================
+// 参数系统 —— 支撑 400+ 参数规模的动态 UI 渲染
+// =====================================================================
+
+// 参数值的底层类型
+enum ValueType {
+    VT_BOOL   = 0;   // true/false
+    VT_INT    = 1;   // 整数
+    VT_FLOAT  = 2;   // 浮点数
+    VT_STRING = 3;   // 自由文本
+    VT_ENUM   = 4;   // 从 options 中选择
+}
+
+// 参数在 UI 上的渲染控件
+enum ControlType {
+    CHECK_BOX       = 0;   // 布尔勾选框
+    NUMERIC_BOX     = 1;   // 数值输入框（带微调按钮）
+    SLIDER          = 2;   // 滑动条（带数值反馈）
+    COMBO_BOX       = 3;   // 下拉单选
+    TEXT_BOX        = 4;   // 纯文本输入
+    OBJECT_SELECTOR = 5;   // 选择场景内模型对象
+    FILE_PICKER     = 6;   // 文件路径选择器
+}
+
+// 单个参数的完整描述
+// 由引擎进程定义并返回，前端据此动态生成 UI
+message ParameterTemplate {
+    // --- 基础标识 ---
+    string key          = 1;   // 内部键名 (如 "layer_height")
+    string display_name = 2;   // 显示名称 (如 "层高")
+
+    // --- 分层分类（支持大量参数的组织） ---
+    string category     = 3;   // 一级分类 (如 "质量", "速度", "支撑")
+    string subcategory  = 4;   // 二级分类 (如 "壁", "顶部/底部", "回抽")
+    int32  order        = 5;   // 同级内排序权重（越小越靠前）
+
+    // --- 类型与控件 ---
+    ValueType   value_type   = 6;
+    ControlType control_type = 7;
+
+    // --- 值约束 ---
+    string default_value    = 8;   // 默认值（字符串形式）
+    double min_value        = 9;   // 数值下限
+    double max_value        = 10;  // 数值上限
+    double step             = 11;  // 步进精度 (如 0.05 for layer_height)
+    repeated string options = 12;  // COMBO_BOX / ENUM 的选项列表
+
+    // --- 展示元数据 ---
+    string unit         = 13;  // 单位 (如 "mm", "%", "°C", "mm/s")
+    string description  = 14;  // 悬停提示文字
+    bool   is_advanced  = 15;  // true = 高级参数，默认折叠隐藏
+
+    // --- 条件逻辑（参数间联动） ---
+    // 简单表达式语法: "key==value", "key!=value", "key>value"
+    // 多条件用 && 连接: "retraction_enable==true&&speed_print>30"
+    string visible_if   = 16;  // 满足条件才在 UI 中显示
+    string enabled_if   = 17;  // 满足条件才可编辑（否则灰色禁用）
+}
+
+message ParameterTemplateList {
+    repeated ParameterTemplate parameters = 1;
+}
+
+
+// =====================================================================
+// 切片数据流
+// =====================================================================
+
+// 单个网格模型
+message MeshObject {
+    int64  id       = 1;
+    string name     = 2;
+    bytes  vertices = 3;   // float[] 紧密排列: [x0,y0,z0, x1,y1,z1, ...]
+    bytes  normals  = 4;   // float[] 紧密排列（可选，引擎可自行计算）
+    bytes  indices  = 5;   // int[]   紧密排列: [i0,i1,i2, ...]
+
+    // 该模型覆盖全局参数的局部参数
+    map<string, string> override_parameters = 6;
+
+    // 4x4 变换矩阵（行主序，16个float）
+    repeated float transform_matrix = 7;
+}
+
+// 五轴扩展配置
+message FiveAxisConfig {
+    bool   is_enabled      = 1;
+    string kinematics_type = 2;   // "BC_Table", "AC_Head", ...
+    double pivot_x = 3;
+    double pivot_y = 4;
+    double pivot_z = 5;
+}
+
+// 切片请求
+message SliceRequest {
+    string algorithm_name              = 1;
+    map<string, string> global_parameters = 2;
+    repeated MeshObject objects        = 3;
+    FiveAxisConfig five_axis_config    = 4;
+}
+
+// 客户端 → 服务端
+message SliceClientMessage {
+    oneof msg {
+        SliceRequest start_request = 1;
+        bool         cancel_request = 2;
+    }
+}
+
+// 切片进度
+message SliceProgress {
+    float  progress      = 1;   // 0.0 ~ 1.0
+    string current_stage = 2;   // "正在切层", "生成填充", ...
+}
+
+// 日志消息
+message LogMessage {
+    enum LogLevel {
+        INFO    = 0;
+        WARNING = 1;
+        ERROR   = 2;
+        DEBUG   = 3;
+    }
+    LogLevel level = 1;
+    string   text  = 2;
+}
+
+// 层预览数据
+message LayerPreview {
+    int32 layer_id  = 1;
+    float z_height  = 2;
+    bytes path_data = 3;   // 路径线段二进制数据
+}
+
+// 切片结果
+message SliceResult {
+    bool   success = 1;
+    string message = 2;
+    bytes  gcode   = 3;    // 生成的 G-Code 文件内容
+
+    // 统计信息
+    int32  total_layers       = 4;
+    double estimated_time_sec = 5;   // 预计打印时间（秒）
+    double filament_used_mm   = 6;   // 耗材用量（mm）
+}
+
+// 服务端 → 客户端
+message SliceServerMessage {
+    oneof msg {
+        SliceProgress progress     = 1;
+        LogMessage    log          = 2;
+        LayerPreview  layer_preview = 3;
+        SliceResult   result       = 4;
+    }
+}

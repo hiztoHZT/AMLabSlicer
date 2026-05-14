@@ -60,5 +60,18 @@
                       Visibility="{Binding IsParameterPanelOpen, Converter={StaticResource BoolToVis}}"/>
 
         <views:ModelPreviewView x:Name="ModelPreview" Grid.Column="2"/>
+
+        <!-- 开始切片按钮 -->
+        <Button Grid.Column="2" 
+                Content="开始切片" 
+                HorizontalAlignment="Right" 
+                VerticalAlignment="Bottom" 
+                Margin="0,0,20,20" 
+                Padding="20,10" 
+                FontSize="16" 
+                FontWeight="Bold" 
+                Background="{DynamicResource AccentBrush}" 
+                Foreground="White" 
+                Command="{Binding StartSlicingCommand}" />
     </Grid>
 </UserControl>
