@@ -23,6 +23,10 @@ using ::grpc::ServerBuilder;
 using ::grpc::ServerContext;
 using ::grpc::Status;
 
+static constexpr const char* kFdmAlgorithmId = "fdm.cartesian.v1";
+static constexpr const char* kFdmDisplayName = "FDM Cartesian Slicing";
+static constexpr const char* kFdmEngineId = "engine.fdm.cpp";
+
 // Forward declaration
 namespace fdm {
     std::string SliceMesh(
@@ -32,29 +36,93 @@ namespace fdm {
         ProgressCallback progressCb);
 }
 
-// 从 params map 中安全读取
-static float GetFloat(const google::protobuf::Map<std::string, std::string>& m, const std::string& key, float def)
+static double GetDouble(const google::protobuf::Map<std::string, ParameterValue>& m, const std::string& key, double def)
 {
     auto it = m.find(key);
     if (it == m.end()) return def;
-    try { return std::stof(it->second); } catch (...) { return def; }
+
+    const auto& value = it->second;
+    switch (value.value_case())
+    {
+    case ParameterValue::kDoubleValue:
+        return value.double_value();
+    case ParameterValue::kIntValue:
+        return static_cast<double>(value.int_value());
+    case ParameterValue::kBoolValue:
+        return value.bool_value() ? 1.0 : 0.0;
+    case ParameterValue::kStringValue:
+        try { return std::stod(value.string_value()); } catch (...) { return def; }
+    default:
+        return def;
+    }
 }
-static int GetInt(const google::protobuf::Map<std::string, std::string>& m, const std::string& key, int def)
+
+static float GetFloat(const google::protobuf::Map<std::string, ParameterValue>& m, const std::string& key, float def)
+{
+    return static_cast<float>(GetDouble(m, key, def));
+}
+
+static int GetInt(const google::protobuf::Map<std::string, ParameterValue>& m, const std::string& key, int def)
 {
     auto it = m.find(key);
     if (it == m.end()) return def;
-    try { return std::stoi(it->second); } catch (...) { return def; }
+
+    const auto& value = it->second;
+    switch (value.value_case())
+    {
+    case ParameterValue::kIntValue:
+        return static_cast<int>(value.int_value());
+    case ParameterValue::kDoubleValue:
+        return static_cast<int>(value.double_value());
+    case ParameterValue::kBoolValue:
+        return value.bool_value() ? 1 : 0;
+    case ParameterValue::kStringValue:
+        try { return std::stoi(value.string_value()); } catch (...) { return def; }
+    default:
+        return def;
+    }
 }
-static bool GetBool(const google::protobuf::Map<std::string, std::string>& m, const std::string& key, bool def)
+
+static bool GetBool(const google::protobuf::Map<std::string, ParameterValue>& m, const std::string& key, bool def)
 {
     auto it = m.find(key);
     if (it == m.end()) return def;
-    return (it->second == "true" || it->second == "True" || it->second == "1");
+
+    const auto& value = it->second;
+    switch (value.value_case())
+    {
+    case ParameterValue::kBoolValue:
+        return value.bool_value();
+    case ParameterValue::kIntValue:
+        return value.int_value() != 0;
+    case ParameterValue::kDoubleValue:
+        return value.double_value() != 0.0;
+    case ParameterValue::kStringValue:
+        return value.string_value() == "true" || value.string_value() == "True" || value.string_value() == "1";
+    default:
+        return def;
+    }
 }
-static std::string GetStr(const google::protobuf::Map<std::string, std::string>& m, const std::string& key, const std::string& def)
+
+static std::string GetStr(const google::protobuf::Map<std::string, ParameterValue>& m, const std::string& key, const std::string& def)
 {
     auto it = m.find(key);
-    return (it != m.end()) ? it->second : def;
+    if (it == m.end()) return def;
+
+    const auto& value = it->second;
+    switch (value.value_case())
+    {
+    case ParameterValue::kStringValue:
+        return value.string_value();
+    case ParameterValue::kBoolValue:
+        return value.bool_value() ? "true" : "false";
+    case ParameterValue::kIntValue:
+        return std::to_string(value.int_value());
+    case ParameterValue::kDoubleValue:
+        return std::to_string(value.double_value());
+    default:
+        return def;
+    }
 }
 
 // ── 参数模板定义辅助宏 ─────────────────────────────────
@@ -92,7 +160,16 @@ class FdmSlicerService final : public SlicerService::Service
 public:
     Status GetAvailableAlgorithms(ServerContext*, const Empty*, AlgorithmList* reply) override
     {
-        reply->add_algorithms("FDM 三轴切片");
+        auto* algorithm = reply->add_algorithms();
+        algorithm->set_algorithm_id(kFdmAlgorithmId);
+        algorithm->set_display_name(kFdmDisplayName);
+        algorithm->set_engine_id(kFdmEngineId);
+        algorithm->set_category("FDM");
+        algorithm->set_version("1.0.0");
+        algorithm->add_capabilities("slice.mesh");
+        algorithm->add_capabilities("output.gcode");
+        algorithm->add_input_kinds("mesh.triangle.float32");
+        algorithm->add_output_kinds("gcode");
         return Status::OK;
     }
 
@@ -178,7 +255,7 @@ public:
             if (clientMsg.msg_case() == SliceClientMessage::kStartRequest)
             {
                 const auto& req = clientMsg.start_request();
-                const auto& pm = req.global_parameters();
+                const auto& pm = req.parameters();
 
                 // 解析参数
                 fdm::SliceParams params;
@@ -310,7 +387,11 @@ public:
                 auto* result = resultMsg.mutable_result();
                 result->set_success(true);
                 result->set_message("切片完成");
-                result->set_gcode(gcode);
+                auto* artifact = result->add_artifacts();
+                artifact->set_kind("gcode");
+                artifact->set_mime_type("text/x-gcode");
+                artifact->set_file_name("slice_output.gcode");
+                artifact->set_data(gcode);
                 result->set_filament_used_mm(gcode.size() > 0 ? 1000.0 : 0);  // 简化估算
                 stream->Write(resultMsg);
 

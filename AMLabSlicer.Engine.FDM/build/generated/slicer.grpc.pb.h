@@ -29,19 +29,6 @@
 namespace amlabslicer {
 namespace proto {
 
-// =====================================================================
-// AMLabSlicer 切片通信协议
-// 
-// 架构:
-//   C# 前端 UI (gRPC Client)
-//       ↕ gRPC (本协议)
-//   C# EngineHost (gRPC Server 面向前端 + gRPC Client 面向引擎)
-//       ↕ gRPC (本协议，复用)
-//   C++ 三轴引擎 / C++ 五轴引擎 / ... (各自为独立 gRPC Server)
-//
-// 每个引擎进程也实现 SlicerService，EngineHost 做请求转发。
-// =====================================================================
-//
 class SlicerService final {
  public:
   static constexpr char const* service_full_name() {
@@ -50,9 +37,6 @@ class SlicerService final {
   class StubInterface {
    public:
     virtual ~StubInterface() {}
-    // 获取该服务支持的算法列表
-    // EngineHost: 汇总所有已注册引擎的名称
-    // 引擎进程:  只返回自己的算法名
     virtual ::grpc::Status GetAvailableAlgorithms(::grpc::ClientContext* context, const ::amlabslicer::proto::Empty& request, ::amlabslicer::proto::AlgorithmList* response) = 0;
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::amlabslicer::proto::AlgorithmList>> AsyncGetAvailableAlgorithms(::grpc::ClientContext* context, const ::amlabslicer::proto::Empty& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::amlabslicer::proto::AlgorithmList>>(AsyncGetAvailableAlgorithmsRaw(context, request, cq));
@@ -60,7 +44,6 @@ class SlicerService final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::amlabslicer::proto::AlgorithmList>> PrepareAsyncGetAvailableAlgorithms(::grpc::ClientContext* context, const ::amlabslicer::proto::Empty& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::amlabslicer::proto::AlgorithmList>>(PrepareAsyncGetAvailableAlgorithmsRaw(context, request, cq));
     }
-    // 获取特定算法的完整参数模板
     virtual ::grpc::Status GetAlgorithmParameters(::grpc::ClientContext* context, const ::amlabslicer::proto::AlgorithmRequest& request, ::amlabslicer::proto::ParameterTemplateList* response) = 0;
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::amlabslicer::proto::ParameterTemplateList>> AsyncGetAlgorithmParameters(::grpc::ClientContext* context, const ::amlabslicer::proto::AlgorithmRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::amlabslicer::proto::ParameterTemplateList>>(AsyncGetAlgorithmParametersRaw(context, request, cq));
@@ -68,7 +51,6 @@ class SlicerService final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::amlabslicer::proto::ParameterTemplateList>> PrepareAsyncGetAlgorithmParameters(::grpc::ClientContext* context, const ::amlabslicer::proto::AlgorithmRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::amlabslicer::proto::ParameterTemplateList>>(PrepareAsyncGetAlgorithmParametersRaw(context, request, cq));
     }
-    // 执行切片（双向流）
     std::unique_ptr< ::grpc::ClientReaderWriterInterface< ::amlabslicer::proto::SliceClientMessage, ::amlabslicer::proto::SliceServerMessage>> Slice(::grpc::ClientContext* context) {
       return std::unique_ptr< ::grpc::ClientReaderWriterInterface< ::amlabslicer::proto::SliceClientMessage, ::amlabslicer::proto::SliceServerMessage>>(SliceRaw(context));
     }
@@ -81,15 +63,10 @@ class SlicerService final {
     class async_interface {
      public:
       virtual ~async_interface() {}
-      // 获取该服务支持的算法列表
-      // EngineHost: 汇总所有已注册引擎的名称
-      // 引擎进程:  只返回自己的算法名
       virtual void GetAvailableAlgorithms(::grpc::ClientContext* context, const ::amlabslicer::proto::Empty* request, ::amlabslicer::proto::AlgorithmList* response, std::function<void(::grpc::Status)>) = 0;
       virtual void GetAvailableAlgorithms(::grpc::ClientContext* context, const ::amlabslicer::proto::Empty* request, ::amlabslicer::proto::AlgorithmList* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      // 获取特定算法的完整参数模板
       virtual void GetAlgorithmParameters(::grpc::ClientContext* context, const ::amlabslicer::proto::AlgorithmRequest* request, ::amlabslicer::proto::ParameterTemplateList* response, std::function<void(::grpc::Status)>) = 0;
       virtual void GetAlgorithmParameters(::grpc::ClientContext* context, const ::amlabslicer::proto::AlgorithmRequest* request, ::amlabslicer::proto::ParameterTemplateList* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      // 执行切片（双向流）
       virtual void Slice(::grpc::ClientContext* context, ::grpc::ClientBidiReactor< ::amlabslicer::proto::SliceClientMessage,::amlabslicer::proto::SliceServerMessage>* reactor) = 0;
     };
     typedef class async_interface experimental_async_interface;
@@ -166,13 +143,8 @@ class SlicerService final {
    public:
     Service();
     virtual ~Service();
-    // 获取该服务支持的算法列表
-    // EngineHost: 汇总所有已注册引擎的名称
-    // 引擎进程:  只返回自己的算法名
     virtual ::grpc::Status GetAvailableAlgorithms(::grpc::ServerContext* context, const ::amlabslicer::proto::Empty* request, ::amlabslicer::proto::AlgorithmList* response);
-    // 获取特定算法的完整参数模板
     virtual ::grpc::Status GetAlgorithmParameters(::grpc::ServerContext* context, const ::amlabslicer::proto::AlgorithmRequest* request, ::amlabslicer::proto::ParameterTemplateList* response);
-    // 执行切片（双向流）
     virtual ::grpc::Status Slice(::grpc::ServerContext* context, ::grpc::ServerReaderWriter< ::amlabslicer::proto::SliceServerMessage, ::amlabslicer::proto::SliceClientMessage>* stream);
   };
   template <class BaseClass>

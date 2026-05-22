@@ -4,6 +4,7 @@ using HelixToolkit.SharpDX;
 using HelixToolkit.Wpf.SharpDX;
 using System.Numerics;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using AMLabSlicer.Core.Parameters;
 using AMLabSlicer.State;
 using Grpc.Net.Client;
@@ -41,6 +42,102 @@ namespace AMLabSlicer.ViewModel
         public bool IsObjectMode => _viewportMode == ViewportMode.ObjectMode;
         public bool IsFaceMode => _viewportMode == ViewportMode.FaceMode;
 
+        private void CacheCurrentParameterValues()
+        {
+            if (string.IsNullOrEmpty(_activeParameterAlgorithmId))
+                return;
+
+            _parameterValuesByAlgorithm[_activeParameterAlgorithmId] =
+                _parameterStore.GetAllParameters().ToDictionary(p => p.Key, p => p.Value);
+        }
+
+        private static ParameterValue ToGrpcParameterValue(object? value, UIControlType controlType)
+        {
+            if (value == null)
+                return new ParameterValue { StringValue = "" };
+
+            if (controlType == UIControlType.CheckBox)
+            {
+                if (value is bool boolValue)
+                    return new ParameterValue { BoolValue = boolValue };
+
+                return new ParameterValue { BoolValue = bool.TryParse(value.ToString(), out var parsed) && parsed };
+            }
+
+            if (controlType == UIControlType.NumericBox || controlType == UIControlType.Slider)
+            {
+                if (value is int intValue)
+                    return new ParameterValue { IntValue = intValue };
+
+                if (value is long longValue)
+                    return new ParameterValue { IntValue = longValue };
+
+                if (value is double doubleValue)
+                    return new ParameterValue { DoubleValue = doubleValue };
+
+                if (value is float floatValue)
+                    return new ParameterValue { DoubleValue = floatValue };
+
+                if (double.TryParse(value.ToString(), NumberStyles.Float, CultureInfo.CurrentCulture, out var parsedDouble) ||
+                    double.TryParse(value.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out parsedDouble))
+                {
+                    return new ParameterValue { DoubleValue = parsedDouble };
+                }
+            }
+
+            return new ParameterValue { StringValue = value.ToString() ?? "" };
+        }
+
+        private static string GroupStateKey(string algorithmId, string category, string subcategory)
+            => $"{algorithmId}|{category}|{subcategory}";
+
+        private void CacheSubcategoryExpandedStates()
+        {
+            foreach (var category in ParameterCategories)
+            {
+                foreach (var subcategory in category.Subcategories)
+                {
+                    _subcategoryExpandedStates[GroupStateKey(_activeParameterAlgorithmId, category.Name, subcategory.Name)] = subcategory.IsExpanded;
+                }
+            }
+        }
+
+        private void RebuildParameterGroups(IEnumerable<SliceParameter> orderedParameters, string algorithmId)
+        {
+            CacheSubcategoryExpandedStates();
+
+            var selectedCategoryName = SelectedParameterCategory?.Name;
+            ParameterCategories.Clear();
+
+            foreach (var parameter in orderedParameters)
+            {
+                var categoryName = string.IsNullOrWhiteSpace(parameter.Category) ? "未分类" : parameter.Category;
+                var subcategoryName = string.IsNullOrWhiteSpace(parameter.Subcategory) ? "常规" : parameter.Subcategory;
+                var category = ParameterCategories.FirstOrDefault(group => group.Name == categoryName);
+
+                if (category == null)
+                {
+                    category = new ParameterCategoryGroup(categoryName);
+                    ParameterCategories.Add(category);
+                }
+
+                var expandedKey = GroupStateKey(algorithmId, categoryName, subcategoryName);
+                var isExpanded = !_subcategoryExpandedStates.TryGetValue(expandedKey, out var savedExpanded) || savedExpanded;
+                category.GetOrAddSubcategory(subcategoryName, isExpanded).Parameters.Add(parameter);
+            }
+
+            SelectedParameterCategory =
+                ParameterCategories.FirstOrDefault(group => group.Name == selectedCategoryName)
+                ?? ParameterCategories.FirstOrDefault();
+        }
+
+        [RelayCommand]
+        private void SelectParameterCategory(ParameterCategoryGroup? category)
+        {
+            if (category != null)
+                SelectedParameterCategory = category;
+        }
+
         [RelayCommand]
         private void ToggleViewportMode()
         {
@@ -60,19 +157,19 @@ namespace AMLabSlicer.ViewModel
         public ObservableCollection<OutlinerNodeViewModel> OutlinerItems { get; } = new ObservableCollection<OutlinerNodeViewModel>();
 
         // 可选切片算法集合
-        public ObservableCollection<string> SlicingAlgorithms { get; } = new ObservableCollection<string>();
+        public ObservableCollection<AlgorithmInfo> SlicingAlgorithms { get; } = new ObservableCollection<AlgorithmInfo>();
 
-        private string _selectedAlgorithm = "";
-        public string SelectedAlgorithm
+        private AlgorithmInfo? _selectedAlgorithm;
+        public AlgorithmInfo? SelectedAlgorithm
         {
             get => _selectedAlgorithm;
             set
             {
                 if (SetProperty(ref _selectedAlgorithm, value))
                 {
-                    if (!string.IsNullOrEmpty(value))
+                    if (!string.IsNullOrEmpty(value?.AlgorithmId))
                     {
-                        _ = RebuildParametersForAlgorithmAsync(value);
+                        _ = RebuildParametersForAlgorithmAsync(value.AlgorithmId);
                     }
                 }
             }
@@ -81,7 +178,24 @@ namespace AMLabSlicer.ViewModel
         // 暴露给 UI 绑定的参数集合
         public ObservableCollection<SliceParameter> Parameters { get; } = new ObservableCollection<SliceParameter>();
 
+        public ObservableCollection<ParameterCategoryGroup> ParameterCategories { get; } = new ObservableCollection<ParameterCategoryGroup>();
+
+        [ObservableProperty]
+        private ParameterCategoryGroup? _selectedParameterCategory;
+
+        partial void OnSelectedParameterCategoryChanged(ParameterCategoryGroup? oldValue, ParameterCategoryGroup? newValue)
+        {
+            if (oldValue != null)
+                oldValue.IsSelected = false;
+
+            if (newValue != null)
+                newValue.IsSelected = true;
+        }
+
         private readonly IParameterStore _parameterStore;
+        private readonly Dictionary<string, Dictionary<string, object?>> _parameterValuesByAlgorithm = new();
+        private readonly Dictionary<string, bool> _subcategoryExpandedStates = new();
+        private string _activeParameterAlgorithmId = "";
         
         public PreferencesViewModel AppPrefs { get; }
 
@@ -139,10 +253,11 @@ namespace AMLabSlicer.ViewModel
 
             try
             {
-                var response = await _grpcClient.GetAlgorithmParametersAsync(new AlgorithmRequest { AlgorithmName = algorithm });
+                CacheCurrentParameterValues();
+                var response = await _grpcClient.GetAlgorithmParametersAsync(new AlgorithmRequest { AlgorithmId = algorithm });
 
                 // 缓存旧参数用于继承
-                var oldParams = _parameterStore.GetAllParameters().ToDictionary(p => p.Key, p => p.Value);
+                _parameterValuesByAlgorithm.TryGetValue(algorithm, out var previousValues);
 
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -168,7 +283,12 @@ namespace AMLabSlicer.ViewModel
                             EnabledIf = pDef.EnabledIf
                         };
 
-                        if (oldParams.TryGetValue(pDef.Key, out var oldVal))
+                        if (param.ControlType == UIControlType.ComboBox)
+                        {
+                            param.Options = pDef.Options.ToList();
+                        }
+
+                        if (previousValues != null && previousValues.TryGetValue(pDef.Key, out var oldVal))
                         {
                             param.Value = oldVal;
                         }
@@ -195,11 +315,21 @@ namespace AMLabSlicer.ViewModel
                         _parameterStore.RegisterParameter(param);
                     }
 
+                    var orderedParameters = response.Parameters
+                        .Select(pDef => _parameterStore.GetParameterRaw(pDef.Key))
+                        .Where(p => p != null)
+                        .Cast<SliceParameter>()
+                        .ToList();
+
                     Parameters.Clear();
-                    foreach (var p in _parameterStore.GetAllParameters())
+                    foreach (var p in orderedParameters)
                     {
                         Parameters.Add(p);
                     }
+
+                    RebuildParameterGroups(orderedParameters, algorithm);
+
+                    _activeParameterAlgorithmId = algorithm;
                 });
             }
             catch (Exception ex)
@@ -219,10 +349,16 @@ namespace AMLabSlicer.ViewModel
 
             try
             {
-                var req = new SliceRequest { AlgorithmName = SelectedAlgorithm ?? "", FiveAxisConfig = new FiveAxisConfig { IsEnabled = false } };
+                var algorithmId = SelectedAlgorithm?.AlgorithmId ?? "";
+                var req = new SliceRequest
+                {
+                    AlgorithmId = algorithmId,
+                    RequestId = Guid.NewGuid().ToString("N"),
+                    FiveAxisConfig = new FiveAxisConfig { IsEnabled = false }
+                };
                 foreach (var p in _parameterStore.GetAllParameters())
                 {
-                    req.GlobalParameters[p.Key] = p.Value?.ToString() ?? "";
+                    req.Parameters[p.Key] = ToGrpcParameterValue(p.Value, p.ControlType);
                 }
 
                 // 将场景中加载的模型转化为 MeshObject
@@ -240,7 +376,14 @@ namespace AMLabSlicer.ViewModel
                         {
                             if (geometry.Positions == null || geometry.Indices == null) continue;
 
-                            var mo = new MeshObject { Id = objectId++, Name = item.Name };
+                            var mo = new MeshObject
+                            {
+                                Id = objectId++,
+                                Name = item.Name,
+                                Units = "mm",
+                                CoordinateSystem = "world",
+                                TransformApplied = true
+                            };
 
                             // 将顶点坐标变换到世界坐标系（考虑 pivot/平移等变换）
                             var worldMatrix = System.Numerics.Matrix4x4.Identity;
@@ -310,7 +453,14 @@ namespace AMLabSlicer.ViewModel
 
                                     if (dlg.ShowDialog() == true)
                                     {
-                                        File.WriteAllBytes(dlg.FileName, response.Result.Gcode.ToByteArray());
+                                        var gcodeArtifact = response.Result.Artifacts.FirstOrDefault(a => a.Kind == "gcode");
+                                        if (gcodeArtifact == null || gcodeArtifact.Data.Length == 0)
+                                        {
+                                            MessageBox.Show("切片成功，但后端没有返回 G-code artifact。", "结果缺失", MessageBoxButton.OK, MessageBoxImage.Warning);
+                                            return;
+                                        }
+
+                                        File.WriteAllBytes(dlg.FileName, gcodeArtifact.Data.ToByteArray());
                                         MessageBox.Show($"文件已保存至：\n{dlg.FileName}", "切片完成", MessageBoxButton.OK, MessageBoxImage.Information);
                                     }
                                 }

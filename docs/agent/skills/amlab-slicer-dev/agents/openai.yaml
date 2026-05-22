@@ -1,0 +1,4 @@
+interface:
+  display_name: "AMLabSlicer Dev"
+  short_description: "AMLabSlicer WPF/C++/gRPC development guidance"
+  default_prompt: "Use $amlab-slicer-dev to work on AMLabSlicer UI, OCCT, gRPC, or slicing engine tasks."

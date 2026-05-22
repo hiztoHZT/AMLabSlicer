@@ -27,58 +27,6 @@ namespace _fl = ::google::protobuf::internal::field_layout;
 namespace amlabslicer {
 namespace proto {
 
-inline constexpr SliceResult::Impl_::Impl_(
-    ::_pbi::ConstantInitialized) noexcept
-      : _cached_size_{0},
-        message_(
-            &::google::protobuf::internal::fixed_address_empty_string,
-            ::_pbi::ConstantInitialized()),
-        gcode_(
-            &::google::protobuf::internal::fixed_address_empty_string,
-            ::_pbi::ConstantInitialized()),
-        success_{false},
-        total_layers_{0},
-        estimated_time_sec_{0},
-        filament_used_mm_{0} {}
-
-template <typename>
-PROTOBUF_CONSTEXPR SliceResult::SliceResult(::_pbi::ConstantInitialized)
-#if defined(PROTOBUF_CUSTOM_VTABLE)
-    : ::google::protobuf::Message(SliceResult_class_data_.base()),
-#else   // PROTOBUF_CUSTOM_VTABLE
-    : ::google::protobuf::Message(),
-#endif  // PROTOBUF_CUSTOM_VTABLE
-      _impl_(::_pbi::ConstantInitialized()) {
-}
-struct SliceResultDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR SliceResultDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
-  ~SliceResultDefaultTypeInternal() {}
-  union {
-    SliceResult _instance;
-  };
-};
-
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
-    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 SliceResultDefaultTypeInternal _SliceResult_default_instance_;
-template <typename>
-PROTOBUF_CONSTEXPR SliceRequest_GlobalParametersEntry_DoNotUse::SliceRequest_GlobalParametersEntry_DoNotUse(::_pbi::ConstantInitialized)
-#if defined(PROTOBUF_CUSTOM_VTABLE)
-    : SliceRequest_GlobalParametersEntry_DoNotUse::MapEntry(SliceRequest_GlobalParametersEntry_DoNotUse_class_data_.base()){}
-#else   // PROTOBUF_CUSTOM_VTABLE
-    : SliceRequest_GlobalParametersEntry_DoNotUse::MapEntry() {
-}
-#endif  // PROTOBUF_CUSTOM_VTABLE
-struct SliceRequest_GlobalParametersEntry_DoNotUseDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR SliceRequest_GlobalParametersEntry_DoNotUseDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
-  ~SliceRequest_GlobalParametersEntry_DoNotUseDefaultTypeInternal() {}
-  union {
-    SliceRequest_GlobalParametersEntry_DoNotUse _instance;
-  };
-};
-
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
-    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 SliceRequest_GlobalParametersEntry_DoNotUseDefaultTypeInternal _SliceRequest_GlobalParametersEntry_DoNotUse_default_instance_;
-
 inline constexpr SliceProgress::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
@@ -106,6 +54,32 @@ struct SliceProgressDefaultTypeInternal {
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 SliceProgressDefaultTypeInternal _SliceProgress_default_instance_;
+
+inline constexpr ParameterValue::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : value_{},
+        _cached_size_{0},
+        _oneof_case_{} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR ParameterValue::ParameterValue(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(ParameterValue_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct ParameterValueDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ParameterValueDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ParameterValueDefaultTypeInternal() {}
+  union {
+    ParameterValue _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ParameterValueDefaultTypeInternal _ParameterValue_default_instance_;
 
 inline constexpr ParameterTemplate::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
@@ -165,24 +139,6 @@ struct ParameterTemplateDefaultTypeInternal {
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ParameterTemplateDefaultTypeInternal _ParameterTemplate_default_instance_;
-template <typename>
-PROTOBUF_CONSTEXPR MeshObject_OverrideParametersEntry_DoNotUse::MeshObject_OverrideParametersEntry_DoNotUse(::_pbi::ConstantInitialized)
-#if defined(PROTOBUF_CUSTOM_VTABLE)
-    : MeshObject_OverrideParametersEntry_DoNotUse::MapEntry(MeshObject_OverrideParametersEntry_DoNotUse_class_data_.base()){}
-#else   // PROTOBUF_CUSTOM_VTABLE
-    : MeshObject_OverrideParametersEntry_DoNotUse::MapEntry() {
-}
-#endif  // PROTOBUF_CUSTOM_VTABLE
-struct MeshObject_OverrideParametersEntry_DoNotUseDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR MeshObject_OverrideParametersEntry_DoNotUseDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
-  ~MeshObject_OverrideParametersEntry_DoNotUseDefaultTypeInternal() {}
-  union {
-    MeshObject_OverrideParametersEntry_DoNotUse _instance;
-  };
-};
-
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
-    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 MeshObject_OverrideParametersEntry_DoNotUseDefaultTypeInternal _MeshObject_OverrideParametersEntry_DoNotUse_default_instance_;
 
 inline constexpr LogMessage::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
@@ -216,6 +172,18 @@ inline constexpr LayerPreview::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
         path_data_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        encoding_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        coordinate_space_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        units_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        schema_version_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
         layer_id_{0},
@@ -272,6 +240,24 @@ struct FiveAxisConfigDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 FiveAxisConfigDefaultTypeInternal _FiveAxisConfig_default_instance_;
 template <typename>
+PROTOBUF_CONSTEXPR ErrorInfo_DetailsEntry_DoNotUse::ErrorInfo_DetailsEntry_DoNotUse(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ErrorInfo_DetailsEntry_DoNotUse::MapEntry(ErrorInfo_DetailsEntry_DoNotUse_class_data_.base()){}
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ErrorInfo_DetailsEntry_DoNotUse::MapEntry() {
+}
+#endif  // PROTOBUF_CUSTOM_VTABLE
+struct ErrorInfo_DetailsEntry_DoNotUseDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ErrorInfo_DetailsEntry_DoNotUseDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ErrorInfo_DetailsEntry_DoNotUseDefaultTypeInternal() {}
+  union {
+    ErrorInfo_DetailsEntry_DoNotUse _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ErrorInfo_DetailsEntry_DoNotUseDefaultTypeInternal _ErrorInfo_DetailsEntry_DoNotUse_default_instance_;
+template <typename>
 PROTOBUF_CONSTEXPR Empty::Empty(::_pbi::ConstantInitialized)
 #if defined(PROTOBUF_CUSTOM_VTABLE)
     : ::google::protobuf::internal::ZeroFieldsBase(Empty_class_data_.base()){}
@@ -289,11 +275,29 @@ struct EmptyDefaultTypeInternal {
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 EmptyDefaultTypeInternal _Empty_default_instance_;
+template <typename>
+PROTOBUF_CONSTEXPR Artifact_MetadataEntry_DoNotUse::Artifact_MetadataEntry_DoNotUse(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : Artifact_MetadataEntry_DoNotUse::MapEntry(Artifact_MetadataEntry_DoNotUse_class_data_.base()){}
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : Artifact_MetadataEntry_DoNotUse::MapEntry() {
+}
+#endif  // PROTOBUF_CUSTOM_VTABLE
+struct Artifact_MetadataEntry_DoNotUseDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR Artifact_MetadataEntry_DoNotUseDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~Artifact_MetadataEntry_DoNotUseDefaultTypeInternal() {}
+  union {
+    Artifact_MetadataEntry_DoNotUse _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 Artifact_MetadataEntry_DoNotUseDefaultTypeInternal _Artifact_MetadataEntry_DoNotUse_default_instance_;
 
 inline constexpr AlgorithmRequest::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
-        algorithm_name_(
+        algorithm_id_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()) {}
 
@@ -316,6 +320,178 @@ struct AlgorithmRequestDefaultTypeInternal {
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 AlgorithmRequestDefaultTypeInternal _AlgorithmRequest_default_instance_;
+
+inline constexpr AlgorithmInfo::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        capabilities_{},
+        input_kinds_{},
+        output_kinds_{},
+        algorithm_id_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        display_name_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        engine_id_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        category_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        version_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()) {}
+
+template <typename>
+PROTOBUF_CONSTEXPR AlgorithmInfo::AlgorithmInfo(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(AlgorithmInfo_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct AlgorithmInfoDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR AlgorithmInfoDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~AlgorithmInfoDefaultTypeInternal() {}
+  union {
+    AlgorithmInfo _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 AlgorithmInfoDefaultTypeInternal _AlgorithmInfo_default_instance_;
+template <typename>
+PROTOBUF_CONSTEXPR SliceRequest_ParametersEntry_DoNotUse::SliceRequest_ParametersEntry_DoNotUse(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : SliceRequest_ParametersEntry_DoNotUse::MapEntry(SliceRequest_ParametersEntry_DoNotUse_class_data_.base()){}
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : SliceRequest_ParametersEntry_DoNotUse::MapEntry() {
+}
+#endif  // PROTOBUF_CUSTOM_VTABLE
+struct SliceRequest_ParametersEntry_DoNotUseDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR SliceRequest_ParametersEntry_DoNotUseDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~SliceRequest_ParametersEntry_DoNotUseDefaultTypeInternal() {}
+  union {
+    SliceRequest_ParametersEntry_DoNotUse _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 SliceRequest_ParametersEntry_DoNotUseDefaultTypeInternal _SliceRequest_ParametersEntry_DoNotUse_default_instance_;
+
+inline constexpr ParameterTemplateList::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        parameters_{} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR ParameterTemplateList::ParameterTemplateList(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(ParameterTemplateList_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct ParameterTemplateListDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ParameterTemplateListDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ParameterTemplateListDefaultTypeInternal() {}
+  union {
+    ParameterTemplateList _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ParameterTemplateListDefaultTypeInternal _ParameterTemplateList_default_instance_;
+template <typename>
+PROTOBUF_CONSTEXPR MeshObject_OverrideParametersEntry_DoNotUse::MeshObject_OverrideParametersEntry_DoNotUse(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : MeshObject_OverrideParametersEntry_DoNotUse::MapEntry(MeshObject_OverrideParametersEntry_DoNotUse_class_data_.base()){}
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : MeshObject_OverrideParametersEntry_DoNotUse::MapEntry() {
+}
+#endif  // PROTOBUF_CUSTOM_VTABLE
+struct MeshObject_OverrideParametersEntry_DoNotUseDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR MeshObject_OverrideParametersEntry_DoNotUseDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~MeshObject_OverrideParametersEntry_DoNotUseDefaultTypeInternal() {}
+  union {
+    MeshObject_OverrideParametersEntry_DoNotUse _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 MeshObject_OverrideParametersEntry_DoNotUseDefaultTypeInternal _MeshObject_OverrideParametersEntry_DoNotUse_default_instance_;
+
+inline constexpr ErrorInfo::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        code_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        message_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        recoverable_{false},
+        details_{} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR ErrorInfo::ErrorInfo(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(ErrorInfo_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct ErrorInfoDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ErrorInfoDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ErrorInfoDefaultTypeInternal() {}
+  union {
+    ErrorInfo _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ErrorInfoDefaultTypeInternal _ErrorInfo_default_instance_;
+
+inline constexpr Artifact::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        kind_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        mime_type_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        file_name_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        data_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        metadata_{} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR Artifact::Artifact(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(Artifact_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct ArtifactDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ArtifactDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ArtifactDefaultTypeInternal() {}
+  union {
+    Artifact _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ArtifactDefaultTypeInternal _Artifact_default_instance_;
 
 inline constexpr AlgorithmList::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
@@ -341,6 +517,85 @@ struct AlgorithmListDefaultTypeInternal {
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 AlgorithmListDefaultTypeInternal _AlgorithmList_default_instance_;
+
+inline constexpr SliceResult::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        artifacts_{},
+        message_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        error_{nullptr},
+        success_{false},
+        total_layers_{0},
+        estimated_time_sec_{0},
+        filament_used_mm_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR SliceResult::SliceResult(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(SliceResult_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct SliceResultDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR SliceResultDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~SliceResultDefaultTypeInternal() {}
+  union {
+    SliceResult _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 SliceResultDefaultTypeInternal _SliceResult_default_instance_;
+
+inline constexpr MeshObject::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        transform_matrix_{},
+        name_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        vertices_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        normals_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        indices_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        units_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        coordinate_system_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        id_{::int64_t{0}},
+        transform_applied_{false},
+        override_parameters_{} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR MeshObject::MeshObject(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(MeshObject_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct MeshObjectDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR MeshObjectDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~MeshObjectDefaultTypeInternal() {}
+  union {
+    MeshObject _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 MeshObjectDefaultTypeInternal _MeshObject_default_instance_;
 
 inline constexpr SliceServerMessage::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
@@ -368,79 +623,18 @@ struct SliceServerMessageDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 SliceServerMessageDefaultTypeInternal _SliceServerMessage_default_instance_;
 
-inline constexpr ParameterTemplateList::Impl_::Impl_(
-    ::_pbi::ConstantInitialized) noexcept
-      : _cached_size_{0},
-        parameters_{} {}
-
-template <typename>
-PROTOBUF_CONSTEXPR ParameterTemplateList::ParameterTemplateList(::_pbi::ConstantInitialized)
-#if defined(PROTOBUF_CUSTOM_VTABLE)
-    : ::google::protobuf::Message(ParameterTemplateList_class_data_.base()),
-#else   // PROTOBUF_CUSTOM_VTABLE
-    : ::google::protobuf::Message(),
-#endif  // PROTOBUF_CUSTOM_VTABLE
-      _impl_(::_pbi::ConstantInitialized()) {
-}
-struct ParameterTemplateListDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR ParameterTemplateListDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
-  ~ParameterTemplateListDefaultTypeInternal() {}
-  union {
-    ParameterTemplateList _instance;
-  };
-};
-
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
-    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ParameterTemplateListDefaultTypeInternal _ParameterTemplateList_default_instance_;
-
-inline constexpr MeshObject::Impl_::Impl_(
-    ::_pbi::ConstantInitialized) noexcept
-      : _cached_size_{0},
-        transform_matrix_{},
-        name_(
-            &::google::protobuf::internal::fixed_address_empty_string,
-            ::_pbi::ConstantInitialized()),
-        vertices_(
-            &::google::protobuf::internal::fixed_address_empty_string,
-            ::_pbi::ConstantInitialized()),
-        normals_(
-            &::google::protobuf::internal::fixed_address_empty_string,
-            ::_pbi::ConstantInitialized()),
-        indices_(
-            &::google::protobuf::internal::fixed_address_empty_string,
-            ::_pbi::ConstantInitialized()),
-        id_{::int64_t{0}},
-        override_parameters_{} {}
-
-template <typename>
-PROTOBUF_CONSTEXPR MeshObject::MeshObject(::_pbi::ConstantInitialized)
-#if defined(PROTOBUF_CUSTOM_VTABLE)
-    : ::google::protobuf::Message(MeshObject_class_data_.base()),
-#else   // PROTOBUF_CUSTOM_VTABLE
-    : ::google::protobuf::Message(),
-#endif  // PROTOBUF_CUSTOM_VTABLE
-      _impl_(::_pbi::ConstantInitialized()) {
-}
-struct MeshObjectDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR MeshObjectDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
-  ~MeshObjectDefaultTypeInternal() {}
-  union {
-    MeshObject _instance;
-  };
-};
-
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
-    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 MeshObjectDefaultTypeInternal _MeshObject_default_instance_;
-
 inline constexpr SliceRequest::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
         objects_{},
-        algorithm_name_(
+        algorithm_id_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        request_id_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
         five_axis_config_{nullptr},
-        global_parameters_{} {}
+        parameters_{} {}
 
 template <typename>
 PROTOBUF_CONSTEXPR SliceRequest::SliceRequest(::_pbi::ConstantInitialized)
@@ -498,6 +692,25 @@ const ::uint32_t
         protodesc_cold) = {
         0x000, // bitmap
         0x081, // bitmap
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::AlgorithmInfo, _impl_._has_bits_),
+        11, // hasbit index offset
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::AlgorithmInfo, _impl_.algorithm_id_),
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::AlgorithmInfo, _impl_.display_name_),
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::AlgorithmInfo, _impl_.engine_id_),
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::AlgorithmInfo, _impl_.category_),
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::AlgorithmInfo, _impl_.version_),
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::AlgorithmInfo, _impl_.capabilities_),
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::AlgorithmInfo, _impl_.input_kinds_),
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::AlgorithmInfo, _impl_.output_kinds_),
+        3,
+        4,
+        5,
+        6,
+        7,
+        0,
+        1,
+        2,
+        0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::AlgorithmList, _impl_._has_bits_),
         4, // hasbit index offset
         PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::AlgorithmList, _impl_.algorithms_),
@@ -505,7 +718,7 @@ const ::uint32_t
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::AlgorithmRequest, _impl_._has_bits_),
         4, // hasbit index offset
-        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::AlgorithmRequest, _impl_.algorithm_name_),
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::AlgorithmRequest, _impl_.algorithm_id_),
         0,
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::ParameterTemplate, _impl_._has_bits_),
@@ -549,6 +762,13 @@ const ::uint32_t
         4, // hasbit index offset
         PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::ParameterTemplateList, _impl_.parameters_),
         0,
+        0x004, // bitmap
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::ParameterValue, _impl_._oneof_case_[0]),
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::ParameterValue, _impl_.value_),
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::ParameterValue, _impl_.value_),
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::ParameterValue, _impl_.value_),
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::ParameterValue, _impl_.value_),
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::ParameterValue, _impl_.value_),
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::MeshObject_OverrideParametersEntry_DoNotUse, _impl_._has_bits_),
         5, // hasbit index offset
@@ -558,7 +778,7 @@ const ::uint32_t
         1,
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::MeshObject, _impl_._has_bits_),
-        10, // hasbit index offset
+        13, // hasbit index offset
         PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::MeshObject, _impl_.id_),
         PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::MeshObject, _impl_.name_),
         PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::MeshObject, _impl_.vertices_),
@@ -566,13 +786,19 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::MeshObject, _impl_.indices_),
         PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::MeshObject, _impl_.override_parameters_),
         PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::MeshObject, _impl_.transform_matrix_),
-        5,
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::MeshObject, _impl_.units_),
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::MeshObject, _impl_.coordinate_system_),
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::MeshObject, _impl_.transform_applied_),
+        7,
         1,
         2,
         3,
         4,
-        6,
+        9,
         0,
+        5,
+        6,
+        8,
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::FiveAxisConfig, _impl_._has_bits_),
         8, // hasbit index offset
@@ -587,22 +813,24 @@ const ::uint32_t
         2,
         3,
         0x081, // bitmap
-        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::SliceRequest_GlobalParametersEntry_DoNotUse, _impl_._has_bits_),
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::SliceRequest_ParametersEntry_DoNotUse, _impl_._has_bits_),
         5, // hasbit index offset
-        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::SliceRequest_GlobalParametersEntry_DoNotUse, _impl_.key_),
-        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::SliceRequest_GlobalParametersEntry_DoNotUse, _impl_.value_),
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::SliceRequest_ParametersEntry_DoNotUse, _impl_.key_),
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::SliceRequest_ParametersEntry_DoNotUse, _impl_.value_),
         0,
         1,
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::SliceRequest, _impl_._has_bits_),
-        7, // hasbit index offset
-        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::SliceRequest, _impl_.algorithm_name_),
-        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::SliceRequest, _impl_.global_parameters_),
+        8, // hasbit index offset
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::SliceRequest, _impl_.algorithm_id_),
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::SliceRequest, _impl_.parameters_),
         PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::SliceRequest, _impl_.objects_),
         PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::SliceRequest, _impl_.five_axis_config_),
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::SliceRequest, _impl_.request_id_),
         1,
-        3,
+        4,
         0,
+        3,
         2,
         0x004, // bitmap
         PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::SliceClientMessage, _impl_._oneof_case_[0]),
@@ -625,28 +853,76 @@ const ::uint32_t
         0,
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::LayerPreview, _impl_._has_bits_),
-        6, // hasbit index offset
+        10, // hasbit index offset
         PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::LayerPreview, _impl_.layer_id_),
         PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::LayerPreview, _impl_.z_height_),
         PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::LayerPreview, _impl_.path_data_),
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::LayerPreview, _impl_.encoding_),
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::LayerPreview, _impl_.coordinate_space_),
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::LayerPreview, _impl_.units_),
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::LayerPreview, _impl_.schema_version_),
+        5,
+        6,
+        0,
         1,
         2,
+        3,
+        4,
+        0x081, // bitmap
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::Artifact_MetadataEntry_DoNotUse, _impl_._has_bits_),
+        5, // hasbit index offset
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::Artifact_MetadataEntry_DoNotUse, _impl_.key_),
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::Artifact_MetadataEntry_DoNotUse, _impl_.value_),
         0,
+        1,
+        0x081, // bitmap
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::Artifact, _impl_._has_bits_),
+        8, // hasbit index offset
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::Artifact, _impl_.kind_),
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::Artifact, _impl_.mime_type_),
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::Artifact, _impl_.file_name_),
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::Artifact, _impl_.data_),
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::Artifact, _impl_.metadata_),
+        0,
+        1,
+        2,
+        3,
+        4,
+        0x081, // bitmap
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::ErrorInfo_DetailsEntry_DoNotUse, _impl_._has_bits_),
+        5, // hasbit index offset
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::ErrorInfo_DetailsEntry_DoNotUse, _impl_.key_),
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::ErrorInfo_DetailsEntry_DoNotUse, _impl_.value_),
+        0,
+        1,
+        0x081, // bitmap
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::ErrorInfo, _impl_._has_bits_),
+        7, // hasbit index offset
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::ErrorInfo, _impl_.code_),
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::ErrorInfo, _impl_.message_),
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::ErrorInfo, _impl_.recoverable_),
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::ErrorInfo, _impl_.details_),
+        0,
+        1,
+        2,
+        3,
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::SliceResult, _impl_._has_bits_),
-        9, // hasbit index offset
+        10, // hasbit index offset
         PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::SliceResult, _impl_.success_),
         PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::SliceResult, _impl_.message_),
-        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::SliceResult, _impl_.gcode_),
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::SliceResult, _impl_.artifacts_),
         PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::SliceResult, _impl_.total_layers_),
         PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::SliceResult, _impl_.estimated_time_sec_),
         PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::SliceResult, _impl_.filament_used_mm_),
-        2,
-        0,
-        1,
+        PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::SliceResult, _impl_.error_),
         3,
+        1,
+        0,
         4,
         5,
+        6,
+        2,
         0x004, // bitmap
         PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::SliceServerMessage, _impl_._oneof_case_[0]),
         PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::SliceServerMessage, _impl_.msg_),
@@ -659,119 +935,156 @@ const ::uint32_t
 static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
         {0, sizeof(::amlabslicer::proto::Empty)},
-        {1, sizeof(::amlabslicer::proto::AlgorithmList)},
-        {6, sizeof(::amlabslicer::proto::AlgorithmRequest)},
-        {11, sizeof(::amlabslicer::proto::ParameterTemplate)},
-        {48, sizeof(::amlabslicer::proto::ParameterTemplateList)},
-        {53, sizeof(::amlabslicer::proto::MeshObject_OverrideParametersEntry_DoNotUse)},
-        {60, sizeof(::amlabslicer::proto::MeshObject)},
-        {77, sizeof(::amlabslicer::proto::FiveAxisConfig)},
-        {90, sizeof(::amlabslicer::proto::SliceRequest_GlobalParametersEntry_DoNotUse)},
-        {97, sizeof(::amlabslicer::proto::SliceRequest)},
-        {108, sizeof(::amlabslicer::proto::SliceClientMessage)},
-        {113, sizeof(::amlabslicer::proto::SliceProgress)},
-        {120, sizeof(::amlabslicer::proto::LogMessage)},
-        {127, sizeof(::amlabslicer::proto::LayerPreview)},
-        {136, sizeof(::amlabslicer::proto::SliceResult)},
-        {151, sizeof(::amlabslicer::proto::SliceServerMessage)},
+        {1, sizeof(::amlabslicer::proto::AlgorithmInfo)},
+        {20, sizeof(::amlabslicer::proto::AlgorithmList)},
+        {25, sizeof(::amlabslicer::proto::AlgorithmRequest)},
+        {30, sizeof(::amlabslicer::proto::ParameterTemplate)},
+        {67, sizeof(::amlabslicer::proto::ParameterTemplateList)},
+        {72, sizeof(::amlabslicer::proto::ParameterValue)},
+        {79, sizeof(::amlabslicer::proto::MeshObject_OverrideParametersEntry_DoNotUse)},
+        {86, sizeof(::amlabslicer::proto::MeshObject)},
+        {109, sizeof(::amlabslicer::proto::FiveAxisConfig)},
+        {122, sizeof(::amlabslicer::proto::SliceRequest_ParametersEntry_DoNotUse)},
+        {129, sizeof(::amlabslicer::proto::SliceRequest)},
+        {142, sizeof(::amlabslicer::proto::SliceClientMessage)},
+        {147, sizeof(::amlabslicer::proto::SliceProgress)},
+        {154, sizeof(::amlabslicer::proto::LogMessage)},
+        {161, sizeof(::amlabslicer::proto::LayerPreview)},
+        {178, sizeof(::amlabslicer::proto::Artifact_MetadataEntry_DoNotUse)},
+        {185, sizeof(::amlabslicer::proto::Artifact)},
+        {198, sizeof(::amlabslicer::proto::ErrorInfo_DetailsEntry_DoNotUse)},
+        {205, sizeof(::amlabslicer::proto::ErrorInfo)},
+        {216, sizeof(::amlabslicer::proto::SliceResult)},
+        {233, sizeof(::amlabslicer::proto::SliceServerMessage)},
 };
 static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
     &::amlabslicer::proto::_Empty_default_instance_._instance,
+    &::amlabslicer::proto::_AlgorithmInfo_default_instance_._instance,
     &::amlabslicer::proto::_AlgorithmList_default_instance_._instance,
     &::amlabslicer::proto::_AlgorithmRequest_default_instance_._instance,
     &::amlabslicer::proto::_ParameterTemplate_default_instance_._instance,
     &::amlabslicer::proto::_ParameterTemplateList_default_instance_._instance,
+    &::amlabslicer::proto::_ParameterValue_default_instance_._instance,
     &::amlabslicer::proto::_MeshObject_OverrideParametersEntry_DoNotUse_default_instance_._instance,
     &::amlabslicer::proto::_MeshObject_default_instance_._instance,
     &::amlabslicer::proto::_FiveAxisConfig_default_instance_._instance,
-    &::amlabslicer::proto::_SliceRequest_GlobalParametersEntry_DoNotUse_default_instance_._instance,
+    &::amlabslicer::proto::_SliceRequest_ParametersEntry_DoNotUse_default_instance_._instance,
     &::amlabslicer::proto::_SliceRequest_default_instance_._instance,
     &::amlabslicer::proto::_SliceClientMessage_default_instance_._instance,
     &::amlabslicer::proto::_SliceProgress_default_instance_._instance,
     &::amlabslicer::proto::_LogMessage_default_instance_._instance,
     &::amlabslicer::proto::_LayerPreview_default_instance_._instance,
+    &::amlabslicer::proto::_Artifact_MetadataEntry_DoNotUse_default_instance_._instance,
+    &::amlabslicer::proto::_Artifact_default_instance_._instance,
+    &::amlabslicer::proto::_ErrorInfo_DetailsEntry_DoNotUse_default_instance_._instance,
+    &::amlabslicer::proto::_ErrorInfo_default_instance_._instance,
     &::amlabslicer::proto::_SliceResult_default_instance_._instance,
     &::amlabslicer::proto::_SliceServerMessage_default_instance_._instance,
 };
 const char descriptor_table_protodef_slicer_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n\014slicer.proto\022\021amlabslicer.proto\"\007\n\005Emp"
-    "ty\"#\n\rAlgorithmList\022\022\n\nalgorithms\030\001 \003(\t\""
-    "*\n\020AlgorithmRequest\022\026\n\016algorithm_name\030\001 "
-    "\001(\t\"\220\003\n\021ParameterTemplate\022\013\n\003key\030\001 \001(\t\022\024"
-    "\n\014display_name\030\002 \001(\t\022\020\n\010category\030\003 \001(\t\022\023"
-    "\n\013subcategory\030\004 \001(\t\022\r\n\005order\030\005 \001(\005\0220\n\nva"
-    "lue_type\030\006 \001(\0162\034.amlabslicer.proto.Value"
-    "Type\0224\n\014control_type\030\007 \001(\0162\036.amlabslicer"
-    ".proto.ControlType\022\025\n\rdefault_value\030\010 \001("
-    "\t\022\021\n\tmin_value\030\t \001(\001\022\021\n\tmax_value\030\n \001(\001\022"
-    "\014\n\004step\030\013 \001(\001\022\017\n\007options\030\014 \003(\t\022\014\n\004unit\030\r"
-    " \001(\t\022\023\n\013description\030\016 \001(\t\022\023\n\013is_advanced"
-    "\030\017 \001(\010\022\022\n\nvisible_if\030\020 \001(\t\022\022\n\nenabled_if"
-    "\030\021 \001(\t\"Q\n\025ParameterTemplateList\0228\n\nparam"
-    "eters\030\001 \003(\0132$.amlabslicer.proto.Paramete"
-    "rTemplate\"\203\002\n\nMeshObject\022\n\n\002id\030\001 \001(\003\022\014\n\004"
-    "name\030\002 \001(\t\022\020\n\010vertices\030\003 \001(\014\022\017\n\007normals\030"
-    "\004 \001(\014\022\017\n\007indices\030\005 \001(\014\022R\n\023override_param"
-    "eters\030\006 \003(\01325.amlabslicer.proto.MeshObje"
-    "ct.OverrideParametersEntry\022\030\n\020transform_"
-    "matrix\030\007 \003(\002\0329\n\027OverrideParametersEntry\022"
-    "\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"p\n\016FiveA"
-    "xisConfig\022\022\n\nis_enabled\030\001 \001(\010\022\027\n\017kinemat"
-    "ics_type\030\002 \001(\t\022\017\n\007pivot_x\030\003 \001(\001\022\017\n\007pivot"
-    "_y\030\004 \001(\001\022\017\n\007pivot_z\030\005 \001(\001\"\236\002\n\014SliceReque"
-    "st\022\026\n\016algorithm_name\030\001 \001(\t\022P\n\021global_par"
-    "ameters\030\002 \003(\01325.amlabslicer.proto.SliceR"
-    "equest.GlobalParametersEntry\022.\n\007objects\030"
-    "\003 \003(\0132\035.amlabslicer.proto.MeshObject\022;\n\020"
-    "five_axis_config\030\004 \001(\0132!.amlabslicer.pro"
-    "to.FiveAxisConfig\0327\n\025GlobalParametersEnt"
-    "ry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"o\n\022Sl"
-    "iceClientMessage\0228\n\rstart_request\030\001 \001(\0132"
-    "\037.amlabslicer.proto.SliceRequestH\000\022\030\n\016ca"
-    "ncel_request\030\002 \001(\010H\000B\005\n\003msg\"8\n\rSliceProg"
-    "ress\022\020\n\010progress\030\001 \001(\002\022\025\n\rcurrent_stage\030"
-    "\002 \001(\t\"\212\001\n\nLogMessage\0225\n\005level\030\001 \001(\0162&.am"
-    "labslicer.proto.LogMessage.LogLevel\022\014\n\004t"
-    "ext\030\002 \001(\t\"7\n\010LogLevel\022\010\n\004INFO\020\000\022\013\n\007WARNI"
-    "NG\020\001\022\t\n\005ERROR\020\002\022\t\n\005DEBUG\020\003\"E\n\014LayerPrevi"
-    "ew\022\020\n\010layer_id\030\001 \001(\005\022\020\n\010z_height\030\002 \001(\002\022\021"
-    "\n\tpath_data\030\003 \001(\014\"\212\001\n\013SliceResult\022\017\n\007suc"
-    "cess\030\001 \001(\010\022\017\n\007message\030\002 \001(\t\022\r\n\005gcode\030\003 \001"
-    "(\014\022\024\n\014total_layers\030\004 \001(\005\022\032\n\022estimated_ti"
-    "me_sec\030\005 \001(\001\022\030\n\020filament_used_mm\030\006 \001(\001\"\353"
-    "\001\n\022SliceServerMessage\0224\n\010progress\030\001 \001(\0132"
-    " .amlabslicer.proto.SliceProgressH\000\022,\n\003l"
-    "og\030\002 \001(\0132\035.amlabslicer.proto.LogMessageH"
-    "\000\0228\n\rlayer_preview\030\003 \001(\0132\037.amlabslicer.p"
-    "roto.LayerPreviewH\000\0220\n\006result\030\004 \001(\0132\036.am"
-    "labslicer.proto.SliceResultH\000B\005\n\003msg*N\n\t"
-    "ValueType\022\013\n\007VT_BOOL\020\000\022\n\n\006VT_INT\020\001\022\014\n\010VT"
-    "_FLOAT\020\002\022\r\n\tVT_STRING\020\003\022\013\n\007VT_ENUM\020\004*|\n\013"
-    "ControlType\022\r\n\tCHECK_BOX\020\000\022\017\n\013NUMERIC_BO"
-    "X\020\001\022\n\n\006SLIDER\020\002\022\r\n\tCOMBO_BOX\020\003\022\014\n\010TEXT_B"
-    "OX\020\004\022\023\n\017OBJECT_SELECTOR\020\005\022\017\n\013FILE_PICKER"
-    "\020\0062\251\002\n\rSlicerService\022T\n\026GetAvailableAlgo"
-    "rithms\022\030.amlabslicer.proto.Empty\032 .amlab"
-    "slicer.proto.AlgorithmList\022g\n\026GetAlgorit"
-    "hmParameters\022#.amlabslicer.proto.Algorit"
-    "hmRequest\032(.amlabslicer.proto.ParameterT"
-    "emplateList\022Y\n\005Slice\022%.amlabslicer.proto"
-    ".SliceClientMessage\032%.amlabslicer.proto."
-    "SliceServerMessage(\0010\001B\023\252\002\020AMLabSlicer.G"
-    "rpcb\006proto3"
+    "ty\"\262\001\n\rAlgorithmInfo\022\024\n\014algorithm_id\030\001 \001"
+    "(\t\022\024\n\014display_name\030\002 \001(\t\022\021\n\tengine_id\030\003 "
+    "\001(\t\022\020\n\010category\030\004 \001(\t\022\017\n\007version\030\005 \001(\t\022\024"
+    "\n\014capabilities\030\006 \003(\t\022\023\n\013input_kinds\030\007 \003("
+    "\t\022\024\n\014output_kinds\030\010 \003(\t\"E\n\rAlgorithmList"
+    "\0224\n\nalgorithms\030\001 \003(\0132 .amlabslicer.proto"
+    ".AlgorithmInfo\"(\n\020AlgorithmRequest\022\024\n\014al"
+    "gorithm_id\030\001 \001(\t\"\220\003\n\021ParameterTemplate\022\013"
+    "\n\003key\030\001 \001(\t\022\024\n\014display_name\030\002 \001(\t\022\020\n\010cat"
+    "egory\030\003 \001(\t\022\023\n\013subcategory\030\004 \001(\t\022\r\n\005orde"
+    "r\030\005 \001(\005\0220\n\nvalue_type\030\006 \001(\0162\034.amlabslice"
+    "r.proto.ValueType\0224\n\014control_type\030\007 \001(\0162"
+    "\036.amlabslicer.proto.ControlType\022\025\n\rdefau"
+    "lt_value\030\010 \001(\t\022\021\n\tmin_value\030\t \001(\001\022\021\n\tmax"
+    "_value\030\n \001(\001\022\014\n\004step\030\013 \001(\001\022\017\n\007options\030\014 "
+    "\003(\t\022\014\n\004unit\030\r \001(\t\022\023\n\013description\030\016 \001(\t\022\023"
+    "\n\013is_advanced\030\017 \001(\010\022\022\n\nvisible_if\030\020 \001(\t\022"
+    "\022\n\nenabled_if\030\021 \001(\t\"Q\n\025ParameterTemplate"
+    "List\0228\n\nparameters\030\001 \003(\0132$.amlabslicer.p"
+    "roto.ParameterTemplate\"t\n\016ParameterValue"
+    "\022\024\n\nbool_value\030\001 \001(\010H\000\022\023\n\tint_value\030\002 \001("
+    "\003H\000\022\026\n\014double_value\030\003 \001(\001H\000\022\026\n\014string_va"
+    "lue\030\004 \001(\tH\000B\007\n\005value\"\353\002\n\nMeshObject\022\n\n\002i"
+    "d\030\001 \001(\003\022\014\n\004name\030\002 \001(\t\022\020\n\010vertices\030\003 \001(\014\022"
+    "\017\n\007normals\030\004 \001(\014\022\017\n\007indices\030\005 \001(\014\022R\n\023ove"
+    "rride_parameters\030\006 \003(\01325.amlabslicer.pro"
+    "to.MeshObject.OverrideParametersEntry\022\030\n"
+    "\020transform_matrix\030\007 \003(\002\022\r\n\005units\030\010 \001(\t\022\031"
+    "\n\021coordinate_system\030\t \001(\t\022\031\n\021transform_a"
+    "pplied\030\n \001(\010\032\\\n\027OverrideParametersEntry\022"
+    "\013\n\003key\030\001 \001(\t\0220\n\005value\030\002 \001(\0132!.amlabslice"
+    "r.proto.ParameterValue:\0028\001\"p\n\016FiveAxisCo"
+    "nfig\022\022\n\nis_enabled\030\001 \001(\010\022\027\n\017kinematics_t"
+    "ype\030\002 \001(\t\022\017\n\007pivot_x\030\003 \001(\001\022\017\n\007pivot_y\030\004 "
+    "\001(\001\022\017\n\007pivot_z\030\005 \001(\001\"\300\002\n\014SliceRequest\022\024\n"
+    "\014algorithm_id\030\001 \001(\t\022C\n\nparameters\030\002 \003(\0132"
+    "/.amlabslicer.proto.SliceRequest.Paramet"
+    "ersEntry\022.\n\007objects\030\003 \003(\0132\035.amlabslicer."
+    "proto.MeshObject\022;\n\020five_axis_config\030\004 \001"
+    "(\0132!.amlabslicer.proto.FiveAxisConfig\022\022\n"
+    "\nrequest_id\030\005 \001(\t\032T\n\017ParametersEntry\022\013\n\003"
+    "key\030\001 \001(\t\0220\n\005value\030\002 \001(\0132!.amlabslicer.p"
+    "roto.ParameterValue:\0028\001\"o\n\022SliceClientMe"
+    "ssage\0228\n\rstart_request\030\001 \001(\0132\037.amlabslic"
+    "er.proto.SliceRequestH\000\022\030\n\016cancel_reques"
+    "t\030\002 \001(\010H\000B\005\n\003msg\"8\n\rSliceProgress\022\020\n\010pro"
+    "gress\030\001 \001(\002\022\025\n\rcurrent_stage\030\002 \001(\t\"\212\001\n\nL"
+    "ogMessage\0225\n\005level\030\001 \001(\0162&.amlabslicer.p"
+    "roto.LogMessage.LogLevel\022\014\n\004text\030\002 \001(\t\"7"
+    "\n\010LogLevel\022\010\n\004INFO\020\000\022\013\n\007WARNING\020\001\022\t\n\005ERR"
+    "OR\020\002\022\t\n\005DEBUG\020\003\"\230\001\n\014LayerPreview\022\020\n\010laye"
+    "r_id\030\001 \001(\005\022\020\n\010z_height\030\002 \001(\002\022\021\n\tpath_dat"
+    "a\030\003 \001(\014\022\020\n\010encoding\030\004 \001(\t\022\030\n\020coordinate_"
+    "space\030\005 \001(\t\022\r\n\005units\030\006 \001(\t\022\026\n\016schema_ver"
+    "sion\030\007 \001(\t\"\272\001\n\010Artifact\022\014\n\004kind\030\001 \001(\t\022\021\n"
+    "\tmime_type\030\002 \001(\t\022\021\n\tfile_name\030\003 \001(\t\022\014\n\004d"
+    "ata\030\004 \001(\014\022;\n\010metadata\030\005 \003(\0132).amlabslice"
+    "r.proto.Artifact.MetadataEntry\032/\n\rMetada"
+    "taEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\""
+    "\253\001\n\tErrorInfo\022\014\n\004code\030\001 \001(\t\022\017\n\007message\030\002"
+    " \001(\t\022\023\n\013recoverable\030\003 \001(\010\022:\n\007details\030\004 \003"
+    "(\0132).amlabslicer.proto.ErrorInfo.Details"
+    "Entry\032.\n\014DetailsEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005va"
+    "lue\030\002 \001(\t:\0028\001\"\330\001\n\013SliceResult\022\017\n\007success"
+    "\030\001 \001(\010\022\017\n\007message\030\002 \001(\t\022.\n\tartifacts\030\003 \003"
+    "(\0132\033.amlabslicer.proto.Artifact\022\024\n\014total"
+    "_layers\030\004 \001(\005\022\032\n\022estimated_time_sec\030\005 \001("
+    "\001\022\030\n\020filament_used_mm\030\006 \001(\001\022+\n\005error\030\007 \001"
+    "(\0132\034.amlabslicer.proto.ErrorInfo\"\353\001\n\022Sli"
+    "ceServerMessage\0224\n\010progress\030\001 \001(\0132 .amla"
+    "bslicer.proto.SliceProgressH\000\022,\n\003log\030\002 \001"
+    "(\0132\035.amlabslicer.proto.LogMessageH\000\0228\n\rl"
+    "ayer_preview\030\003 \001(\0132\037.amlabslicer.proto.L"
+    "ayerPreviewH\000\0220\n\006result\030\004 \001(\0132\036.amlabsli"
+    "cer.proto.SliceResultH\000B\005\n\003msg*N\n\tValueT"
+    "ype\022\013\n\007VT_BOOL\020\000\022\n\n\006VT_INT\020\001\022\014\n\010VT_FLOAT"
+    "\020\002\022\r\n\tVT_STRING\020\003\022\013\n\007VT_ENUM\020\004*|\n\013Contro"
+    "lType\022\r\n\tCHECK_BOX\020\000\022\017\n\013NUMERIC_BOX\020\001\022\n\n"
+    "\006SLIDER\020\002\022\r\n\tCOMBO_BOX\020\003\022\014\n\010TEXT_BOX\020\004\022\023"
+    "\n\017OBJECT_SELECTOR\020\005\022\017\n\013FILE_PICKER\020\0062\251\002\n"
+    "\rSlicerService\022T\n\026GetAvailableAlgorithms"
+    "\022\030.amlabslicer.proto.Empty\032 .amlabslicer"
+    ".proto.AlgorithmList\022g\n\026GetAlgorithmPara"
+    "meters\022#.amlabslicer.proto.AlgorithmRequ"
+    "est\032(.amlabslicer.proto.ParameterTemplat"
+    "eList\022Y\n\005Slice\022%.amlabslicer.proto.Slice"
+    "ClientMessage\032%.amlabslicer.proto.SliceS"
+    "erverMessage(\0010\001B\023\252\002\020AMLabSlicer.Grpcb\006p"
+    "roto3"
 };
 static ::absl::once_flag descriptor_table_slicer_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_slicer_2eproto = {
     false,
     false,
-    2571,
+    3565,
     descriptor_table_protodef_slicer_2eproto,
     "slicer.proto",
     &descriptor_table_slicer_2eproto_once,
     nullptr,
     0,
-    16,
+    22,
     schemas,
     file_default_instances,
     TableStruct_slicer_2eproto::offsets,
@@ -909,6 +1222,578 @@ Empty::_table_ = {
 }
 // ===================================================================
 
+class AlgorithmInfo::_Internal {
+ public:
+  using HasBits =
+      decltype(::std::declval<AlgorithmInfo>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+      8 * PROTOBUF_FIELD_OFFSET(AlgorithmInfo, _impl_._has_bits_);
+};
+
+AlgorithmInfo::AlgorithmInfo(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, AlgorithmInfo_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:amlabslicer.proto.AlgorithmInfo)
+}
+PROTOBUF_NDEBUG_INLINE AlgorithmInfo::Impl_::Impl_(
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+    [[maybe_unused]] const ::amlabslicer::proto::AlgorithmInfo& from_msg)
+      : _has_bits_{from._has_bits_},
+        _cached_size_{0},
+        capabilities_{visibility, arena, from.capabilities_},
+        input_kinds_{visibility, arena, from.input_kinds_},
+        output_kinds_{visibility, arena, from.output_kinds_},
+        algorithm_id_(arena, from.algorithm_id_),
+        display_name_(arena, from.display_name_),
+        engine_id_(arena, from.engine_id_),
+        category_(arena, from.category_),
+        version_(arena, from.version_) {}
+
+AlgorithmInfo::AlgorithmInfo(
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena,
+    const AlgorithmInfo& from)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, AlgorithmInfo_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  AlgorithmInfo* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+
+  // @@protoc_insertion_point(copy_constructor:amlabslicer.proto.AlgorithmInfo)
+}
+PROTOBUF_NDEBUG_INLINE AlgorithmInfo::Impl_::Impl_(
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+      : _cached_size_{0},
+        capabilities_{visibility, arena},
+        input_kinds_{visibility, arena},
+        output_kinds_{visibility, arena},
+        algorithm_id_(arena),
+        display_name_(arena),
+        engine_id_(arena),
+        category_(arena),
+        version_(arena) {}
+
+inline void AlgorithmInfo::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+}
+AlgorithmInfo::~AlgorithmInfo() {
+  // @@protoc_insertion_point(destructor:amlabslicer.proto.AlgorithmInfo)
+  SharedDtor(*this);
+}
+inline void AlgorithmInfo::SharedDtor(MessageLite& self) {
+  AlgorithmInfo& this_ = static_cast<AlgorithmInfo&>(self);
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    this_.CheckHasBitConsistency();
+  }
+  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  ABSL_DCHECK(this_.GetArena() == nullptr);
+  this_._impl_.algorithm_id_.Destroy();
+  this_._impl_.display_name_.Destroy();
+  this_._impl_.engine_id_.Destroy();
+  this_._impl_.category_.Destroy();
+  this_._impl_.version_.Destroy();
+  this_._impl_.~Impl_();
+}
+
+inline void* PROTOBUF_NONNULL AlgorithmInfo::PlacementNew_(
+    const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena) {
+  return ::new (mem) AlgorithmInfo(arena);
+}
+constexpr auto AlgorithmInfo::InternalNewImpl_() {
+  constexpr auto arena_bits = ::google::protobuf::internal::EncodePlacementArenaOffsets({
+      PROTOBUF_FIELD_OFFSET(AlgorithmInfo, _impl_.capabilities_) +
+          decltype(AlgorithmInfo::_impl_.capabilities_)::
+              InternalGetArenaOffset(
+                  ::google::protobuf::Message::internal_visibility()),
+      PROTOBUF_FIELD_OFFSET(AlgorithmInfo, _impl_.input_kinds_) +
+          decltype(AlgorithmInfo::_impl_.input_kinds_)::
+              InternalGetArenaOffset(
+                  ::google::protobuf::Message::internal_visibility()),
+      PROTOBUF_FIELD_OFFSET(AlgorithmInfo, _impl_.output_kinds_) +
+          decltype(AlgorithmInfo::_impl_.output_kinds_)::
+              InternalGetArenaOffset(
+                  ::google::protobuf::Message::internal_visibility()),
+  });
+  if (arena_bits.has_value()) {
+    return ::google::protobuf::internal::MessageCreator::CopyInit(
+        sizeof(AlgorithmInfo), alignof(AlgorithmInfo), *arena_bits);
+  } else {
+    return ::google::protobuf::internal::MessageCreator(&AlgorithmInfo::PlacementNew_,
+                                 sizeof(AlgorithmInfo),
+                                 alignof(AlgorithmInfo));
+  }
+}
+constexpr auto AlgorithmInfo::InternalGenerateClassData_() {
+  return ::google::protobuf::internal::ClassDataFull{
+      ::google::protobuf::internal::ClassData{
+          &_AlgorithmInfo_default_instance_._instance,
+          &_table_.header,
+          nullptr,  // OnDemandRegisterArenaDtor
+          nullptr,  // IsInitialized
+          &AlgorithmInfo::MergeImpl,
+          ::google::protobuf::Message::GetNewImpl<AlgorithmInfo>(),
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+          &AlgorithmInfo::SharedDtor,
+          ::google::protobuf::Message::GetClearImpl<AlgorithmInfo>(), &AlgorithmInfo::ByteSizeLong,
+              &AlgorithmInfo::_InternalSerialize,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          PROTOBUF_FIELD_OFFSET(AlgorithmInfo, _impl_._cached_size_),
+          false,
+      },
+      &AlgorithmInfo::kDescriptorMethods,
+      &descriptor_table_slicer_2eproto,
+      nullptr,  // tracker
+  };
+}
+
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const
+    ::google::protobuf::internal::ClassDataFull AlgorithmInfo_class_data_ =
+        AlgorithmInfo::InternalGenerateClassData_();
+
+PROTOBUF_ATTRIBUTE_WEAK const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL
+AlgorithmInfo::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&AlgorithmInfo_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(AlgorithmInfo_class_data_.tc_table);
+  return AlgorithmInfo_class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<3, 8, 0, 131, 2>
+AlgorithmInfo::_table_ = {
+  {
+    PROTOBUF_FIELD_OFFSET(AlgorithmInfo, _impl_._has_bits_),
+    0, // no _extensions_
+    8, 56,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967040,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    8,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    AlgorithmInfo_class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::amlabslicer::proto::AlgorithmInfo>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    // repeated string output_kinds = 8;
+    {::_pbi::TcParser::FastUR1,
+     {66, 2, 0,
+      PROTOBUF_FIELD_OFFSET(AlgorithmInfo, _impl_.output_kinds_)}},
+    // string algorithm_id = 1;
+    {::_pbi::TcParser::FastUS1,
+     {10, 3, 0,
+      PROTOBUF_FIELD_OFFSET(AlgorithmInfo, _impl_.algorithm_id_)}},
+    // string display_name = 2;
+    {::_pbi::TcParser::FastUS1,
+     {18, 4, 0,
+      PROTOBUF_FIELD_OFFSET(AlgorithmInfo, _impl_.display_name_)}},
+    // string engine_id = 3;
+    {::_pbi::TcParser::FastUS1,
+     {26, 5, 0,
+      PROTOBUF_FIELD_OFFSET(AlgorithmInfo, _impl_.engine_id_)}},
+    // string category = 4;
+    {::_pbi::TcParser::FastUS1,
+     {34, 6, 0,
+      PROTOBUF_FIELD_OFFSET(AlgorithmInfo, _impl_.category_)}},
+    // string version = 5;
+    {::_pbi::TcParser::FastUS1,
+     {42, 7, 0,
+      PROTOBUF_FIELD_OFFSET(AlgorithmInfo, _impl_.version_)}},
+    // repeated string capabilities = 6;
+    {::_pbi::TcParser::FastUR1,
+     {50, 0, 0,
+      PROTOBUF_FIELD_OFFSET(AlgorithmInfo, _impl_.capabilities_)}},
+    // repeated string input_kinds = 7;
+    {::_pbi::TcParser::FastUR1,
+     {58, 1, 0,
+      PROTOBUF_FIELD_OFFSET(AlgorithmInfo, _impl_.input_kinds_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // string algorithm_id = 1;
+    {PROTOBUF_FIELD_OFFSET(AlgorithmInfo, _impl_.algorithm_id_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string display_name = 2;
+    {PROTOBUF_FIELD_OFFSET(AlgorithmInfo, _impl_.display_name_), _Internal::kHasBitsOffset + 4, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string engine_id = 3;
+    {PROTOBUF_FIELD_OFFSET(AlgorithmInfo, _impl_.engine_id_), _Internal::kHasBitsOffset + 5, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string category = 4;
+    {PROTOBUF_FIELD_OFFSET(AlgorithmInfo, _impl_.category_), _Internal::kHasBitsOffset + 6, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string version = 5;
+    {PROTOBUF_FIELD_OFFSET(AlgorithmInfo, _impl_.version_), _Internal::kHasBitsOffset + 7, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // repeated string capabilities = 6;
+    {PROTOBUF_FIELD_OFFSET(AlgorithmInfo, _impl_.capabilities_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcRepeated | ::_fl::kUtf8String | ::_fl::kRepSString)},
+    // repeated string input_kinds = 7;
+    {PROTOBUF_FIELD_OFFSET(AlgorithmInfo, _impl_.input_kinds_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcRepeated | ::_fl::kUtf8String | ::_fl::kRepSString)},
+    // repeated string output_kinds = 8;
+    {PROTOBUF_FIELD_OFFSET(AlgorithmInfo, _impl_.output_kinds_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcRepeated | ::_fl::kUtf8String | ::_fl::kRepSString)},
+  }},
+  // no aux_entries
+  {{
+    "\37\14\14\11\10\7\14\13\14\0\0\0\0\0\0\0"
+    "amlabslicer.proto.AlgorithmInfo"
+    "algorithm_id"
+    "display_name"
+    "engine_id"
+    "category"
+    "version"
+    "capabilities"
+    "input_kinds"
+    "output_kinds"
+  }},
+};
+PROTOBUF_NOINLINE void AlgorithmInfo::Clear() {
+// @@protoc_insertion_point(message_clear_start:amlabslicer.proto.AlgorithmInfo)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _impl_._has_bits_[0];
+  if (BatchCheckHasBit(cached_has_bits, 0x000000ffU)) {
+    if (CheckHasBitForRepeated(cached_has_bits, 0x00000001U)) {
+      _impl_.capabilities_.Clear();
+    }
+    if (CheckHasBitForRepeated(cached_has_bits, 0x00000002U)) {
+      _impl_.input_kinds_.Clear();
+    }
+    if (CheckHasBitForRepeated(cached_has_bits, 0x00000004U)) {
+      _impl_.output_kinds_.Clear();
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+      _impl_.algorithm_id_.ClearNonDefaultToEmpty();
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+      _impl_.display_name_.ClearNonDefaultToEmpty();
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+      _impl_.engine_id_.ClearNonDefaultToEmpty();
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000040U)) {
+      _impl_.category_.ClearNonDefaultToEmpty();
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000080U)) {
+      _impl_.version_.ClearNonDefaultToEmpty();
+    }
+  }
+  _impl_._has_bits_.Clear();
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+::uint8_t* PROTOBUF_NONNULL AlgorithmInfo::_InternalSerialize(
+    const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
+    ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
+  const AlgorithmInfo& this_ = static_cast<const AlgorithmInfo&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+::uint8_t* PROTOBUF_NONNULL AlgorithmInfo::_InternalSerialize(
+    ::uint8_t* PROTOBUF_NONNULL target,
+    ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+  const AlgorithmInfo& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    this_.CheckHasBitConsistency();
+  }
+  // @@protoc_insertion_point(serialize_to_array_start:amlabslicer.proto.AlgorithmInfo)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  cached_has_bits = this_._impl_._has_bits_[0];
+  // string algorithm_id = 1;
+  if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+    if (!this_._internal_algorithm_id().empty()) {
+      const ::std::string& _s = this_._internal_algorithm_id();
+      ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.AlgorithmInfo.algorithm_id");
+      target = stream->WriteStringMaybeAliased(1, _s, target);
+    }
+  }
+
+  // string display_name = 2;
+  if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+    if (!this_._internal_display_name().empty()) {
+      const ::std::string& _s = this_._internal_display_name();
+      ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.AlgorithmInfo.display_name");
+      target = stream->WriteStringMaybeAliased(2, _s, target);
+    }
+  }
+
+  // string engine_id = 3;
+  if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+    if (!this_._internal_engine_id().empty()) {
+      const ::std::string& _s = this_._internal_engine_id();
+      ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.AlgorithmInfo.engine_id");
+      target = stream->WriteStringMaybeAliased(3, _s, target);
+    }
+  }
+
+  // string category = 4;
+  if (CheckHasBit(cached_has_bits, 0x00000040U)) {
+    if (!this_._internal_category().empty()) {
+      const ::std::string& _s = this_._internal_category();
+      ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.AlgorithmInfo.category");
+      target = stream->WriteStringMaybeAliased(4, _s, target);
+    }
+  }
+
+  // string version = 5;
+  if (CheckHasBit(cached_has_bits, 0x00000080U)) {
+    if (!this_._internal_version().empty()) {
+      const ::std::string& _s = this_._internal_version();
+      ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.AlgorithmInfo.version");
+      target = stream->WriteStringMaybeAliased(5, _s, target);
+    }
+  }
+
+  // repeated string capabilities = 6;
+  if (CheckHasBitForRepeated(cached_has_bits, 0x00000001U)) {
+    for (int i = 0, n = this_._internal_capabilities_size(); i < n; ++i) {
+      const auto& s = this_._internal_capabilities().Get(i);
+      ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+          s.data(), static_cast<int>(s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.AlgorithmInfo.capabilities");
+      target = stream->WriteString(6, s, target);
+    }
+  }
+
+  // repeated string input_kinds = 7;
+  if (CheckHasBitForRepeated(cached_has_bits, 0x00000002U)) {
+    for (int i = 0, n = this_._internal_input_kinds_size(); i < n; ++i) {
+      const auto& s = this_._internal_input_kinds().Get(i);
+      ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+          s.data(), static_cast<int>(s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.AlgorithmInfo.input_kinds");
+      target = stream->WriteString(7, s, target);
+    }
+  }
+
+  // repeated string output_kinds = 8;
+  if (CheckHasBitForRepeated(cached_has_bits, 0x00000004U)) {
+    for (int i = 0, n = this_._internal_output_kinds_size(); i < n; ++i) {
+      const auto& s = this_._internal_output_kinds().Get(i);
+      ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+          s.data(), static_cast<int>(s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.AlgorithmInfo.output_kinds");
+      target = stream->WriteString(8, s, target);
+    }
+  }
+
+  if (ABSL_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:amlabslicer.proto.AlgorithmInfo)
+  return target;
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+::size_t AlgorithmInfo::ByteSizeLong(const MessageLite& base) {
+  const AlgorithmInfo& this_ = static_cast<const AlgorithmInfo&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+::size_t AlgorithmInfo::ByteSizeLong() const {
+  const AlgorithmInfo& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  // @@protoc_insertion_point(message_byte_size_start:amlabslicer.proto.AlgorithmInfo)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void)cached_has_bits;
+
+  ::_pbi::Prefetch5LinesFrom7Lines(&this_);
+  cached_has_bits = this_._impl_._has_bits_[0];
+  if (BatchCheckHasBit(cached_has_bits, 0x000000ffU)) {
+    // repeated string capabilities = 6;
+    if (CheckHasBitForRepeated(cached_has_bits, 0x00000001U)) {
+      total_size +=
+          1 * ::google::protobuf::internal::FromIntSize(this_._internal_capabilities().size());
+      for (int i = 0, n = this_._internal_capabilities().size(); i < n; ++i) {
+        total_size += ::google::protobuf::internal::WireFormatLite::StringSize(
+            this_._internal_capabilities().Get(i));
+      }
+    }
+    // repeated string input_kinds = 7;
+    if (CheckHasBitForRepeated(cached_has_bits, 0x00000002U)) {
+      total_size +=
+          1 * ::google::protobuf::internal::FromIntSize(this_._internal_input_kinds().size());
+      for (int i = 0, n = this_._internal_input_kinds().size(); i < n; ++i) {
+        total_size += ::google::protobuf::internal::WireFormatLite::StringSize(
+            this_._internal_input_kinds().Get(i));
+      }
+    }
+    // repeated string output_kinds = 8;
+    if (CheckHasBitForRepeated(cached_has_bits, 0x00000004U)) {
+      total_size +=
+          1 * ::google::protobuf::internal::FromIntSize(this_._internal_output_kinds().size());
+      for (int i = 0, n = this_._internal_output_kinds().size(); i < n; ++i) {
+        total_size += ::google::protobuf::internal::WireFormatLite::StringSize(
+            this_._internal_output_kinds().Get(i));
+      }
+    }
+    // string algorithm_id = 1;
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+      if (!this_._internal_algorithm_id().empty()) {
+        total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                        this_._internal_algorithm_id());
+      }
+    }
+    // string display_name = 2;
+    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+      if (!this_._internal_display_name().empty()) {
+        total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                        this_._internal_display_name());
+      }
+    }
+    // string engine_id = 3;
+    if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+      if (!this_._internal_engine_id().empty()) {
+        total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                        this_._internal_engine_id());
+      }
+    }
+    // string category = 4;
+    if (CheckHasBit(cached_has_bits, 0x00000040U)) {
+      if (!this_._internal_category().empty()) {
+        total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                        this_._internal_category());
+      }
+    }
+    // string version = 5;
+    if (CheckHasBit(cached_has_bits, 0x00000080U)) {
+      if (!this_._internal_version().empty()) {
+        total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                        this_._internal_version());
+      }
+    }
+  }
+  return this_.MaybeComputeUnknownFieldsSize(total_size,
+                                             &this_._impl_._cached_size_);
+}
+
+void AlgorithmInfo::MergeImpl(::google::protobuf::MessageLite& to_msg,
+                            const ::google::protobuf::MessageLite& from_msg) {
+   auto* const _this =
+      static_cast<AlgorithmInfo*>(&to_msg);
+  auto& from = static_cast<const AlgorithmInfo&>(from_msg);
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    from.CheckHasBitConsistency();
+  }
+  ::google::protobuf::Arena* arena = _this->GetArena();
+  // @@protoc_insertion_point(class_specific_merge_from_start:amlabslicer.proto.AlgorithmInfo)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  cached_has_bits = from._impl_._has_bits_[0];
+  if (BatchCheckHasBit(cached_has_bits, 0x000000ffU)) {
+    if (CheckHasBitForRepeated(cached_has_bits, 0x00000001U)) {
+      _this->_internal_mutable_capabilities()->InternalMergeFromWithArena(
+          ::google::protobuf::MessageLite::internal_visibility(), arena,
+          from._internal_capabilities());
+    }
+    if (CheckHasBitForRepeated(cached_has_bits, 0x00000002U)) {
+      _this->_internal_mutable_input_kinds()->InternalMergeFromWithArena(
+          ::google::protobuf::MessageLite::internal_visibility(), arena,
+          from._internal_input_kinds());
+    }
+    if (CheckHasBitForRepeated(cached_has_bits, 0x00000004U)) {
+      _this->_internal_mutable_output_kinds()->InternalMergeFromWithArena(
+          ::google::protobuf::MessageLite::internal_visibility(), arena,
+          from._internal_output_kinds());
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+      if (!from._internal_algorithm_id().empty()) {
+        _this->_internal_set_algorithm_id(from._internal_algorithm_id());
+      } else {
+        if (_this->_impl_.algorithm_id_.IsDefault()) {
+          _this->_internal_set_algorithm_id("");
+        }
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+      if (!from._internal_display_name().empty()) {
+        _this->_internal_set_display_name(from._internal_display_name());
+      } else {
+        if (_this->_impl_.display_name_.IsDefault()) {
+          _this->_internal_set_display_name("");
+        }
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+      if (!from._internal_engine_id().empty()) {
+        _this->_internal_set_engine_id(from._internal_engine_id());
+      } else {
+        if (_this->_impl_.engine_id_.IsDefault()) {
+          _this->_internal_set_engine_id("");
+        }
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000040U)) {
+      if (!from._internal_category().empty()) {
+        _this->_internal_set_category(from._internal_category());
+      } else {
+        if (_this->_impl_.category_.IsDefault()) {
+          _this->_internal_set_category("");
+        }
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000080U)) {
+      if (!from._internal_version().empty()) {
+        _this->_internal_set_version(from._internal_version());
+      } else {
+        if (_this->_impl_.version_.IsDefault()) {
+          _this->_internal_set_version("");
+        }
+      }
+    }
+  }
+  _this->_impl_._has_bits_[0] |= cached_has_bits;
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+}
+
+void AlgorithmInfo::CopyFrom(const AlgorithmInfo& from) {
+  // @@protoc_insertion_point(class_specific_copy_from_start:amlabslicer.proto.AlgorithmInfo)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void AlgorithmInfo::InternalSwap(AlgorithmInfo* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
+  using ::std::swap;
+  auto* arena = GetArena();
+  ABSL_DCHECK_EQ(arena, other->GetArena());
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
+  _impl_.capabilities_.InternalSwap(&other->_impl_.capabilities_);
+  _impl_.input_kinds_.InternalSwap(&other->_impl_.input_kinds_);
+  _impl_.output_kinds_.InternalSwap(&other->_impl_.output_kinds_);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.algorithm_id_, &other->_impl_.algorithm_id_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.display_name_, &other->_impl_.display_name_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.engine_id_, &other->_impl_.engine_id_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.category_, &other->_impl_.category_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.version_, &other->_impl_.version_, arena);
+}
+
+::google::protobuf::Metadata AlgorithmInfo::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
 class AlgorithmList::_Internal {
  public:
   using HasBits =
@@ -1028,7 +1913,7 @@ AlgorithmList::GetClassData() const {
   return AlgorithmList_class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<0, 1, 0, 50, 2>
+const ::_pbi::TcParseTable<0, 1, 1, 0, 2>
 AlgorithmList::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(AlgorithmList, _impl_._has_bits_),
@@ -1038,8 +1923,8 @@ AlgorithmList::_table_ = {
     4294967294,  // skipmap
     offsetof(decltype(_table_), field_entries),
     1,  // num_field_entries
-    0,  // num_aux_entries
-    offsetof(decltype(_table_), field_names),  // no aux_entries
+    1,  // num_aux_entries
+    offsetof(decltype(_table_), aux_entries),
     AlgorithmList_class_data_.base(),
     nullptr,  // post_loop_handler
     ::_pbi::TcParser::GenericFallback,  // fallback
@@ -1047,21 +1932,20 @@ AlgorithmList::_table_ = {
     ::_pbi::TcParser::GetTable<::amlabslicer::proto::AlgorithmList>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    // repeated string algorithms = 1;
-    {::_pbi::TcParser::FastUR1,
+    // repeated .amlabslicer.proto.AlgorithmInfo algorithms = 1;
+    {::_pbi::TcParser::FastMtR1,
      {10, 0, 0,
       PROTOBUF_FIELD_OFFSET(AlgorithmList, _impl_.algorithms_)}},
   }}, {{
     65535, 65535
   }}, {{
-    // repeated string algorithms = 1;
-    {PROTOBUF_FIELD_OFFSET(AlgorithmList, _impl_.algorithms_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcRepeated | ::_fl::kUtf8String | ::_fl::kRepSString)},
+    // repeated .amlabslicer.proto.AlgorithmInfo algorithms = 1;
+    {PROTOBUF_FIELD_OFFSET(AlgorithmList, _impl_.algorithms_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
   }},
-  // no aux_entries
   {{
-    "\37\12\0\0\0\0\0\0"
-    "amlabslicer.proto.AlgorithmList"
-    "algorithms"
+      {::_pbi::TcParser::GetTable<::amlabslicer::proto::AlgorithmInfo>()},
+  }},
+  {{
   }},
 };
 PROTOBUF_NOINLINE void AlgorithmList::Clear() {
@@ -1098,13 +1982,16 @@ PROTOBUF_NOINLINE void AlgorithmList::Clear() {
   (void)cached_has_bits;
 
   cached_has_bits = this_._impl_._has_bits_[0];
-  // repeated string algorithms = 1;
+  // repeated .amlabslicer.proto.AlgorithmInfo algorithms = 1;
   if (CheckHasBitForRepeated(cached_has_bits, 0x00000001U)) {
-    for (int i = 0, n = this_._internal_algorithms_size(); i < n; ++i) {
-      const auto& s = this_._internal_algorithms().Get(i);
-      ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-          s.data(), static_cast<int>(s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.AlgorithmList.algorithms");
-      target = stream->WriteString(1, s, target);
+    for (unsigned i = 0, n = static_cast<unsigned>(
+                             this_._internal_algorithms_size());
+         i < n; i++) {
+      const auto& repfield = this_._internal_algorithms().Get(i);
+      target =
+          ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+              1, repfield, repfield.GetCachedSize(),
+              target, stream);
     }
   }
 
@@ -1133,14 +2020,12 @@ PROTOBUF_NOINLINE void AlgorithmList::Clear() {
 
   ::_pbi::Prefetch5LinesFrom7Lines(&this_);
    {
-    // repeated string algorithms = 1;
+    // repeated .amlabslicer.proto.AlgorithmInfo algorithms = 1;
     cached_has_bits = this_._impl_._has_bits_[0];
     if (CheckHasBitForRepeated(cached_has_bits, 0x00000001U)) {
-      total_size +=
-          1 * ::google::protobuf::internal::FromIntSize(this_._internal_algorithms().size());
-      for (int i = 0, n = this_._internal_algorithms().size(); i < n; ++i) {
-        total_size += ::google::protobuf::internal::WireFormatLite::StringSize(
-            this_._internal_algorithms().Get(i));
+      total_size += 1UL * this_._internal_algorithms_size();
+      for (const auto& msg : this_._internal_algorithms()) {
+        total_size += ::google::protobuf::internal::WireFormatLite::MessageSize(msg);
       }
     }
   }
@@ -1216,7 +2101,7 @@ PROTOBUF_NDEBUG_INLINE AlgorithmRequest::Impl_::Impl_(
     [[maybe_unused]] const ::amlabslicer::proto::AlgorithmRequest& from_msg)
       : _has_bits_{from._has_bits_},
         _cached_size_{0},
-        algorithm_name_(arena, from.algorithm_name_) {}
+        algorithm_id_(arena, from.algorithm_id_) {}
 
 AlgorithmRequest::AlgorithmRequest(
     ::google::protobuf::Arena* PROTOBUF_NULLABLE arena,
@@ -1238,7 +2123,7 @@ PROTOBUF_NDEBUG_INLINE AlgorithmRequest::Impl_::Impl_(
     [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
     [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
       : _cached_size_{0},
-        algorithm_name_(arena) {}
+        algorithm_id_(arena) {}
 
 inline void AlgorithmRequest::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
@@ -1254,7 +2139,7 @@ inline void AlgorithmRequest::SharedDtor(MessageLite& self) {
   }
   this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   ABSL_DCHECK(this_.GetArena() == nullptr);
-  this_._impl_.algorithm_name_.Destroy();
+  this_._impl_.algorithm_id_.Destroy();
   this_._impl_.~Impl_();
 }
 
@@ -1301,7 +2186,7 @@ AlgorithmRequest::GetClassData() const {
   return AlgorithmRequest_class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<0, 1, 0, 57, 2>
+const ::_pbi::TcParseTable<0, 1, 0, 55, 2>
 AlgorithmRequest::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(AlgorithmRequest, _impl_._has_bits_),
@@ -1320,21 +2205,21 @@ AlgorithmRequest::_table_ = {
     ::_pbi::TcParser::GetTable<::amlabslicer::proto::AlgorithmRequest>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    // string algorithm_name = 1;
+    // string algorithm_id = 1;
     {::_pbi::TcParser::FastUS1,
      {10, 0, 0,
-      PROTOBUF_FIELD_OFFSET(AlgorithmRequest, _impl_.algorithm_name_)}},
+      PROTOBUF_FIELD_OFFSET(AlgorithmRequest, _impl_.algorithm_id_)}},
   }}, {{
     65535, 65535
   }}, {{
-    // string algorithm_name = 1;
-    {PROTOBUF_FIELD_OFFSET(AlgorithmRequest, _impl_.algorithm_name_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string algorithm_id = 1;
+    {PROTOBUF_FIELD_OFFSET(AlgorithmRequest, _impl_.algorithm_id_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
   }},
   // no aux_entries
   {{
-    "\42\16\0\0\0\0\0\0"
+    "\42\14\0\0\0\0\0\0"
     "amlabslicer.proto.AlgorithmRequest"
-    "algorithm_name"
+    "algorithm_id"
   }},
 };
 PROTOBUF_NOINLINE void AlgorithmRequest::Clear() {
@@ -1346,7 +2231,7 @@ PROTOBUF_NOINLINE void AlgorithmRequest::Clear() {
 
   cached_has_bits = _impl_._has_bits_[0];
   if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-    _impl_.algorithm_name_.ClearNonDefaultToEmpty();
+    _impl_.algorithm_id_.ClearNonDefaultToEmpty();
   }
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
@@ -1371,12 +2256,12 @@ PROTOBUF_NOINLINE void AlgorithmRequest::Clear() {
   (void)cached_has_bits;
 
   cached_has_bits = this_._impl_._has_bits_[0];
-  // string algorithm_name = 1;
+  // string algorithm_id = 1;
   if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-    if (!this_._internal_algorithm_name().empty()) {
-      const ::std::string& _s = this_._internal_algorithm_name();
+    if (!this_._internal_algorithm_id().empty()) {
+      const ::std::string& _s = this_._internal_algorithm_id();
       ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.AlgorithmRequest.algorithm_name");
+          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.AlgorithmRequest.algorithm_id");
       target = stream->WriteStringMaybeAliased(1, _s, target);
     }
   }
@@ -1405,12 +2290,12 @@ PROTOBUF_NOINLINE void AlgorithmRequest::Clear() {
   (void)cached_has_bits;
 
    {
-    // string algorithm_name = 1;
+    // string algorithm_id = 1;
     cached_has_bits = this_._impl_._has_bits_[0];
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-      if (!this_._internal_algorithm_name().empty()) {
+      if (!this_._internal_algorithm_id().empty()) {
         total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
-                                        this_._internal_algorithm_name());
+                                        this_._internal_algorithm_id());
       }
     }
   }
@@ -1433,11 +2318,11 @@ void AlgorithmRequest::MergeImpl(::google::protobuf::MessageLite& to_msg,
 
   cached_has_bits = from._impl_._has_bits_[0];
   if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-    if (!from._internal_algorithm_name().empty()) {
-      _this->_internal_set_algorithm_name(from._internal_algorithm_name());
+    if (!from._internal_algorithm_id().empty()) {
+      _this->_internal_set_algorithm_id(from._internal_algorithm_id());
     } else {
-      if (_this->_impl_.algorithm_name_.IsDefault()) {
-        _this->_internal_set_algorithm_name("");
+      if (_this->_impl_.algorithm_id_.IsDefault()) {
+        _this->_internal_set_algorithm_id("");
       }
     }
   }
@@ -1460,7 +2345,7 @@ void AlgorithmRequest::InternalSwap(AlgorithmRequest* PROTOBUF_RESTRICT PROTOBUF
   ABSL_DCHECK_EQ(arena, other->GetArena());
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
-  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.algorithm_name_, &other->_impl_.algorithm_name_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.algorithm_id_, &other->_impl_.algorithm_id_, arena);
 }
 
 ::google::protobuf::Metadata AlgorithmRequest::GetMetadata() const {
@@ -2635,6 +3520,383 @@ void ParameterTemplateList::InternalSwap(ParameterTemplateList* PROTOBUF_RESTRIC
 }
 // ===================================================================
 
+class ParameterValue::_Internal {
+ public:
+  static constexpr ::int32_t kOneofCaseOffset =
+      PROTOBUF_FIELD_OFFSET(::amlabslicer::proto::ParameterValue, _impl_._oneof_case_);
+};
+
+ParameterValue::ParameterValue(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, ParameterValue_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:amlabslicer.proto.ParameterValue)
+}
+PROTOBUF_NDEBUG_INLINE ParameterValue::Impl_::Impl_(
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+    [[maybe_unused]] const ::amlabslicer::proto::ParameterValue& from_msg)
+      : value_{},
+        _cached_size_{0},
+        _oneof_case_{from._oneof_case_[0]} {}
+
+ParameterValue::ParameterValue(
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena,
+    const ParameterValue& from)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, ParameterValue_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  ParameterValue* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+  switch (value_case()) {
+    case VALUE_NOT_SET:
+      break;
+      case kBoolValue:
+        _impl_.value_.bool_value_ = from._impl_.value_.bool_value_;
+        break;
+      case kIntValue:
+        _impl_.value_.int_value_ = from._impl_.value_.int_value_;
+        break;
+      case kDoubleValue:
+        _impl_.value_.double_value_ = from._impl_.value_.double_value_;
+        break;
+      case kStringValue:
+        new (&_impl_.value_.string_value_) decltype(_impl_.value_.string_value_){arena, from._impl_.value_.string_value_};
+        break;
+  }
+
+  // @@protoc_insertion_point(copy_constructor:amlabslicer.proto.ParameterValue)
+}
+PROTOBUF_NDEBUG_INLINE ParameterValue::Impl_::Impl_(
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+      : value_{},
+        _cached_size_{0},
+        _oneof_case_{} {}
+
+inline void ParameterValue::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+}
+ParameterValue::~ParameterValue() {
+  // @@protoc_insertion_point(destructor:amlabslicer.proto.ParameterValue)
+  SharedDtor(*this);
+}
+inline void ParameterValue::SharedDtor(MessageLite& self) {
+  ParameterValue& this_ = static_cast<ParameterValue&>(self);
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    this_.CheckHasBitConsistency();
+  }
+  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  ABSL_DCHECK(this_.GetArena() == nullptr);
+  if (this_.has_value()) {
+    this_.clear_value();
+  }
+  this_._impl_.~Impl_();
+}
+
+void ParameterValue::clear_value() {
+// @@protoc_insertion_point(one_of_clear_start:amlabslicer.proto.ParameterValue)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  switch (value_case()) {
+    case kBoolValue: {
+      // No need to clear
+      break;
+    }
+    case kIntValue: {
+      // No need to clear
+      break;
+    }
+    case kDoubleValue: {
+      // No need to clear
+      break;
+    }
+    case kStringValue: {
+      _impl_.value_.string_value_.Destroy();
+      break;
+    }
+    case VALUE_NOT_SET: {
+      break;
+    }
+  }
+  _impl_._oneof_case_[0] = VALUE_NOT_SET;
+}
+
+
+inline void* PROTOBUF_NONNULL ParameterValue::PlacementNew_(
+    const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena) {
+  return ::new (mem) ParameterValue(arena);
+}
+constexpr auto ParameterValue::InternalNewImpl_() {
+  return ::google::protobuf::internal::MessageCreator::ZeroInit(sizeof(ParameterValue),
+                                            alignof(ParameterValue));
+}
+constexpr auto ParameterValue::InternalGenerateClassData_() {
+  return ::google::protobuf::internal::ClassDataFull{
+      ::google::protobuf::internal::ClassData{
+          &_ParameterValue_default_instance_._instance,
+          &_table_.header,
+          nullptr,  // OnDemandRegisterArenaDtor
+          nullptr,  // IsInitialized
+          &ParameterValue::MergeImpl,
+          ::google::protobuf::Message::GetNewImpl<ParameterValue>(),
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+          &ParameterValue::SharedDtor,
+          ::google::protobuf::Message::GetClearImpl<ParameterValue>(), &ParameterValue::ByteSizeLong,
+              &ParameterValue::_InternalSerialize,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          PROTOBUF_FIELD_OFFSET(ParameterValue, _impl_._cached_size_),
+          false,
+      },
+      &ParameterValue::kDescriptorMethods,
+      &descriptor_table_slicer_2eproto,
+      nullptr,  // tracker
+  };
+}
+
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const
+    ::google::protobuf::internal::ClassDataFull ParameterValue_class_data_ =
+        ParameterValue::InternalGenerateClassData_();
+
+PROTOBUF_ATTRIBUTE_WEAK const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL
+ParameterValue::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&ParameterValue_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(ParameterValue_class_data_.tc_table);
+  return ParameterValue_class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<0, 4, 0, 53, 2>
+ParameterValue::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    4, 0,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967280,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    4,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    ParameterValue_class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::amlabslicer::proto::ParameterValue>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    {::_pbi::TcParser::MiniParse, {}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // bool bool_value = 1;
+    {PROTOBUF_FIELD_OFFSET(ParameterValue, _impl_.value_.bool_value_), _Internal::kOneofCaseOffset + 0, 0, (0 | ::_fl::kFcOneof | ::_fl::kBool)},
+    // int64 int_value = 2;
+    {PROTOBUF_FIELD_OFFSET(ParameterValue, _impl_.value_.int_value_), _Internal::kOneofCaseOffset + 0, 0, (0 | ::_fl::kFcOneof | ::_fl::kInt64)},
+    // double double_value = 3;
+    {PROTOBUF_FIELD_OFFSET(ParameterValue, _impl_.value_.double_value_), _Internal::kOneofCaseOffset + 0, 0, (0 | ::_fl::kFcOneof | ::_fl::kDouble)},
+    // string string_value = 4;
+    {PROTOBUF_FIELD_OFFSET(ParameterValue, _impl_.value_.string_value_), _Internal::kOneofCaseOffset + 0, 0, (0 | ::_fl::kFcOneof | ::_fl::kUtf8String | ::_fl::kRepAString)},
+  }},
+  // no aux_entries
+  {{
+    "\40\0\0\0\14\0\0\0"
+    "amlabslicer.proto.ParameterValue"
+    "string_value"
+  }},
+};
+PROTOBUF_NOINLINE void ParameterValue::Clear() {
+// @@protoc_insertion_point(message_clear_start:amlabslicer.proto.ParameterValue)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  clear_value();
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+::uint8_t* PROTOBUF_NONNULL ParameterValue::_InternalSerialize(
+    const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
+    ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
+  const ParameterValue& this_ = static_cast<const ParameterValue&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+::uint8_t* PROTOBUF_NONNULL ParameterValue::_InternalSerialize(
+    ::uint8_t* PROTOBUF_NONNULL target,
+    ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+  const ParameterValue& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    this_.CheckHasBitConsistency();
+  }
+  // @@protoc_insertion_point(serialize_to_array_start:amlabslicer.proto.ParameterValue)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  switch (this_.value_case()) {
+    case kBoolValue: {
+      target = stream->EnsureSpace(target);
+      target = ::_pbi::WireFormatLite::WriteBoolToArray(
+          1, this_._internal_bool_value(), target);
+      break;
+    }
+    case kIntValue: {
+      target =
+          ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<2>(
+              stream, this_._internal_int_value(), target);
+      break;
+    }
+    case kDoubleValue: {
+      target = stream->EnsureSpace(target);
+      target = ::_pbi::WireFormatLite::WriteDoubleToArray(
+          3, this_._internal_double_value(), target);
+      break;
+    }
+    case kStringValue: {
+      const ::std::string& _s = this_._internal_string_value();
+      ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.ParameterValue.string_value");
+      target = stream->WriteStringMaybeAliased(4, _s, target);
+      break;
+    }
+    default:
+      break;
+  }
+  if (ABSL_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:amlabslicer.proto.ParameterValue)
+  return target;
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+::size_t ParameterValue::ByteSizeLong(const MessageLite& base) {
+  const ParameterValue& this_ = static_cast<const ParameterValue&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+::size_t ParameterValue::ByteSizeLong() const {
+  const ParameterValue& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  // @@protoc_insertion_point(message_byte_size_start:amlabslicer.proto.ParameterValue)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void)cached_has_bits;
+
+  switch (this_.value_case()) {
+    // bool bool_value = 1;
+    case kBoolValue: {
+      total_size += 2;
+      break;
+    }
+    // int64 int_value = 2;
+    case kIntValue: {
+      total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
+          this_._internal_int_value());
+      break;
+    }
+    // double double_value = 3;
+    case kDoubleValue: {
+      total_size += 9;
+      break;
+    }
+    // string string_value = 4;
+    case kStringValue: {
+      total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                      this_._internal_string_value());
+      break;
+    }
+    case VALUE_NOT_SET: {
+      break;
+    }
+  }
+  return this_.MaybeComputeUnknownFieldsSize(total_size,
+                                             &this_._impl_._cached_size_);
+}
+
+void ParameterValue::MergeImpl(::google::protobuf::MessageLite& to_msg,
+                            const ::google::protobuf::MessageLite& from_msg) {
+   auto* const _this =
+      static_cast<ParameterValue*>(&to_msg);
+  auto& from = static_cast<const ParameterValue&>(from_msg);
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    from.CheckHasBitConsistency();
+  }
+  ::google::protobuf::Arena* arena = _this->GetArena();
+  // @@protoc_insertion_point(class_specific_merge_from_start:amlabslicer.proto.ParameterValue)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  if (const uint32_t oneof_from_case =
+          from._impl_._oneof_case_[0]) {
+    const uint32_t oneof_to_case = _this->_impl_._oneof_case_[0];
+    const bool oneof_needs_init = oneof_to_case != oneof_from_case;
+    if (oneof_needs_init) {
+      if (oneof_to_case != 0) {
+        _this->clear_value();
+      }
+      _this->_impl_._oneof_case_[0] = oneof_from_case;
+    }
+
+    switch (oneof_from_case) {
+      case kBoolValue: {
+        _this->_impl_.value_.bool_value_ = from._impl_.value_.bool_value_;
+        break;
+      }
+      case kIntValue: {
+        _this->_impl_.value_.int_value_ = from._impl_.value_.int_value_;
+        break;
+      }
+      case kDoubleValue: {
+        _this->_impl_.value_.double_value_ = from._impl_.value_.double_value_;
+        break;
+      }
+      case kStringValue: {
+        if (oneof_needs_init) {
+          _this->_impl_.value_.string_value_.InitDefault();
+        }
+        _this->_impl_.value_.string_value_.Set(from._internal_string_value(), arena);
+        break;
+      }
+      case VALUE_NOT_SET:
+        break;
+    }
+  }
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+}
+
+void ParameterValue::CopyFrom(const ParameterValue& from) {
+  // @@protoc_insertion_point(class_specific_copy_from_start:amlabslicer.proto.ParameterValue)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void ParameterValue::InternalSwap(ParameterValue* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
+  using ::std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_.value_, other->_impl_.value_);
+  swap(_impl_._oneof_case_[0], other->_impl_._oneof_case_[0]);
+}
+
+::google::protobuf::Metadata ParameterValue::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
 #if defined(PROTOBUF_CUSTOM_VTABLE)
 MeshObject_OverrideParametersEntry_DoNotUse::MeshObject_OverrideParametersEntry_DoNotUse()
     : SuperType(MeshObject_OverrideParametersEntry_DoNotUse_class_data_.base()) {}
@@ -2688,7 +3950,7 @@ MeshObject_OverrideParametersEntry_DoNotUse::GetClassData() const {
   return MeshObject_OverrideParametersEntry_DoNotUse_class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<1, 2, 0, 69, 2>
+const ::_pbi::TcParseTable<1, 2, 1, 64, 2>
 MeshObject_OverrideParametersEntry_DoNotUse::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(MeshObject_OverrideParametersEntry_DoNotUse, _impl_._has_bits_),
@@ -2698,8 +3960,8 @@ MeshObject_OverrideParametersEntry_DoNotUse::_table_ = {
     4294967292,  // skipmap
     offsetof(decltype(_table_), field_entries),
     2,  // num_field_entries
-    0,  // num_aux_entries
-    offsetof(decltype(_table_), field_names),  // no aux_entries
+    1,  // num_aux_entries
+    offsetof(decltype(_table_), aux_entries),
     MeshObject_OverrideParametersEntry_DoNotUse_class_data_.base(),
     nullptr,  // post_loop_handler
     ::_pbi::TcParser::DiscardEverythingFallback,  // fallback
@@ -2707,8 +3969,8 @@ MeshObject_OverrideParametersEntry_DoNotUse::_table_ = {
     ::_pbi::TcParser::GetTable<::amlabslicer::proto::MeshObject_OverrideParametersEntry_DoNotUse>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    // string value = 2;
-    {::_pbi::TcParser::FastUS1,
+    // .amlabslicer.proto.ParameterValue value = 2;
+    {::_pbi::TcParser::FastMtS1,
      {18, 1, 0,
       PROTOBUF_FIELD_OFFSET(MeshObject_OverrideParametersEntry_DoNotUse, _impl_.value_)}},
     // string key = 1;
@@ -2720,15 +3982,16 @@ MeshObject_OverrideParametersEntry_DoNotUse::_table_ = {
   }}, {{
     // string key = 1;
     {PROTOBUF_FIELD_OFFSET(MeshObject_OverrideParametersEntry_DoNotUse, _impl_.key_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // string value = 2;
-    {PROTOBUF_FIELD_OFFSET(MeshObject_OverrideParametersEntry_DoNotUse, _impl_.value_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // .amlabslicer.proto.ParameterValue value = 2;
+    {PROTOBUF_FIELD_OFFSET(MeshObject_OverrideParametersEntry_DoNotUse, _impl_.value_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kMessage | ::_fl::kTvTable)},
   }},
-  // no aux_entries
   {{
-    "\64\3\5\0\0\0\0\0"
+      {::_pbi::TcParser::GetTable<::amlabslicer::proto::ParameterValue>()},
+  }},
+  {{
+    "\64\3\0\0\0\0\0\0"
     "amlabslicer.proto.MeshObject.OverrideParametersEntry"
     "key"
-    "value"
   }},
 };
 // ===================================================================
@@ -2761,6 +4024,8 @@ PROTOBUF_NDEBUG_INLINE MeshObject::Impl_::Impl_(
         vertices_(arena, from.vertices_),
         normals_(arena, from.normals_),
         indices_(arena, from.indices_),
+        units_(arena, from.units_),
+        coordinate_system_(arena, from.coordinate_system_),
         override_parameters_{visibility, arena, from.override_parameters_} {}
 
 MeshObject::MeshObject(
@@ -2776,7 +4041,13 @@ MeshObject::MeshObject(
   _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
       from._internal_metadata_);
   new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
-  _impl_.id_ = from._impl_.id_;
+  ::memcpy(reinterpret_cast<char*>(&_impl_) +
+               offsetof(Impl_, id_),
+           reinterpret_cast<const char*>(&from._impl_) +
+               offsetof(Impl_, id_),
+           offsetof(Impl_, transform_applied_) -
+               offsetof(Impl_, id_) +
+               sizeof(Impl_::transform_applied_));
 
   // @@protoc_insertion_point(copy_constructor:amlabslicer.proto.MeshObject)
 }
@@ -2789,11 +4060,18 @@ PROTOBUF_NDEBUG_INLINE MeshObject::Impl_::Impl_(
         vertices_(arena),
         normals_(arena),
         indices_(arena),
+        units_(arena),
+        coordinate_system_(arena),
         override_parameters_{visibility, arena} {}
 
 inline void MeshObject::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
-  _impl_.id_ = {};
+  ::memset(reinterpret_cast<char*>(&_impl_) +
+               offsetof(Impl_, id_),
+           0,
+           offsetof(Impl_, transform_applied_) -
+               offsetof(Impl_, id_) +
+               sizeof(Impl_::transform_applied_));
 }
 MeshObject::~MeshObject() {
   // @@protoc_insertion_point(destructor:amlabslicer.proto.MeshObject)
@@ -2810,6 +4088,8 @@ inline void MeshObject::SharedDtor(MessageLite& self) {
   this_._impl_.vertices_.Destroy();
   this_._impl_.normals_.Destroy();
   this_._impl_.indices_.Destroy();
+  this_._impl_.units_.Destroy();
+  this_._impl_.coordinate_system_.Destroy();
   this_._impl_.~Impl_();
 }
 
@@ -2872,17 +4152,17 @@ MeshObject::GetClassData() const {
   return MeshObject_class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<3, 7, 1, 60, 2>
+const ::_pbi::TcParseTable<4, 10, 2, 90, 2>
 MeshObject::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(MeshObject, _impl_._has_bits_),
     0, // no _extensions_
-    7, 56,  // max_field_number, fast_idx_mask
+    10, 120,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967168,  // skipmap
+    4294966272,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    7,  // num_field_entries
-    1,  // num_aux_entries
+    10,  // num_field_entries
+    2,  // num_aux_entries
     offsetof(decltype(_table_), aux_entries),
     MeshObject_class_data_.base(),
     nullptr,  // post_loop_handler
@@ -2893,8 +4173,8 @@ MeshObject::_table_ = {
   }, {{
     {::_pbi::TcParser::MiniParse, {}},
     // int64 id = 1;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(MeshObject, _impl_.id_), 5>(),
-     {8, 5, 0,
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(MeshObject, _impl_.id_), 7>(),
+     {8, 7, 0,
       PROTOBUF_FIELD_OFFSET(MeshObject, _impl_.id_)}},
     // string name = 2;
     {::_pbi::TcParser::FastUS1,
@@ -2917,11 +4197,28 @@ MeshObject::_table_ = {
     {::_pbi::TcParser::FastF32P1,
      {58, 0, 0,
       PROTOBUF_FIELD_OFFSET(MeshObject, _impl_.transform_matrix_)}},
+    // string units = 8;
+    {::_pbi::TcParser::FastUS1,
+     {66, 5, 0,
+      PROTOBUF_FIELD_OFFSET(MeshObject, _impl_.units_)}},
+    // string coordinate_system = 9;
+    {::_pbi::TcParser::FastUS1,
+     {74, 6, 0,
+      PROTOBUF_FIELD_OFFSET(MeshObject, _impl_.coordinate_system_)}},
+    // bool transform_applied = 10;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(MeshObject, _impl_.transform_applied_), 8>(),
+     {80, 8, 0,
+      PROTOBUF_FIELD_OFFSET(MeshObject, _impl_.transform_applied_)}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
   }}, {{
     65535, 65535
   }}, {{
     // int64 id = 1;
-    {PROTOBUF_FIELD_OFFSET(MeshObject, _impl_.id_), _Internal::kHasBitsOffset + 5, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    {PROTOBUF_FIELD_OFFSET(MeshObject, _impl_.id_), _Internal::kHasBitsOffset + 7, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
     // string name = 2;
     {PROTOBUF_FIELD_OFFSET(MeshObject, _impl_.name_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
     // bytes vertices = 3;
@@ -2930,20 +4227,29 @@ MeshObject::_table_ = {
     {PROTOBUF_FIELD_OFFSET(MeshObject, _impl_.normals_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kBytes | ::_fl::kRepAString)},
     // bytes indices = 5;
     {PROTOBUF_FIELD_OFFSET(MeshObject, _impl_.indices_), _Internal::kHasBitsOffset + 4, 0, (0 | ::_fl::kFcOptional | ::_fl::kBytes | ::_fl::kRepAString)},
-    // map<string, string> override_parameters = 6;
-    {PROTOBUF_FIELD_OFFSET(MeshObject, _impl_.override_parameters_), _Internal::kHasBitsOffset + 6, 0, (0 | ::_fl::kFcRepeated | ::_fl::kMap)},
+    // map<string, .amlabslicer.proto.ParameterValue> override_parameters = 6;
+    {PROTOBUF_FIELD_OFFSET(MeshObject, _impl_.override_parameters_), _Internal::kHasBitsOffset + 9, 0, (0 | ::_fl::kFcRepeated | ::_fl::kMap)},
     // repeated float transform_matrix = 7;
     {PROTOBUF_FIELD_OFFSET(MeshObject, _impl_.transform_matrix_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcRepeated | ::_fl::kPackedFloat)},
+    // string units = 8;
+    {PROTOBUF_FIELD_OFFSET(MeshObject, _impl_.units_), _Internal::kHasBitsOffset + 5, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string coordinate_system = 9;
+    {PROTOBUF_FIELD_OFFSET(MeshObject, _impl_.coordinate_system_), _Internal::kHasBitsOffset + 6, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // bool transform_applied = 10;
+    {PROTOBUF_FIELD_OFFSET(MeshObject, _impl_.transform_applied_), _Internal::kHasBitsOffset + 8, 0, (0 | ::_fl::kFcOptional | ::_fl::kBool)},
   }},
   {{
       {::_pbi::TcParser::GetMapAuxInfo(
-          1, 0, 9, 9, 0)},
+          1, 0, 9, 11, 0)},
+      {::_pbi::TcParser::GetTable<::amlabslicer::proto::ParameterValue>()},
   }},
   {{
-    "\34\0\4\0\0\0\23\0"
+    "\34\0\4\0\0\0\23\0\5\21\0\0\0\0\0\0"
     "amlabslicer.proto.MeshObject"
     "name"
     "override_parameters"
+    "units"
+    "coordinate_system"
   }},
 };
 PROTOBUF_NOINLINE void MeshObject::Clear() {
@@ -2954,7 +4260,7 @@ PROTOBUF_NOINLINE void MeshObject::Clear() {
   (void) cached_has_bits;
 
   cached_has_bits = _impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x0000001fU)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x0000007fU)) {
     if (CheckHasBitForRepeated(cached_has_bits, 0x00000001U)) {
       _impl_.transform_matrix_.Clear();
     }
@@ -2970,10 +4276,17 @@ PROTOBUF_NOINLINE void MeshObject::Clear() {
     if (CheckHasBit(cached_has_bits, 0x00000010U)) {
       _impl_.indices_.ClearNonDefaultToEmpty();
     }
+    if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+      _impl_.units_.ClearNonDefaultToEmpty();
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000040U)) {
+      _impl_.coordinate_system_.ClearNonDefaultToEmpty();
+    }
   }
-  if (BatchCheckHasBit(cached_has_bits, 0x00000060U)) {
-    _impl_.id_ = ::int64_t{0};
-    if (CheckHasBitForRepeated(cached_has_bits, 0x00000040U)) {
+  _impl_.id_ = ::int64_t{0};
+  if (BatchCheckHasBit(cached_has_bits, 0x00000300U)) {
+    _impl_.transform_applied_ = false;
+    if (CheckHasBitForRepeated(cached_has_bits, 0x00000200U)) {
       _impl_.override_parameters_.Clear();
     }
   }
@@ -3001,7 +4314,7 @@ PROTOBUF_NOINLINE void MeshObject::Clear() {
 
   cached_has_bits = this_._impl_._has_bits_[0];
   // int64 id = 1;
-  if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+  if (CheckHasBit(cached_has_bits, 0x00000080U)) {
     if (this_._internal_id() != 0) {
       target =
           ::google::protobuf::internal::WireFormatLite::WriteInt64ToArrayWithField<1>(
@@ -3043,13 +4356,13 @@ PROTOBUF_NOINLINE void MeshObject::Clear() {
     }
   }
 
-  // map<string, string> override_parameters = 6;
-  if (CheckHasBitForRepeated(cached_has_bits, 0x00000040U)) {
+  // map<string, .amlabslicer.proto.ParameterValue> override_parameters = 6;
+  if (CheckHasBitForRepeated(cached_has_bits, 0x00000200U)) {
     if (!this_._internal_override_parameters().empty()) {
-      using MapType = ::google::protobuf::Map<::std::string, ::std::string>;
-      using WireHelper = _pbi::MapEntryFuncs<::std::string, ::std::string,
+      using MapType = ::google::protobuf::Map<::std::string, ::amlabslicer::proto::ParameterValue>;
+      using WireHelper = _pbi::MapEntryFuncs<::std::string, ::amlabslicer::proto::ParameterValue,
                                      _pbi::WireFormatLite::TYPE_STRING,
-                                     _pbi::WireFormatLite::TYPE_STRING>;
+                                     _pbi::WireFormatLite::TYPE_MESSAGE>;
       const auto& field = this_._internal_override_parameters();
 
       if (stream->IsSerializationDeterministic() && field.size() > 1) {
@@ -3059,9 +4372,6 @@ PROTOBUF_NOINLINE void MeshObject::Clear() {
           ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
               entry.first.data(), static_cast<int>(entry.first.length()),
  ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.MeshObject.override_parameters");
-          ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-              entry.second.data(), static_cast<int>(entry.second.length()),
- ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.MeshObject.override_parameters");
         }
       } else {
         for (const auto& entry : field) {
@@ -3069,9 +4379,6 @@ PROTOBUF_NOINLINE void MeshObject::Clear() {
               6, entry.first, entry.second, target, stream);
           ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
               entry.first.data(), static_cast<int>(entry.first.length()),
- ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.MeshObject.override_parameters");
-          ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-              entry.second.data(), static_cast<int>(entry.second.length()),
  ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.MeshObject.override_parameters");
         }
       }
@@ -3082,6 +4389,35 @@ PROTOBUF_NOINLINE void MeshObject::Clear() {
   if (CheckHasBitForRepeated(cached_has_bits, 0x00000001U)) {
     if (this_._internal_transform_matrix_size() > 0) {
       target = stream->WriteFixedPacked(7, this_._internal_transform_matrix(), target);
+    }
+  }
+
+  // string units = 8;
+  if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+    if (!this_._internal_units().empty()) {
+      const ::std::string& _s = this_._internal_units();
+      ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.MeshObject.units");
+      target = stream->WriteStringMaybeAliased(8, _s, target);
+    }
+  }
+
+  // string coordinate_system = 9;
+  if (CheckHasBit(cached_has_bits, 0x00000040U)) {
+    if (!this_._internal_coordinate_system().empty()) {
+      const ::std::string& _s = this_._internal_coordinate_system();
+      ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.MeshObject.coordinate_system");
+      target = stream->WriteStringMaybeAliased(9, _s, target);
+    }
+  }
+
+  // bool transform_applied = 10;
+  if (CheckHasBit(cached_has_bits, 0x00000100U)) {
+    if (this_._internal_transform_applied() != 0) {
+      target = stream->EnsureSpace(target);
+      target = ::_pbi::WireFormatLite::WriteBoolToArray(
+          10, this_._internal_transform_applied(), target);
     }
   }
 
@@ -3110,7 +4446,7 @@ PROTOBUF_NOINLINE void MeshObject::Clear() {
 
   ::_pbi::Prefetch5LinesFrom7Lines(&this_);
   cached_has_bits = this_._impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x0000007fU)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x000000ffU)) {
     // repeated float transform_matrix = 7;
     if (CheckHasBitForRepeated(cached_has_bits, 0x00000001U)) {
       ::size_t data_size = ::size_t{4} *
@@ -3149,21 +4485,43 @@ PROTOBUF_NOINLINE void MeshObject::Clear() {
                                         this_._internal_indices());
       }
     }
-    // int64 id = 1;
+    // string units = 8;
     if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+      if (!this_._internal_units().empty()) {
+        total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                        this_._internal_units());
+      }
+    }
+    // string coordinate_system = 9;
+    if (CheckHasBit(cached_has_bits, 0x00000040U)) {
+      if (!this_._internal_coordinate_system().empty()) {
+        total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                        this_._internal_coordinate_system());
+      }
+    }
+    // int64 id = 1;
+    if (CheckHasBit(cached_has_bits, 0x00000080U)) {
       if (this_._internal_id() != 0) {
         total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
             this_._internal_id());
       }
     }
-    // map<string, string> override_parameters = 6;
-    if (CheckHasBitForRepeated(cached_has_bits, 0x00000040U)) {
+  }
+  if (BatchCheckHasBit(cached_has_bits, 0x00000300U)) {
+    // bool transform_applied = 10;
+    if (CheckHasBit(cached_has_bits, 0x00000100U)) {
+      if (this_._internal_transform_applied() != 0) {
+        total_size += 2;
+      }
+    }
+    // map<string, .amlabslicer.proto.ParameterValue> override_parameters = 6;
+    if (CheckHasBitForRepeated(cached_has_bits, 0x00000200U)) {
       total_size +=
           1 * ::google::protobuf::internal::FromIntSize(this_._internal_override_parameters_size());
       for (const auto& entry : this_._internal_override_parameters()) {
-        total_size += _pbi::MapEntryFuncs<::std::string, ::std::string,
+        total_size += _pbi::MapEntryFuncs<::std::string, ::amlabslicer::proto::ParameterValue,
                                        _pbi::WireFormatLite::TYPE_STRING,
-                                       _pbi::WireFormatLite::TYPE_STRING>::ByteSizeLong(entry.first, entry.second);
+                                       _pbi::WireFormatLite::TYPE_MESSAGE>::ByteSizeLong(entry.first, entry.second);
       }
     }
   }
@@ -3185,7 +4543,7 @@ void MeshObject::MergeImpl(::google::protobuf::MessageLite& to_msg,
   (void)cached_has_bits;
 
   cached_has_bits = from._impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x0000007fU)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x000000ffU)) {
     if (CheckHasBitForRepeated(cached_has_bits, 0x00000001U)) {
       _this->_internal_mutable_transform_matrix()->MergeFrom(from._internal_transform_matrix());
     }
@@ -3226,11 +4584,36 @@ void MeshObject::MergeImpl(::google::protobuf::MessageLite& to_msg,
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+      if (!from._internal_units().empty()) {
+        _this->_internal_set_units(from._internal_units());
+      } else {
+        if (_this->_impl_.units_.IsDefault()) {
+          _this->_internal_set_units("");
+        }
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000040U)) {
+      if (!from._internal_coordinate_system().empty()) {
+        _this->_internal_set_coordinate_system(from._internal_coordinate_system());
+      } else {
+        if (_this->_impl_.coordinate_system_.IsDefault()) {
+          _this->_internal_set_coordinate_system("");
+        }
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000080U)) {
       if (from._internal_id() != 0) {
         _this->_impl_.id_ = from._impl_.id_;
       }
     }
-    if (CheckHasBitForRepeated(cached_has_bits, 0x00000040U)) {
+  }
+  if (BatchCheckHasBit(cached_has_bits, 0x00000300U)) {
+    if (CheckHasBit(cached_has_bits, 0x00000100U)) {
+      if (from._internal_transform_applied() != 0) {
+        _this->_impl_.transform_applied_ = from._impl_.transform_applied_;
+      }
+    }
+    if (CheckHasBitForRepeated(cached_has_bits, 0x00000200U)) {
       _this->_impl_.override_parameters_.MergeFrom(from._impl_.override_parameters_);
     }
   }
@@ -3258,7 +4641,14 @@ void MeshObject::InternalSwap(MeshObject* PROTOBUF_RESTRICT PROTOBUF_NONNULL oth
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.vertices_, &other->_impl_.vertices_, arena);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.normals_, &other->_impl_.normals_, arena);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.indices_, &other->_impl_.indices_, arena);
-  swap(_impl_.id_, other->_impl_.id_);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.units_, &other->_impl_.units_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.coordinate_system_, &other->_impl_.coordinate_system_, arena);
+  ::google::protobuf::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(MeshObject, _impl_.transform_applied_)
+      + sizeof(MeshObject::_impl_.transform_applied_)
+      - PROTOBUF_FIELD_OFFSET(MeshObject, _impl_.id_)>(
+          reinterpret_cast<char*>(&_impl_.id_),
+          reinterpret_cast<char*>(&other->_impl_.id_));
   _impl_.override_parameters_.InternalSwap(&other->_impl_.override_parameters_);
 }
 
@@ -3677,99 +5067,100 @@ void FiveAxisConfig::InternalSwap(FiveAxisConfig* PROTOBUF_RESTRICT PROTOBUF_NON
 // ===================================================================
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-SliceRequest_GlobalParametersEntry_DoNotUse::SliceRequest_GlobalParametersEntry_DoNotUse()
-    : SuperType(SliceRequest_GlobalParametersEntry_DoNotUse_class_data_.base()) {}
-SliceRequest_GlobalParametersEntry_DoNotUse::SliceRequest_GlobalParametersEntry_DoNotUse(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
-    : SuperType(arena, SliceRequest_GlobalParametersEntry_DoNotUse_class_data_.base()) {}
+SliceRequest_ParametersEntry_DoNotUse::SliceRequest_ParametersEntry_DoNotUse()
+    : SuperType(SliceRequest_ParametersEntry_DoNotUse_class_data_.base()) {}
+SliceRequest_ParametersEntry_DoNotUse::SliceRequest_ParametersEntry_DoNotUse(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+    : SuperType(arena, SliceRequest_ParametersEntry_DoNotUse_class_data_.base()) {}
 #else   // PROTOBUF_CUSTOM_VTABLE
-SliceRequest_GlobalParametersEntry_DoNotUse::SliceRequest_GlobalParametersEntry_DoNotUse() : SuperType() {}
-SliceRequest_GlobalParametersEntry_DoNotUse::SliceRequest_GlobalParametersEntry_DoNotUse(::google::protobuf::Arena* PROTOBUF_NULLABLE arena) : SuperType(arena) {}
+SliceRequest_ParametersEntry_DoNotUse::SliceRequest_ParametersEntry_DoNotUse() : SuperType() {}
+SliceRequest_ParametersEntry_DoNotUse::SliceRequest_ParametersEntry_DoNotUse(::google::protobuf::Arena* PROTOBUF_NULLABLE arena) : SuperType(arena) {}
 #endif  // PROTOBUF_CUSTOM_VTABLE
-inline void* PROTOBUF_NONNULL SliceRequest_GlobalParametersEntry_DoNotUse::PlacementNew_(
+inline void* PROTOBUF_NONNULL SliceRequest_ParametersEntry_DoNotUse::PlacementNew_(
     const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
     ::google::protobuf::Arena* PROTOBUF_NULLABLE arena) {
-  return ::new (mem) SliceRequest_GlobalParametersEntry_DoNotUse(arena);
+  return ::new (mem) SliceRequest_ParametersEntry_DoNotUse(arena);
 }
-constexpr auto SliceRequest_GlobalParametersEntry_DoNotUse::InternalNewImpl_() {
-  return ::google::protobuf::internal::MessageCreator::CopyInit(sizeof(SliceRequest_GlobalParametersEntry_DoNotUse),
-                                            alignof(SliceRequest_GlobalParametersEntry_DoNotUse));
+constexpr auto SliceRequest_ParametersEntry_DoNotUse::InternalNewImpl_() {
+  return ::google::protobuf::internal::MessageCreator::CopyInit(sizeof(SliceRequest_ParametersEntry_DoNotUse),
+                                            alignof(SliceRequest_ParametersEntry_DoNotUse));
 }
-constexpr auto SliceRequest_GlobalParametersEntry_DoNotUse::InternalGenerateClassData_() {
+constexpr auto SliceRequest_ParametersEntry_DoNotUse::InternalGenerateClassData_() {
   return ::google::protobuf::internal::ClassDataFull{
       ::google::protobuf::internal::ClassData{
-          &_SliceRequest_GlobalParametersEntry_DoNotUse_default_instance_._instance,
+          &_SliceRequest_ParametersEntry_DoNotUse_default_instance_._instance,
           &_table_.header,
           nullptr,  // OnDemandRegisterArenaDtor
           nullptr,  // IsInitialized
-          &SliceRequest_GlobalParametersEntry_DoNotUse::MergeImpl,
-          ::google::protobuf::Message::GetNewImpl<SliceRequest_GlobalParametersEntry_DoNotUse>(),
+          &SliceRequest_ParametersEntry_DoNotUse::MergeImpl,
+          ::google::protobuf::Message::GetNewImpl<SliceRequest_ParametersEntry_DoNotUse>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-          &SliceRequest_GlobalParametersEntry_DoNotUse::SharedDtor,
-          static_cast<void (::google::protobuf::MessageLite::*)()>(&SliceRequest_GlobalParametersEntry_DoNotUse::ClearImpl),
+          &SliceRequest_ParametersEntry_DoNotUse::SharedDtor,
+          static_cast<void (::google::protobuf::MessageLite::*)()>(&SliceRequest_ParametersEntry_DoNotUse::ClearImpl),
               ::google::protobuf::Message::ByteSizeLongImpl, ::google::protobuf::Message::_InternalSerializeImpl
               ,
 #endif  // PROTOBUF_CUSTOM_VTABLE
-          PROTOBUF_FIELD_OFFSET(SliceRequest_GlobalParametersEntry_DoNotUse, _impl_._cached_size_),
+          PROTOBUF_FIELD_OFFSET(SliceRequest_ParametersEntry_DoNotUse, _impl_._cached_size_),
           false,
       },
-      &SliceRequest_GlobalParametersEntry_DoNotUse::kDescriptorMethods,
+      &SliceRequest_ParametersEntry_DoNotUse::kDescriptorMethods,
       &descriptor_table_slicer_2eproto,
       nullptr,  // tracker
   };
 }
 
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const
-    ::google::protobuf::internal::ClassDataFull SliceRequest_GlobalParametersEntry_DoNotUse_class_data_ =
-        SliceRequest_GlobalParametersEntry_DoNotUse::InternalGenerateClassData_();
+    ::google::protobuf::internal::ClassDataFull SliceRequest_ParametersEntry_DoNotUse_class_data_ =
+        SliceRequest_ParametersEntry_DoNotUse::InternalGenerateClassData_();
 
 PROTOBUF_ATTRIBUTE_WEAK const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL
-SliceRequest_GlobalParametersEntry_DoNotUse::GetClassData() const {
-  ::google::protobuf::internal::PrefetchToLocalCache(&SliceRequest_GlobalParametersEntry_DoNotUse_class_data_);
-  ::google::protobuf::internal::PrefetchToLocalCache(SliceRequest_GlobalParametersEntry_DoNotUse_class_data_.tc_table);
-  return SliceRequest_GlobalParametersEntry_DoNotUse_class_data_.base();
+SliceRequest_ParametersEntry_DoNotUse::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&SliceRequest_ParametersEntry_DoNotUse_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(SliceRequest_ParametersEntry_DoNotUse_class_data_.tc_table);
+  return SliceRequest_ParametersEntry_DoNotUse_class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<1, 2, 0, 69, 2>
-SliceRequest_GlobalParametersEntry_DoNotUse::_table_ = {
+const ::_pbi::TcParseTable<1, 2, 1, 58, 2>
+SliceRequest_ParametersEntry_DoNotUse::_table_ = {
   {
-    PROTOBUF_FIELD_OFFSET(SliceRequest_GlobalParametersEntry_DoNotUse, _impl_._has_bits_),
+    PROTOBUF_FIELD_OFFSET(SliceRequest_ParametersEntry_DoNotUse, _impl_._has_bits_),
     0, // no _extensions_
     2, 8,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
     4294967292,  // skipmap
     offsetof(decltype(_table_), field_entries),
     2,  // num_field_entries
-    0,  // num_aux_entries
-    offsetof(decltype(_table_), field_names),  // no aux_entries
-    SliceRequest_GlobalParametersEntry_DoNotUse_class_data_.base(),
+    1,  // num_aux_entries
+    offsetof(decltype(_table_), aux_entries),
+    SliceRequest_ParametersEntry_DoNotUse_class_data_.base(),
     nullptr,  // post_loop_handler
     ::_pbi::TcParser::DiscardEverythingFallback,  // fallback
     #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
-    ::_pbi::TcParser::GetTable<::amlabslicer::proto::SliceRequest_GlobalParametersEntry_DoNotUse>(),  // to_prefetch
+    ::_pbi::TcParser::GetTable<::amlabslicer::proto::SliceRequest_ParametersEntry_DoNotUse>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    // string value = 2;
-    {::_pbi::TcParser::FastUS1,
+    // .amlabslicer.proto.ParameterValue value = 2;
+    {::_pbi::TcParser::FastMtS1,
      {18, 1, 0,
-      PROTOBUF_FIELD_OFFSET(SliceRequest_GlobalParametersEntry_DoNotUse, _impl_.value_)}},
+      PROTOBUF_FIELD_OFFSET(SliceRequest_ParametersEntry_DoNotUse, _impl_.value_)}},
     // string key = 1;
     {::_pbi::TcParser::FastUS1,
      {10, 0, 0,
-      PROTOBUF_FIELD_OFFSET(SliceRequest_GlobalParametersEntry_DoNotUse, _impl_.key_)}},
+      PROTOBUF_FIELD_OFFSET(SliceRequest_ParametersEntry_DoNotUse, _impl_.key_)}},
   }}, {{
     65535, 65535
   }}, {{
     // string key = 1;
-    {PROTOBUF_FIELD_OFFSET(SliceRequest_GlobalParametersEntry_DoNotUse, _impl_.key_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // string value = 2;
-    {PROTOBUF_FIELD_OFFSET(SliceRequest_GlobalParametersEntry_DoNotUse, _impl_.value_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    {PROTOBUF_FIELD_OFFSET(SliceRequest_ParametersEntry_DoNotUse, _impl_.key_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // .amlabslicer.proto.ParameterValue value = 2;
+    {PROTOBUF_FIELD_OFFSET(SliceRequest_ParametersEntry_DoNotUse, _impl_.value_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kMessage | ::_fl::kTvTable)},
   }},
-  // no aux_entries
   {{
-    "\64\3\5\0\0\0\0\0"
-    "amlabslicer.proto.SliceRequest.GlobalParametersEntry"
+      {::_pbi::TcParser::GetTable<::amlabslicer::proto::ParameterValue>()},
+  }},
+  {{
+    "\56\3\0\0\0\0\0\0"
+    "amlabslicer.proto.SliceRequest.ParametersEntry"
     "key"
-    "value"
   }},
 };
 // ===================================================================
@@ -3798,8 +5189,9 @@ PROTOBUF_NDEBUG_INLINE SliceRequest::Impl_::Impl_(
       : _has_bits_{from._has_bits_},
         _cached_size_{0},
         objects_{visibility, arena, from.objects_},
-        algorithm_name_(arena, from.algorithm_name_),
-        global_parameters_{visibility, arena, from.global_parameters_} {}
+        algorithm_id_(arena, from.algorithm_id_),
+        request_id_(arena, from.request_id_),
+        parameters_{visibility, arena, from.parameters_} {}
 
 SliceRequest::SliceRequest(
     ::google::protobuf::Arena* PROTOBUF_NULLABLE arena,
@@ -3815,7 +5207,7 @@ SliceRequest::SliceRequest(
       from._internal_metadata_);
   new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
   ::uint32_t cached_has_bits = _impl_._has_bits_[0];
-  _impl_.five_axis_config_ = (CheckHasBit(cached_has_bits, 0x00000004U))
+  _impl_.five_axis_config_ = (CheckHasBit(cached_has_bits, 0x00000008U))
                 ? ::google::protobuf::Message::CopyConstruct(arena, *from._impl_.five_axis_config_)
                 : nullptr;
 
@@ -3826,8 +5218,9 @@ PROTOBUF_NDEBUG_INLINE SliceRequest::Impl_::Impl_(
     [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
       : _cached_size_{0},
         objects_{visibility, arena},
-        algorithm_name_(arena),
-        global_parameters_{visibility, arena} {}
+        algorithm_id_(arena),
+        request_id_(arena),
+        parameters_{visibility, arena} {}
 
 inline void SliceRequest::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
@@ -3844,7 +5237,8 @@ inline void SliceRequest::SharedDtor(MessageLite& self) {
   }
   this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   ABSL_DCHECK(this_.GetArena() == nullptr);
-  this_._impl_.algorithm_name_.Destroy();
+  this_._impl_.algorithm_id_.Destroy();
+  this_._impl_.request_id_.Destroy();
   delete this_._impl_.five_axis_config_;
   this_._impl_.~Impl_();
 }
@@ -3856,8 +5250,8 @@ inline void* PROTOBUF_NONNULL SliceRequest::PlacementNew_(
 }
 constexpr auto SliceRequest::InternalNewImpl_() {
   constexpr auto arena_bits = ::google::protobuf::internal::EncodePlacementArenaOffsets({
-      PROTOBUF_FIELD_OFFSET(SliceRequest, _impl_.global_parameters_) +
-          decltype(SliceRequest::_impl_.global_parameters_)::
+      PROTOBUF_FIELD_OFFSET(SliceRequest, _impl_.parameters_) +
+          decltype(SliceRequest::_impl_.parameters_)::
               InternalGetArenaOffset(
                   ::google::protobuf::Message::internal_visibility()),
       PROTOBUF_FIELD_OFFSET(SliceRequest, _impl_.objects_) +
@@ -3908,17 +5302,17 @@ SliceRequest::GetClassData() const {
   return SliceRequest_class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<2, 4, 3, 70, 2>
+const ::_pbi::TcParseTable<3, 5, 4, 71, 2>
 SliceRequest::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(SliceRequest, _impl_._has_bits_),
     0, // no _extensions_
-    4, 24,  // max_field_number, fast_idx_mask
+    5, 56,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967280,  // skipmap
+    4294967264,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    4,  // num_field_entries
-    3,  // num_aux_entries
+    5,  // num_field_entries
+    4,  // num_aux_entries
     offsetof(decltype(_table_), aux_entries),
     SliceRequest_class_data_.base(),
     nullptr,  // post_loop_handler
@@ -3927,42 +5321,53 @@ SliceRequest::_table_ = {
     ::_pbi::TcParser::GetTable<::amlabslicer::proto::SliceRequest>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    // .amlabslicer.proto.FiveAxisConfig five_axis_config = 4;
-    {::_pbi::TcParser::FastMtS1,
-     {34, 2, 1,
-      PROTOBUF_FIELD_OFFSET(SliceRequest, _impl_.five_axis_config_)}},
-    // string algorithm_name = 1;
+    {::_pbi::TcParser::MiniParse, {}},
+    // string algorithm_id = 1;
     {::_pbi::TcParser::FastUS1,
      {10, 1, 0,
-      PROTOBUF_FIELD_OFFSET(SliceRequest, _impl_.algorithm_name_)}},
+      PROTOBUF_FIELD_OFFSET(SliceRequest, _impl_.algorithm_id_)}},
     {::_pbi::TcParser::MiniParse, {}},
     // repeated .amlabslicer.proto.MeshObject objects = 3;
     {::_pbi::TcParser::FastMtR1,
      {26, 0, 0,
       PROTOBUF_FIELD_OFFSET(SliceRequest, _impl_.objects_)}},
+    // .amlabslicer.proto.FiveAxisConfig five_axis_config = 4;
+    {::_pbi::TcParser::FastMtS1,
+     {34, 3, 1,
+      PROTOBUF_FIELD_OFFSET(SliceRequest, _impl_.five_axis_config_)}},
+    // string request_id = 5;
+    {::_pbi::TcParser::FastUS1,
+     {42, 2, 0,
+      PROTOBUF_FIELD_OFFSET(SliceRequest, _impl_.request_id_)}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
   }}, {{
     65535, 65535
   }}, {{
-    // string algorithm_name = 1;
-    {PROTOBUF_FIELD_OFFSET(SliceRequest, _impl_.algorithm_name_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // map<string, string> global_parameters = 2;
-    {PROTOBUF_FIELD_OFFSET(SliceRequest, _impl_.global_parameters_), _Internal::kHasBitsOffset + 3, 2, (0 | ::_fl::kFcRepeated | ::_fl::kMap)},
+    // string algorithm_id = 1;
+    {PROTOBUF_FIELD_OFFSET(SliceRequest, _impl_.algorithm_id_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // map<string, .amlabslicer.proto.ParameterValue> parameters = 2;
+    {PROTOBUF_FIELD_OFFSET(SliceRequest, _impl_.parameters_), _Internal::kHasBitsOffset + 4, 2, (0 | ::_fl::kFcRepeated | ::_fl::kMap)},
     // repeated .amlabslicer.proto.MeshObject objects = 3;
     {PROTOBUF_FIELD_OFFSET(SliceRequest, _impl_.objects_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
     // .amlabslicer.proto.FiveAxisConfig five_axis_config = 4;
-    {PROTOBUF_FIELD_OFFSET(SliceRequest, _impl_.five_axis_config_), _Internal::kHasBitsOffset + 2, 1, (0 | ::_fl::kFcOptional | ::_fl::kMessage | ::_fl::kTvTable)},
+    {PROTOBUF_FIELD_OFFSET(SliceRequest, _impl_.five_axis_config_), _Internal::kHasBitsOffset + 3, 1, (0 | ::_fl::kFcOptional | ::_fl::kMessage | ::_fl::kTvTable)},
+    // string request_id = 5;
+    {PROTOBUF_FIELD_OFFSET(SliceRequest, _impl_.request_id_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
   }},
   {{
       {::_pbi::TcParser::GetTable<::amlabslicer::proto::MeshObject>()},
       {::_pbi::TcParser::GetTable<::amlabslicer::proto::FiveAxisConfig>()},
       {::_pbi::TcParser::GetMapAuxInfo(
-          1, 0, 9, 9, 0)},
+          1, 0, 9, 11, 0)},
+      {::_pbi::TcParser::GetTable<::amlabslicer::proto::ParameterValue>()},
   }},
   {{
-    "\36\16\21\0\0\0\0\0"
+    "\36\14\12\0\0\12\0\0"
     "amlabslicer.proto.SliceRequest"
-    "algorithm_name"
-    "global_parameters"
+    "algorithm_id"
+    "parameters"
+    "request_id"
   }},
 };
 PROTOBUF_NOINLINE void SliceRequest::Clear() {
@@ -3973,19 +5378,22 @@ PROTOBUF_NOINLINE void SliceRequest::Clear() {
   (void) cached_has_bits;
 
   cached_has_bits = _impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x0000000fU)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x0000001fU)) {
     if (CheckHasBitForRepeated(cached_has_bits, 0x00000001U)) {
       _impl_.objects_.Clear();
     }
     if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-      _impl_.algorithm_name_.ClearNonDefaultToEmpty();
+      _impl_.algorithm_id_.ClearNonDefaultToEmpty();
     }
     if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+      _impl_.request_id_.ClearNonDefaultToEmpty();
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
       ABSL_DCHECK(_impl_.five_axis_config_ != nullptr);
       _impl_.five_axis_config_->Clear();
     }
-    if (CheckHasBitForRepeated(cached_has_bits, 0x00000008U)) {
-      _impl_.global_parameters_.Clear();
+    if (CheckHasBitForRepeated(cached_has_bits, 0x00000010U)) {
+      _impl_.parameters_.Clear();
     }
   }
   _impl_._has_bits_.Clear();
@@ -4011,24 +5419,24 @@ PROTOBUF_NOINLINE void SliceRequest::Clear() {
   (void)cached_has_bits;
 
   cached_has_bits = this_._impl_._has_bits_[0];
-  // string algorithm_name = 1;
+  // string algorithm_id = 1;
   if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-    if (!this_._internal_algorithm_name().empty()) {
-      const ::std::string& _s = this_._internal_algorithm_name();
+    if (!this_._internal_algorithm_id().empty()) {
+      const ::std::string& _s = this_._internal_algorithm_id();
       ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.SliceRequest.algorithm_name");
+          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.SliceRequest.algorithm_id");
       target = stream->WriteStringMaybeAliased(1, _s, target);
     }
   }
 
-  // map<string, string> global_parameters = 2;
-  if (CheckHasBitForRepeated(cached_has_bits, 0x00000008U)) {
-    if (!this_._internal_global_parameters().empty()) {
-      using MapType = ::google::protobuf::Map<::std::string, ::std::string>;
-      using WireHelper = _pbi::MapEntryFuncs<::std::string, ::std::string,
+  // map<string, .amlabslicer.proto.ParameterValue> parameters = 2;
+  if (CheckHasBitForRepeated(cached_has_bits, 0x00000010U)) {
+    if (!this_._internal_parameters().empty()) {
+      using MapType = ::google::protobuf::Map<::std::string, ::amlabslicer::proto::ParameterValue>;
+      using WireHelper = _pbi::MapEntryFuncs<::std::string, ::amlabslicer::proto::ParameterValue,
                                      _pbi::WireFormatLite::TYPE_STRING,
-                                     _pbi::WireFormatLite::TYPE_STRING>;
-      const auto& field = this_._internal_global_parameters();
+                                     _pbi::WireFormatLite::TYPE_MESSAGE>;
+      const auto& field = this_._internal_parameters();
 
       if (stream->IsSerializationDeterministic() && field.size() > 1) {
         for (const auto& entry : ::google::protobuf::internal::MapSorterPtr<MapType>(field)) {
@@ -4036,10 +5444,7 @@ PROTOBUF_NOINLINE void SliceRequest::Clear() {
               2, entry.first, entry.second, target, stream);
           ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
               entry.first.data(), static_cast<int>(entry.first.length()),
- ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.SliceRequest.global_parameters");
-          ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-              entry.second.data(), static_cast<int>(entry.second.length()),
- ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.SliceRequest.global_parameters");
+ ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.SliceRequest.parameters");
         }
       } else {
         for (const auto& entry : field) {
@@ -4047,10 +5452,7 @@ PROTOBUF_NOINLINE void SliceRequest::Clear() {
               2, entry.first, entry.second, target, stream);
           ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
               entry.first.data(), static_cast<int>(entry.first.length()),
- ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.SliceRequest.global_parameters");
-          ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-              entry.second.data(), static_cast<int>(entry.second.length()),
- ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.SliceRequest.global_parameters");
+ ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.SliceRequest.parameters");
         }
       }
     }
@@ -4070,10 +5472,20 @@ PROTOBUF_NOINLINE void SliceRequest::Clear() {
   }
 
   // .amlabslicer.proto.FiveAxisConfig five_axis_config = 4;
-  if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+  if (CheckHasBit(cached_has_bits, 0x00000008U)) {
     target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
         4, *this_._impl_.five_axis_config_, this_._impl_.five_axis_config_->GetCachedSize(), target,
         stream);
+  }
+
+  // string request_id = 5;
+  if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+    if (!this_._internal_request_id().empty()) {
+      const ::std::string& _s = this_._internal_request_id();
+      ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.SliceRequest.request_id");
+      target = stream->WriteStringMaybeAliased(5, _s, target);
+    }
   }
 
   if (ABSL_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
@@ -4101,7 +5513,7 @@ PROTOBUF_NOINLINE void SliceRequest::Clear() {
 
   ::_pbi::Prefetch5LinesFrom7Lines(&this_);
   cached_has_bits = this_._impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x0000000fU)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x0000001fU)) {
     // repeated .amlabslicer.proto.MeshObject objects = 3;
     if (CheckHasBitForRepeated(cached_has_bits, 0x00000001U)) {
       total_size += 1UL * this_._internal_objects_size();
@@ -4109,26 +5521,33 @@ PROTOBUF_NOINLINE void SliceRequest::Clear() {
         total_size += ::google::protobuf::internal::WireFormatLite::MessageSize(msg);
       }
     }
-    // string algorithm_name = 1;
+    // string algorithm_id = 1;
     if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-      if (!this_._internal_algorithm_name().empty()) {
+      if (!this_._internal_algorithm_id().empty()) {
         total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
-                                        this_._internal_algorithm_name());
+                                        this_._internal_algorithm_id());
+      }
+    }
+    // string request_id = 5;
+    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+      if (!this_._internal_request_id().empty()) {
+        total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                        this_._internal_request_id());
       }
     }
     // .amlabslicer.proto.FiveAxisConfig five_axis_config = 4;
-    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
       total_size += 1 +
                     ::google::protobuf::internal::WireFormatLite::MessageSize(*this_._impl_.five_axis_config_);
     }
-    // map<string, string> global_parameters = 2;
-    if (CheckHasBitForRepeated(cached_has_bits, 0x00000008U)) {
+    // map<string, .amlabslicer.proto.ParameterValue> parameters = 2;
+    if (CheckHasBitForRepeated(cached_has_bits, 0x00000010U)) {
       total_size +=
-          1 * ::google::protobuf::internal::FromIntSize(this_._internal_global_parameters_size());
-      for (const auto& entry : this_._internal_global_parameters()) {
-        total_size += _pbi::MapEntryFuncs<::std::string, ::std::string,
+          1 * ::google::protobuf::internal::FromIntSize(this_._internal_parameters_size());
+      for (const auto& entry : this_._internal_parameters()) {
+        total_size += _pbi::MapEntryFuncs<::std::string, ::amlabslicer::proto::ParameterValue,
                                        _pbi::WireFormatLite::TYPE_STRING,
-                                       _pbi::WireFormatLite::TYPE_STRING>::ByteSizeLong(entry.first, entry.second);
+                                       _pbi::WireFormatLite::TYPE_MESSAGE>::ByteSizeLong(entry.first, entry.second);
       }
     }
   }
@@ -4151,22 +5570,31 @@ void SliceRequest::MergeImpl(::google::protobuf::MessageLite& to_msg,
   (void)cached_has_bits;
 
   cached_has_bits = from._impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x0000000fU)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x0000001fU)) {
     if (CheckHasBitForRepeated(cached_has_bits, 0x00000001U)) {
       _this->_internal_mutable_objects()->InternalMergeFromWithArena(
           ::google::protobuf::MessageLite::internal_visibility(), arena,
           from._internal_objects());
     }
     if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-      if (!from._internal_algorithm_name().empty()) {
-        _this->_internal_set_algorithm_name(from._internal_algorithm_name());
+      if (!from._internal_algorithm_id().empty()) {
+        _this->_internal_set_algorithm_id(from._internal_algorithm_id());
       } else {
-        if (_this->_impl_.algorithm_name_.IsDefault()) {
-          _this->_internal_set_algorithm_name("");
+        if (_this->_impl_.algorithm_id_.IsDefault()) {
+          _this->_internal_set_algorithm_id("");
         }
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+      if (!from._internal_request_id().empty()) {
+        _this->_internal_set_request_id(from._internal_request_id());
+      } else {
+        if (_this->_impl_.request_id_.IsDefault()) {
+          _this->_internal_set_request_id("");
+        }
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
       ABSL_DCHECK(from._impl_.five_axis_config_ != nullptr);
       if (_this->_impl_.five_axis_config_ == nullptr) {
         _this->_impl_.five_axis_config_ = ::google::protobuf::Message::CopyConstruct(arena, *from._impl_.five_axis_config_);
@@ -4174,8 +5602,8 @@ void SliceRequest::MergeImpl(::google::protobuf::MessageLite& to_msg,
         _this->_impl_.five_axis_config_->MergeFrom(*from._impl_.five_axis_config_);
       }
     }
-    if (CheckHasBitForRepeated(cached_has_bits, 0x00000008U)) {
-      _this->_impl_.global_parameters_.MergeFrom(from._impl_.global_parameters_);
+    if (CheckHasBitForRepeated(cached_has_bits, 0x00000010U)) {
+      _this->_impl_.parameters_.MergeFrom(from._impl_.parameters_);
     }
   }
   _this->_impl_._has_bits_[0] |= cached_has_bits;
@@ -4198,9 +5626,10 @@ void SliceRequest::InternalSwap(SliceRequest* PROTOBUF_RESTRICT PROTOBUF_NONNULL
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
   _impl_.objects_.InternalSwap(&other->_impl_.objects_);
-  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.algorithm_name_, &other->_impl_.algorithm_name_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.algorithm_id_, &other->_impl_.algorithm_id_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.request_id_, &other->_impl_.request_id_, arena);
   swap(_impl_.five_axis_config_, other->_impl_.five_axis_config_);
-  _impl_.global_parameters_.InternalSwap(&other->_impl_.global_parameters_);
+  _impl_.parameters_.InternalSwap(&other->_impl_.parameters_);
 }
 
 ::google::protobuf::Metadata SliceRequest::GetMetadata() const {
@@ -5192,7 +6621,11 @@ PROTOBUF_NDEBUG_INLINE LayerPreview::Impl_::Impl_(
     [[maybe_unused]] const ::amlabslicer::proto::LayerPreview& from_msg)
       : _has_bits_{from._has_bits_},
         _cached_size_{0},
-        path_data_(arena, from.path_data_) {}
+        path_data_(arena, from.path_data_),
+        encoding_(arena, from.encoding_),
+        coordinate_space_(arena, from.coordinate_space_),
+        units_(arena, from.units_),
+        schema_version_(arena, from.schema_version_) {}
 
 LayerPreview::LayerPreview(
     ::google::protobuf::Arena* PROTOBUF_NULLABLE arena,
@@ -5221,7 +6654,11 @@ PROTOBUF_NDEBUG_INLINE LayerPreview::Impl_::Impl_(
     [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
     [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
       : _cached_size_{0},
-        path_data_(arena) {}
+        path_data_(arena),
+        encoding_(arena),
+        coordinate_space_(arena),
+        units_(arena),
+        schema_version_(arena) {}
 
 inline void LayerPreview::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
@@ -5244,6 +6681,10 @@ inline void LayerPreview::SharedDtor(MessageLite& self) {
   this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   ABSL_DCHECK(this_.GetArena() == nullptr);
   this_._impl_.path_data_.Destroy();
+  this_._impl_.encoding_.Destroy();
+  this_._impl_.coordinate_space_.Destroy();
+  this_._impl_.units_.Destroy();
+  this_._impl_.schema_version_.Destroy();
   this_._impl_.~Impl_();
 }
 
@@ -5290,16 +6731,16 @@ LayerPreview::GetClassData() const {
   return LayerPreview_class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<2, 3, 0, 0, 2>
+const ::_pbi::TcParseTable<3, 7, 0, 82, 2>
 LayerPreview::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(LayerPreview, _impl_._has_bits_),
     0, // no _extensions_
-    3, 24,  // max_field_number, fast_idx_mask
+    7, 56,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967288,  // skipmap
+    4294967168,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    3,  // num_field_entries
+    7,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     LayerPreview_class_data_.base(),
@@ -5311,29 +6752,59 @@ LayerPreview::_table_ = {
   }, {{
     {::_pbi::TcParser::MiniParse, {}},
     // int32 layer_id = 1;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(LayerPreview, _impl_.layer_id_), 1>(),
-     {8, 1, 0,
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(LayerPreview, _impl_.layer_id_), 5>(),
+     {8, 5, 0,
       PROTOBUF_FIELD_OFFSET(LayerPreview, _impl_.layer_id_)}},
     // float z_height = 2;
     {::_pbi::TcParser::FastF32S1,
-     {21, 2, 0,
+     {21, 6, 0,
       PROTOBUF_FIELD_OFFSET(LayerPreview, _impl_.z_height_)}},
     // bytes path_data = 3;
     {::_pbi::TcParser::FastBS1,
      {26, 0, 0,
       PROTOBUF_FIELD_OFFSET(LayerPreview, _impl_.path_data_)}},
+    // string encoding = 4;
+    {::_pbi::TcParser::FastUS1,
+     {34, 1, 0,
+      PROTOBUF_FIELD_OFFSET(LayerPreview, _impl_.encoding_)}},
+    // string coordinate_space = 5;
+    {::_pbi::TcParser::FastUS1,
+     {42, 2, 0,
+      PROTOBUF_FIELD_OFFSET(LayerPreview, _impl_.coordinate_space_)}},
+    // string units = 6;
+    {::_pbi::TcParser::FastUS1,
+     {50, 3, 0,
+      PROTOBUF_FIELD_OFFSET(LayerPreview, _impl_.units_)}},
+    // string schema_version = 7;
+    {::_pbi::TcParser::FastUS1,
+     {58, 4, 0,
+      PROTOBUF_FIELD_OFFSET(LayerPreview, _impl_.schema_version_)}},
   }}, {{
     65535, 65535
   }}, {{
     // int32 layer_id = 1;
-    {PROTOBUF_FIELD_OFFSET(LayerPreview, _impl_.layer_id_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
+    {PROTOBUF_FIELD_OFFSET(LayerPreview, _impl_.layer_id_), _Internal::kHasBitsOffset + 5, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
     // float z_height = 2;
-    {PROTOBUF_FIELD_OFFSET(LayerPreview, _impl_.z_height_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
+    {PROTOBUF_FIELD_OFFSET(LayerPreview, _impl_.z_height_), _Internal::kHasBitsOffset + 6, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
     // bytes path_data = 3;
     {PROTOBUF_FIELD_OFFSET(LayerPreview, _impl_.path_data_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kBytes | ::_fl::kRepAString)},
+    // string encoding = 4;
+    {PROTOBUF_FIELD_OFFSET(LayerPreview, _impl_.encoding_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string coordinate_space = 5;
+    {PROTOBUF_FIELD_OFFSET(LayerPreview, _impl_.coordinate_space_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string units = 6;
+    {PROTOBUF_FIELD_OFFSET(LayerPreview, _impl_.units_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string schema_version = 7;
+    {PROTOBUF_FIELD_OFFSET(LayerPreview, _impl_.schema_version_), _Internal::kHasBitsOffset + 4, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
   }},
   // no aux_entries
   {{
+    "\36\0\0\0\10\20\5\16"
+    "amlabslicer.proto.LayerPreview"
+    "encoding"
+    "coordinate_space"
+    "units"
+    "schema_version"
   }},
 };
 PROTOBUF_NOINLINE void LayerPreview::Clear() {
@@ -5344,10 +6815,24 @@ PROTOBUF_NOINLINE void LayerPreview::Clear() {
   (void) cached_has_bits;
 
   cached_has_bits = _impl_._has_bits_[0];
-  if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-    _impl_.path_data_.ClearNonDefaultToEmpty();
+  if (BatchCheckHasBit(cached_has_bits, 0x0000001fU)) {
+    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+      _impl_.path_data_.ClearNonDefaultToEmpty();
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+      _impl_.encoding_.ClearNonDefaultToEmpty();
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+      _impl_.coordinate_space_.ClearNonDefaultToEmpty();
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+      _impl_.units_.ClearNonDefaultToEmpty();
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+      _impl_.schema_version_.ClearNonDefaultToEmpty();
+    }
   }
-  if (BatchCheckHasBit(cached_has_bits, 0x00000006U)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x00000060U)) {
     ::memset(&_impl_.layer_id_, 0, static_cast<::size_t>(
         reinterpret_cast<char*>(&_impl_.z_height_) -
         reinterpret_cast<char*>(&_impl_.layer_id_)) + sizeof(_impl_.z_height_));
@@ -5376,7 +6861,7 @@ PROTOBUF_NOINLINE void LayerPreview::Clear() {
 
   cached_has_bits = this_._impl_._has_bits_[0];
   // int32 layer_id = 1;
-  if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+  if (CheckHasBit(cached_has_bits, 0x00000020U)) {
     if (this_._internal_layer_id() != 0) {
       target =
           ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<1>(
@@ -5385,7 +6870,7 @@ PROTOBUF_NOINLINE void LayerPreview::Clear() {
   }
 
   // float z_height = 2;
-  if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+  if (CheckHasBit(cached_has_bits, 0x00000040U)) {
     if (::absl::bit_cast<::uint32_t>(this_._internal_z_height()) != 0) {
       target = stream->EnsureSpace(target);
       target = ::_pbi::WireFormatLite::WriteFloatToArray(
@@ -5398,6 +6883,46 @@ PROTOBUF_NOINLINE void LayerPreview::Clear() {
     if (!this_._internal_path_data().empty()) {
       const ::std::string& _s = this_._internal_path_data();
       target = stream->WriteBytesMaybeAliased(3, _s, target);
+    }
+  }
+
+  // string encoding = 4;
+  if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+    if (!this_._internal_encoding().empty()) {
+      const ::std::string& _s = this_._internal_encoding();
+      ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.LayerPreview.encoding");
+      target = stream->WriteStringMaybeAliased(4, _s, target);
+    }
+  }
+
+  // string coordinate_space = 5;
+  if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+    if (!this_._internal_coordinate_space().empty()) {
+      const ::std::string& _s = this_._internal_coordinate_space();
+      ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.LayerPreview.coordinate_space");
+      target = stream->WriteStringMaybeAliased(5, _s, target);
+    }
+  }
+
+  // string units = 6;
+  if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+    if (!this_._internal_units().empty()) {
+      const ::std::string& _s = this_._internal_units();
+      ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.LayerPreview.units");
+      target = stream->WriteStringMaybeAliased(6, _s, target);
+    }
+  }
+
+  // string schema_version = 7;
+  if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+    if (!this_._internal_schema_version().empty()) {
+      const ::std::string& _s = this_._internal_schema_version();
+      ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.LayerPreview.schema_version");
+      target = stream->WriteStringMaybeAliased(7, _s, target);
     }
   }
 
@@ -5426,7 +6951,7 @@ PROTOBUF_NOINLINE void LayerPreview::Clear() {
 
   ::_pbi::Prefetch5LinesFrom7Lines(&this_);
   cached_has_bits = this_._impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x00000007U)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x0000007fU)) {
     // bytes path_data = 3;
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
       if (!this_._internal_path_data().empty()) {
@@ -5434,15 +6959,43 @@ PROTOBUF_NOINLINE void LayerPreview::Clear() {
                                         this_._internal_path_data());
       }
     }
-    // int32 layer_id = 1;
+    // string encoding = 4;
     if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+      if (!this_._internal_encoding().empty()) {
+        total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                        this_._internal_encoding());
+      }
+    }
+    // string coordinate_space = 5;
+    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+      if (!this_._internal_coordinate_space().empty()) {
+        total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                        this_._internal_coordinate_space());
+      }
+    }
+    // string units = 6;
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+      if (!this_._internal_units().empty()) {
+        total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                        this_._internal_units());
+      }
+    }
+    // string schema_version = 7;
+    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+      if (!this_._internal_schema_version().empty()) {
+        total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                        this_._internal_schema_version());
+      }
+    }
+    // int32 layer_id = 1;
+    if (CheckHasBit(cached_has_bits, 0x00000020U)) {
       if (this_._internal_layer_id() != 0) {
         total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
             this_._internal_layer_id());
       }
     }
     // float z_height = 2;
-    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+    if (CheckHasBit(cached_has_bits, 0x00000040U)) {
       if (::absl::bit_cast<::uint32_t>(this_._internal_z_height()) != 0) {
         total_size += 5;
       }
@@ -5466,7 +7019,7 @@ void LayerPreview::MergeImpl(::google::protobuf::MessageLite& to_msg,
   (void)cached_has_bits;
 
   cached_has_bits = from._impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x00000007U)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x0000007fU)) {
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
       if (!from._internal_path_data().empty()) {
         _this->_internal_set_path_data(from._internal_path_data());
@@ -5477,11 +7030,47 @@ void LayerPreview::MergeImpl(::google::protobuf::MessageLite& to_msg,
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+      if (!from._internal_encoding().empty()) {
+        _this->_internal_set_encoding(from._internal_encoding());
+      } else {
+        if (_this->_impl_.encoding_.IsDefault()) {
+          _this->_internal_set_encoding("");
+        }
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+      if (!from._internal_coordinate_space().empty()) {
+        _this->_internal_set_coordinate_space(from._internal_coordinate_space());
+      } else {
+        if (_this->_impl_.coordinate_space_.IsDefault()) {
+          _this->_internal_set_coordinate_space("");
+        }
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+      if (!from._internal_units().empty()) {
+        _this->_internal_set_units(from._internal_units());
+      } else {
+        if (_this->_impl_.units_.IsDefault()) {
+          _this->_internal_set_units("");
+        }
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+      if (!from._internal_schema_version().empty()) {
+        _this->_internal_set_schema_version(from._internal_schema_version());
+      } else {
+        if (_this->_impl_.schema_version_.IsDefault()) {
+          _this->_internal_set_schema_version("");
+        }
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000020U)) {
       if (from._internal_layer_id() != 0) {
         _this->_impl_.layer_id_ = from._impl_.layer_id_;
       }
     }
-    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+    if (CheckHasBit(cached_has_bits, 0x00000040U)) {
       if (::absl::bit_cast<::uint32_t>(from._internal_z_height()) != 0) {
         _this->_impl_.z_height_ = from._impl_.z_height_;
       }
@@ -5507,6 +7096,10 @@ void LayerPreview::InternalSwap(LayerPreview* PROTOBUF_RESTRICT PROTOBUF_NONNULL
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.path_data_, &other->_impl_.path_data_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.encoding_, &other->_impl_.encoding_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.coordinate_space_, &other->_impl_.coordinate_space_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.units_, &other->_impl_.units_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.schema_version_, &other->_impl_.schema_version_, arena);
   ::google::protobuf::internal::memswap<
       PROTOBUF_FIELD_OFFSET(LayerPreview, _impl_.z_height_)
       + sizeof(LayerPreview::_impl_.z_height_)
@@ -5516,6 +7109,1096 @@ void LayerPreview::InternalSwap(LayerPreview* PROTOBUF_RESTRICT PROTOBUF_NONNULL
 }
 
 ::google::protobuf::Metadata LayerPreview::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+Artifact_MetadataEntry_DoNotUse::Artifact_MetadataEntry_DoNotUse()
+    : SuperType(Artifact_MetadataEntry_DoNotUse_class_data_.base()) {}
+Artifact_MetadataEntry_DoNotUse::Artifact_MetadataEntry_DoNotUse(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+    : SuperType(arena, Artifact_MetadataEntry_DoNotUse_class_data_.base()) {}
+#else   // PROTOBUF_CUSTOM_VTABLE
+Artifact_MetadataEntry_DoNotUse::Artifact_MetadataEntry_DoNotUse() : SuperType() {}
+Artifact_MetadataEntry_DoNotUse::Artifact_MetadataEntry_DoNotUse(::google::protobuf::Arena* PROTOBUF_NULLABLE arena) : SuperType(arena) {}
+#endif  // PROTOBUF_CUSTOM_VTABLE
+inline void* PROTOBUF_NONNULL Artifact_MetadataEntry_DoNotUse::PlacementNew_(
+    const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena) {
+  return ::new (mem) Artifact_MetadataEntry_DoNotUse(arena);
+}
+constexpr auto Artifact_MetadataEntry_DoNotUse::InternalNewImpl_() {
+  return ::google::protobuf::internal::MessageCreator::CopyInit(sizeof(Artifact_MetadataEntry_DoNotUse),
+                                            alignof(Artifact_MetadataEntry_DoNotUse));
+}
+constexpr auto Artifact_MetadataEntry_DoNotUse::InternalGenerateClassData_() {
+  return ::google::protobuf::internal::ClassDataFull{
+      ::google::protobuf::internal::ClassData{
+          &_Artifact_MetadataEntry_DoNotUse_default_instance_._instance,
+          &_table_.header,
+          nullptr,  // OnDemandRegisterArenaDtor
+          nullptr,  // IsInitialized
+          &Artifact_MetadataEntry_DoNotUse::MergeImpl,
+          ::google::protobuf::Message::GetNewImpl<Artifact_MetadataEntry_DoNotUse>(),
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+          &Artifact_MetadataEntry_DoNotUse::SharedDtor,
+          static_cast<void (::google::protobuf::MessageLite::*)()>(&Artifact_MetadataEntry_DoNotUse::ClearImpl),
+              ::google::protobuf::Message::ByteSizeLongImpl, ::google::protobuf::Message::_InternalSerializeImpl
+              ,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          PROTOBUF_FIELD_OFFSET(Artifact_MetadataEntry_DoNotUse, _impl_._cached_size_),
+          false,
+      },
+      &Artifact_MetadataEntry_DoNotUse::kDescriptorMethods,
+      &descriptor_table_slicer_2eproto,
+      nullptr,  // tracker
+  };
+}
+
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const
+    ::google::protobuf::internal::ClassDataFull Artifact_MetadataEntry_DoNotUse_class_data_ =
+        Artifact_MetadataEntry_DoNotUse::InternalGenerateClassData_();
+
+PROTOBUF_ATTRIBUTE_WEAK const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL
+Artifact_MetadataEntry_DoNotUse::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&Artifact_MetadataEntry_DoNotUse_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(Artifact_MetadataEntry_DoNotUse_class_data_.tc_table);
+  return Artifact_MetadataEntry_DoNotUse_class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<1, 2, 0, 57, 2>
+Artifact_MetadataEntry_DoNotUse::_table_ = {
+  {
+    PROTOBUF_FIELD_OFFSET(Artifact_MetadataEntry_DoNotUse, _impl_._has_bits_),
+    0, // no _extensions_
+    2, 8,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967292,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    2,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    Artifact_MetadataEntry_DoNotUse_class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::DiscardEverythingFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::amlabslicer::proto::Artifact_MetadataEntry_DoNotUse>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    // string value = 2;
+    {::_pbi::TcParser::FastUS1,
+     {18, 1, 0,
+      PROTOBUF_FIELD_OFFSET(Artifact_MetadataEntry_DoNotUse, _impl_.value_)}},
+    // string key = 1;
+    {::_pbi::TcParser::FastUS1,
+     {10, 0, 0,
+      PROTOBUF_FIELD_OFFSET(Artifact_MetadataEntry_DoNotUse, _impl_.key_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // string key = 1;
+    {PROTOBUF_FIELD_OFFSET(Artifact_MetadataEntry_DoNotUse, _impl_.key_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string value = 2;
+    {PROTOBUF_FIELD_OFFSET(Artifact_MetadataEntry_DoNotUse, _impl_.value_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+  }},
+  // no aux_entries
+  {{
+    "\50\3\5\0\0\0\0\0"
+    "amlabslicer.proto.Artifact.MetadataEntry"
+    "key"
+    "value"
+  }},
+};
+// ===================================================================
+
+class Artifact::_Internal {
+ public:
+  using HasBits =
+      decltype(::std::declval<Artifact>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+      8 * PROTOBUF_FIELD_OFFSET(Artifact, _impl_._has_bits_);
+};
+
+Artifact::Artifact(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, Artifact_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:amlabslicer.proto.Artifact)
+}
+PROTOBUF_NDEBUG_INLINE Artifact::Impl_::Impl_(
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+    [[maybe_unused]] const ::amlabslicer::proto::Artifact& from_msg)
+      : _has_bits_{from._has_bits_},
+        _cached_size_{0},
+        kind_(arena, from.kind_),
+        mime_type_(arena, from.mime_type_),
+        file_name_(arena, from.file_name_),
+        data_(arena, from.data_),
+        metadata_{visibility, arena, from.metadata_} {}
+
+Artifact::Artifact(
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena,
+    const Artifact& from)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, Artifact_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  Artifact* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+
+  // @@protoc_insertion_point(copy_constructor:amlabslicer.proto.Artifact)
+}
+PROTOBUF_NDEBUG_INLINE Artifact::Impl_::Impl_(
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+      : _cached_size_{0},
+        kind_(arena),
+        mime_type_(arena),
+        file_name_(arena),
+        data_(arena),
+        metadata_{visibility, arena} {}
+
+inline void Artifact::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+}
+Artifact::~Artifact() {
+  // @@protoc_insertion_point(destructor:amlabslicer.proto.Artifact)
+  SharedDtor(*this);
+}
+inline void Artifact::SharedDtor(MessageLite& self) {
+  Artifact& this_ = static_cast<Artifact&>(self);
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    this_.CheckHasBitConsistency();
+  }
+  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  ABSL_DCHECK(this_.GetArena() == nullptr);
+  this_._impl_.kind_.Destroy();
+  this_._impl_.mime_type_.Destroy();
+  this_._impl_.file_name_.Destroy();
+  this_._impl_.data_.Destroy();
+  this_._impl_.~Impl_();
+}
+
+inline void* PROTOBUF_NONNULL Artifact::PlacementNew_(
+    const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena) {
+  return ::new (mem) Artifact(arena);
+}
+constexpr auto Artifact::InternalNewImpl_() {
+  constexpr auto arena_bits = ::google::protobuf::internal::EncodePlacementArenaOffsets({
+      PROTOBUF_FIELD_OFFSET(Artifact, _impl_.metadata_) +
+          decltype(Artifact::_impl_.metadata_)::
+              InternalGetArenaOffset(
+                  ::google::protobuf::Message::internal_visibility()),
+  });
+  if (arena_bits.has_value()) {
+    return ::google::protobuf::internal::MessageCreator::CopyInit(
+        sizeof(Artifact), alignof(Artifact), *arena_bits);
+  } else {
+    return ::google::protobuf::internal::MessageCreator(&Artifact::PlacementNew_,
+                                 sizeof(Artifact),
+                                 alignof(Artifact));
+  }
+}
+constexpr auto Artifact::InternalGenerateClassData_() {
+  return ::google::protobuf::internal::ClassDataFull{
+      ::google::protobuf::internal::ClassData{
+          &_Artifact_default_instance_._instance,
+          &_table_.header,
+          nullptr,  // OnDemandRegisterArenaDtor
+          nullptr,  // IsInitialized
+          &Artifact::MergeImpl,
+          ::google::protobuf::Message::GetNewImpl<Artifact>(),
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+          &Artifact::SharedDtor,
+          ::google::protobuf::Message::GetClearImpl<Artifact>(), &Artifact::ByteSizeLong,
+              &Artifact::_InternalSerialize,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          PROTOBUF_FIELD_OFFSET(Artifact, _impl_._cached_size_),
+          false,
+      },
+      &Artifact::kDescriptorMethods,
+      &descriptor_table_slicer_2eproto,
+      nullptr,  // tracker
+  };
+}
+
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const
+    ::google::protobuf::internal::ClassDataFull Artifact_class_data_ =
+        Artifact::InternalGenerateClassData_();
+
+PROTOBUF_ATTRIBUTE_WEAK const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL
+Artifact::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&Artifact_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(Artifact_class_data_.tc_table);
+  return Artifact_class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<2, 5, 1, 65, 2>
+Artifact::_table_ = {
+  {
+    PROTOBUF_FIELD_OFFSET(Artifact, _impl_._has_bits_),
+    0, // no _extensions_
+    5, 24,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967264,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    5,  // num_field_entries
+    1,  // num_aux_entries
+    offsetof(decltype(_table_), aux_entries),
+    Artifact_class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::amlabslicer::proto::Artifact>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    // bytes data = 4;
+    {::_pbi::TcParser::FastBS1,
+     {34, 3, 0,
+      PROTOBUF_FIELD_OFFSET(Artifact, _impl_.data_)}},
+    // string kind = 1;
+    {::_pbi::TcParser::FastUS1,
+     {10, 0, 0,
+      PROTOBUF_FIELD_OFFSET(Artifact, _impl_.kind_)}},
+    // string mime_type = 2;
+    {::_pbi::TcParser::FastUS1,
+     {18, 1, 0,
+      PROTOBUF_FIELD_OFFSET(Artifact, _impl_.mime_type_)}},
+    // string file_name = 3;
+    {::_pbi::TcParser::FastUS1,
+     {26, 2, 0,
+      PROTOBUF_FIELD_OFFSET(Artifact, _impl_.file_name_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // string kind = 1;
+    {PROTOBUF_FIELD_OFFSET(Artifact, _impl_.kind_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string mime_type = 2;
+    {PROTOBUF_FIELD_OFFSET(Artifact, _impl_.mime_type_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string file_name = 3;
+    {PROTOBUF_FIELD_OFFSET(Artifact, _impl_.file_name_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // bytes data = 4;
+    {PROTOBUF_FIELD_OFFSET(Artifact, _impl_.data_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kBytes | ::_fl::kRepAString)},
+    // map<string, string> metadata = 5;
+    {PROTOBUF_FIELD_OFFSET(Artifact, _impl_.metadata_), _Internal::kHasBitsOffset + 4, 0, (0 | ::_fl::kFcRepeated | ::_fl::kMap)},
+  }},
+  {{
+      {::_pbi::TcParser::GetMapAuxInfo(
+          1, 0, 9, 9, 0)},
+  }},
+  {{
+    "\32\4\11\11\0\10\0\0"
+    "amlabslicer.proto.Artifact"
+    "kind"
+    "mime_type"
+    "file_name"
+    "metadata"
+  }},
+};
+PROTOBUF_NOINLINE void Artifact::Clear() {
+// @@protoc_insertion_point(message_clear_start:amlabslicer.proto.Artifact)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _impl_._has_bits_[0];
+  if (BatchCheckHasBit(cached_has_bits, 0x0000001fU)) {
+    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+      _impl_.kind_.ClearNonDefaultToEmpty();
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+      _impl_.mime_type_.ClearNonDefaultToEmpty();
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+      _impl_.file_name_.ClearNonDefaultToEmpty();
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+      _impl_.data_.ClearNonDefaultToEmpty();
+    }
+    if (CheckHasBitForRepeated(cached_has_bits, 0x00000010U)) {
+      _impl_.metadata_.Clear();
+    }
+  }
+  _impl_._has_bits_.Clear();
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+::uint8_t* PROTOBUF_NONNULL Artifact::_InternalSerialize(
+    const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
+    ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
+  const Artifact& this_ = static_cast<const Artifact&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+::uint8_t* PROTOBUF_NONNULL Artifact::_InternalSerialize(
+    ::uint8_t* PROTOBUF_NONNULL target,
+    ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+  const Artifact& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    this_.CheckHasBitConsistency();
+  }
+  // @@protoc_insertion_point(serialize_to_array_start:amlabslicer.proto.Artifact)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  cached_has_bits = this_._impl_._has_bits_[0];
+  // string kind = 1;
+  if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+    if (!this_._internal_kind().empty()) {
+      const ::std::string& _s = this_._internal_kind();
+      ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.Artifact.kind");
+      target = stream->WriteStringMaybeAliased(1, _s, target);
+    }
+  }
+
+  // string mime_type = 2;
+  if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+    if (!this_._internal_mime_type().empty()) {
+      const ::std::string& _s = this_._internal_mime_type();
+      ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.Artifact.mime_type");
+      target = stream->WriteStringMaybeAliased(2, _s, target);
+    }
+  }
+
+  // string file_name = 3;
+  if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+    if (!this_._internal_file_name().empty()) {
+      const ::std::string& _s = this_._internal_file_name();
+      ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.Artifact.file_name");
+      target = stream->WriteStringMaybeAliased(3, _s, target);
+    }
+  }
+
+  // bytes data = 4;
+  if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+    if (!this_._internal_data().empty()) {
+      const ::std::string& _s = this_._internal_data();
+      target = stream->WriteBytesMaybeAliased(4, _s, target);
+    }
+  }
+
+  // map<string, string> metadata = 5;
+  if (CheckHasBitForRepeated(cached_has_bits, 0x00000010U)) {
+    if (!this_._internal_metadata().empty()) {
+      using MapType = ::google::protobuf::Map<::std::string, ::std::string>;
+      using WireHelper = _pbi::MapEntryFuncs<::std::string, ::std::string,
+                                     _pbi::WireFormatLite::TYPE_STRING,
+                                     _pbi::WireFormatLite::TYPE_STRING>;
+      const auto& field = this_._internal_metadata();
+
+      if (stream->IsSerializationDeterministic() && field.size() > 1) {
+        for (const auto& entry : ::google::protobuf::internal::MapSorterPtr<MapType>(field)) {
+          target = WireHelper::InternalSerialize(
+              5, entry.first, entry.second, target, stream);
+          ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+              entry.first.data(), static_cast<int>(entry.first.length()),
+ ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.Artifact.metadata");
+          ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+              entry.second.data(), static_cast<int>(entry.second.length()),
+ ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.Artifact.metadata");
+        }
+      } else {
+        for (const auto& entry : field) {
+          target = WireHelper::InternalSerialize(
+              5, entry.first, entry.second, target, stream);
+          ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+              entry.first.data(), static_cast<int>(entry.first.length()),
+ ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.Artifact.metadata");
+          ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+              entry.second.data(), static_cast<int>(entry.second.length()),
+ ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.Artifact.metadata");
+        }
+      }
+    }
+  }
+
+  if (ABSL_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:amlabslicer.proto.Artifact)
+  return target;
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+::size_t Artifact::ByteSizeLong(const MessageLite& base) {
+  const Artifact& this_ = static_cast<const Artifact&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+::size_t Artifact::ByteSizeLong() const {
+  const Artifact& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  // @@protoc_insertion_point(message_byte_size_start:amlabslicer.proto.Artifact)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void)cached_has_bits;
+
+  ::_pbi::Prefetch5LinesFrom7Lines(&this_);
+  cached_has_bits = this_._impl_._has_bits_[0];
+  if (BatchCheckHasBit(cached_has_bits, 0x0000001fU)) {
+    // string kind = 1;
+    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+      if (!this_._internal_kind().empty()) {
+        total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                        this_._internal_kind());
+      }
+    }
+    // string mime_type = 2;
+    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+      if (!this_._internal_mime_type().empty()) {
+        total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                        this_._internal_mime_type());
+      }
+    }
+    // string file_name = 3;
+    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+      if (!this_._internal_file_name().empty()) {
+        total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                        this_._internal_file_name());
+      }
+    }
+    // bytes data = 4;
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+      if (!this_._internal_data().empty()) {
+        total_size += 1 + ::google::protobuf::internal::WireFormatLite::BytesSize(
+                                        this_._internal_data());
+      }
+    }
+    // map<string, string> metadata = 5;
+    if (CheckHasBitForRepeated(cached_has_bits, 0x00000010U)) {
+      total_size +=
+          1 * ::google::protobuf::internal::FromIntSize(this_._internal_metadata_size());
+      for (const auto& entry : this_._internal_metadata()) {
+        total_size += _pbi::MapEntryFuncs<::std::string, ::std::string,
+                                       _pbi::WireFormatLite::TYPE_STRING,
+                                       _pbi::WireFormatLite::TYPE_STRING>::ByteSizeLong(entry.first, entry.second);
+      }
+    }
+  }
+  return this_.MaybeComputeUnknownFieldsSize(total_size,
+                                             &this_._impl_._cached_size_);
+}
+
+void Artifact::MergeImpl(::google::protobuf::MessageLite& to_msg,
+                            const ::google::protobuf::MessageLite& from_msg) {
+   auto* const _this =
+      static_cast<Artifact*>(&to_msg);
+  auto& from = static_cast<const Artifact&>(from_msg);
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    from.CheckHasBitConsistency();
+  }
+  // @@protoc_insertion_point(class_specific_merge_from_start:amlabslicer.proto.Artifact)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  cached_has_bits = from._impl_._has_bits_[0];
+  if (BatchCheckHasBit(cached_has_bits, 0x0000001fU)) {
+    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+      if (!from._internal_kind().empty()) {
+        _this->_internal_set_kind(from._internal_kind());
+      } else {
+        if (_this->_impl_.kind_.IsDefault()) {
+          _this->_internal_set_kind("");
+        }
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+      if (!from._internal_mime_type().empty()) {
+        _this->_internal_set_mime_type(from._internal_mime_type());
+      } else {
+        if (_this->_impl_.mime_type_.IsDefault()) {
+          _this->_internal_set_mime_type("");
+        }
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+      if (!from._internal_file_name().empty()) {
+        _this->_internal_set_file_name(from._internal_file_name());
+      } else {
+        if (_this->_impl_.file_name_.IsDefault()) {
+          _this->_internal_set_file_name("");
+        }
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+      if (!from._internal_data().empty()) {
+        _this->_internal_set_data(from._internal_data());
+      } else {
+        if (_this->_impl_.data_.IsDefault()) {
+          _this->_internal_set_data("");
+        }
+      }
+    }
+    if (CheckHasBitForRepeated(cached_has_bits, 0x00000010U)) {
+      _this->_impl_.metadata_.MergeFrom(from._impl_.metadata_);
+    }
+  }
+  _this->_impl_._has_bits_[0] |= cached_has_bits;
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+}
+
+void Artifact::CopyFrom(const Artifact& from) {
+  // @@protoc_insertion_point(class_specific_copy_from_start:amlabslicer.proto.Artifact)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void Artifact::InternalSwap(Artifact* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
+  using ::std::swap;
+  auto* arena = GetArena();
+  ABSL_DCHECK_EQ(arena, other->GetArena());
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.kind_, &other->_impl_.kind_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.mime_type_, &other->_impl_.mime_type_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.file_name_, &other->_impl_.file_name_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.data_, &other->_impl_.data_, arena);
+  _impl_.metadata_.InternalSwap(&other->_impl_.metadata_);
+}
+
+::google::protobuf::Metadata Artifact::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+ErrorInfo_DetailsEntry_DoNotUse::ErrorInfo_DetailsEntry_DoNotUse()
+    : SuperType(ErrorInfo_DetailsEntry_DoNotUse_class_data_.base()) {}
+ErrorInfo_DetailsEntry_DoNotUse::ErrorInfo_DetailsEntry_DoNotUse(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+    : SuperType(arena, ErrorInfo_DetailsEntry_DoNotUse_class_data_.base()) {}
+#else   // PROTOBUF_CUSTOM_VTABLE
+ErrorInfo_DetailsEntry_DoNotUse::ErrorInfo_DetailsEntry_DoNotUse() : SuperType() {}
+ErrorInfo_DetailsEntry_DoNotUse::ErrorInfo_DetailsEntry_DoNotUse(::google::protobuf::Arena* PROTOBUF_NULLABLE arena) : SuperType(arena) {}
+#endif  // PROTOBUF_CUSTOM_VTABLE
+inline void* PROTOBUF_NONNULL ErrorInfo_DetailsEntry_DoNotUse::PlacementNew_(
+    const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena) {
+  return ::new (mem) ErrorInfo_DetailsEntry_DoNotUse(arena);
+}
+constexpr auto ErrorInfo_DetailsEntry_DoNotUse::InternalNewImpl_() {
+  return ::google::protobuf::internal::MessageCreator::CopyInit(sizeof(ErrorInfo_DetailsEntry_DoNotUse),
+                                            alignof(ErrorInfo_DetailsEntry_DoNotUse));
+}
+constexpr auto ErrorInfo_DetailsEntry_DoNotUse::InternalGenerateClassData_() {
+  return ::google::protobuf::internal::ClassDataFull{
+      ::google::protobuf::internal::ClassData{
+          &_ErrorInfo_DetailsEntry_DoNotUse_default_instance_._instance,
+          &_table_.header,
+          nullptr,  // OnDemandRegisterArenaDtor
+          nullptr,  // IsInitialized
+          &ErrorInfo_DetailsEntry_DoNotUse::MergeImpl,
+          ::google::protobuf::Message::GetNewImpl<ErrorInfo_DetailsEntry_DoNotUse>(),
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+          &ErrorInfo_DetailsEntry_DoNotUse::SharedDtor,
+          static_cast<void (::google::protobuf::MessageLite::*)()>(&ErrorInfo_DetailsEntry_DoNotUse::ClearImpl),
+              ::google::protobuf::Message::ByteSizeLongImpl, ::google::protobuf::Message::_InternalSerializeImpl
+              ,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          PROTOBUF_FIELD_OFFSET(ErrorInfo_DetailsEntry_DoNotUse, _impl_._cached_size_),
+          false,
+      },
+      &ErrorInfo_DetailsEntry_DoNotUse::kDescriptorMethods,
+      &descriptor_table_slicer_2eproto,
+      nullptr,  // tracker
+  };
+}
+
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const
+    ::google::protobuf::internal::ClassDataFull ErrorInfo_DetailsEntry_DoNotUse_class_data_ =
+        ErrorInfo_DetailsEntry_DoNotUse::InternalGenerateClassData_();
+
+PROTOBUF_ATTRIBUTE_WEAK const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL
+ErrorInfo_DetailsEntry_DoNotUse::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&ErrorInfo_DetailsEntry_DoNotUse_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(ErrorInfo_DetailsEntry_DoNotUse_class_data_.tc_table);
+  return ErrorInfo_DetailsEntry_DoNotUse_class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<1, 2, 0, 57, 2>
+ErrorInfo_DetailsEntry_DoNotUse::_table_ = {
+  {
+    PROTOBUF_FIELD_OFFSET(ErrorInfo_DetailsEntry_DoNotUse, _impl_._has_bits_),
+    0, // no _extensions_
+    2, 8,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967292,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    2,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    ErrorInfo_DetailsEntry_DoNotUse_class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::DiscardEverythingFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::amlabslicer::proto::ErrorInfo_DetailsEntry_DoNotUse>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    // string value = 2;
+    {::_pbi::TcParser::FastUS1,
+     {18, 1, 0,
+      PROTOBUF_FIELD_OFFSET(ErrorInfo_DetailsEntry_DoNotUse, _impl_.value_)}},
+    // string key = 1;
+    {::_pbi::TcParser::FastUS1,
+     {10, 0, 0,
+      PROTOBUF_FIELD_OFFSET(ErrorInfo_DetailsEntry_DoNotUse, _impl_.key_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // string key = 1;
+    {PROTOBUF_FIELD_OFFSET(ErrorInfo_DetailsEntry_DoNotUse, _impl_.key_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string value = 2;
+    {PROTOBUF_FIELD_OFFSET(ErrorInfo_DetailsEntry_DoNotUse, _impl_.value_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+  }},
+  // no aux_entries
+  {{
+    "\50\3\5\0\0\0\0\0"
+    "amlabslicer.proto.ErrorInfo.DetailsEntry"
+    "key"
+    "value"
+  }},
+};
+// ===================================================================
+
+class ErrorInfo::_Internal {
+ public:
+  using HasBits =
+      decltype(::std::declval<ErrorInfo>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+      8 * PROTOBUF_FIELD_OFFSET(ErrorInfo, _impl_._has_bits_);
+};
+
+ErrorInfo::ErrorInfo(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, ErrorInfo_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:amlabslicer.proto.ErrorInfo)
+}
+PROTOBUF_NDEBUG_INLINE ErrorInfo::Impl_::Impl_(
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+    [[maybe_unused]] const ::amlabslicer::proto::ErrorInfo& from_msg)
+      : _has_bits_{from._has_bits_},
+        _cached_size_{0},
+        code_(arena, from.code_),
+        message_(arena, from.message_),
+        details_{visibility, arena, from.details_} {}
+
+ErrorInfo::ErrorInfo(
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena,
+    const ErrorInfo& from)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, ErrorInfo_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  ErrorInfo* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+  _impl_.recoverable_ = from._impl_.recoverable_;
+
+  // @@protoc_insertion_point(copy_constructor:amlabslicer.proto.ErrorInfo)
+}
+PROTOBUF_NDEBUG_INLINE ErrorInfo::Impl_::Impl_(
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+      : _cached_size_{0},
+        code_(arena),
+        message_(arena),
+        details_{visibility, arena} {}
+
+inline void ErrorInfo::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  _impl_.recoverable_ = {};
+}
+ErrorInfo::~ErrorInfo() {
+  // @@protoc_insertion_point(destructor:amlabslicer.proto.ErrorInfo)
+  SharedDtor(*this);
+}
+inline void ErrorInfo::SharedDtor(MessageLite& self) {
+  ErrorInfo& this_ = static_cast<ErrorInfo&>(self);
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    this_.CheckHasBitConsistency();
+  }
+  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  ABSL_DCHECK(this_.GetArena() == nullptr);
+  this_._impl_.code_.Destroy();
+  this_._impl_.message_.Destroy();
+  this_._impl_.~Impl_();
+}
+
+inline void* PROTOBUF_NONNULL ErrorInfo::PlacementNew_(
+    const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena) {
+  return ::new (mem) ErrorInfo(arena);
+}
+constexpr auto ErrorInfo::InternalNewImpl_() {
+  constexpr auto arena_bits = ::google::protobuf::internal::EncodePlacementArenaOffsets({
+      PROTOBUF_FIELD_OFFSET(ErrorInfo, _impl_.details_) +
+          decltype(ErrorInfo::_impl_.details_)::
+              InternalGetArenaOffset(
+                  ::google::protobuf::Message::internal_visibility()),
+  });
+  if (arena_bits.has_value()) {
+    return ::google::protobuf::internal::MessageCreator::CopyInit(
+        sizeof(ErrorInfo), alignof(ErrorInfo), *arena_bits);
+  } else {
+    return ::google::protobuf::internal::MessageCreator(&ErrorInfo::PlacementNew_,
+                                 sizeof(ErrorInfo),
+                                 alignof(ErrorInfo));
+  }
+}
+constexpr auto ErrorInfo::InternalGenerateClassData_() {
+  return ::google::protobuf::internal::ClassDataFull{
+      ::google::protobuf::internal::ClassData{
+          &_ErrorInfo_default_instance_._instance,
+          &_table_.header,
+          nullptr,  // OnDemandRegisterArenaDtor
+          nullptr,  // IsInitialized
+          &ErrorInfo::MergeImpl,
+          ::google::protobuf::Message::GetNewImpl<ErrorInfo>(),
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+          &ErrorInfo::SharedDtor,
+          ::google::protobuf::Message::GetClearImpl<ErrorInfo>(), &ErrorInfo::ByteSizeLong,
+              &ErrorInfo::_InternalSerialize,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          PROTOBUF_FIELD_OFFSET(ErrorInfo, _impl_._cached_size_),
+          false,
+      },
+      &ErrorInfo::kDescriptorMethods,
+      &descriptor_table_slicer_2eproto,
+      nullptr,  // tracker
+  };
+}
+
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const
+    ::google::protobuf::internal::ClassDataFull ErrorInfo_class_data_ =
+        ErrorInfo::InternalGenerateClassData_();
+
+PROTOBUF_ATTRIBUTE_WEAK const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL
+ErrorInfo::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&ErrorInfo_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(ErrorInfo_class_data_.tc_table);
+  return ErrorInfo_class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<2, 4, 1, 54, 2>
+ErrorInfo::_table_ = {
+  {
+    PROTOBUF_FIELD_OFFSET(ErrorInfo, _impl_._has_bits_),
+    0, // no _extensions_
+    4, 24,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967280,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    4,  // num_field_entries
+    1,  // num_aux_entries
+    offsetof(decltype(_table_), aux_entries),
+    ErrorInfo_class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::amlabslicer::proto::ErrorInfo>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    {::_pbi::TcParser::MiniParse, {}},
+    // string code = 1;
+    {::_pbi::TcParser::FastUS1,
+     {10, 0, 0,
+      PROTOBUF_FIELD_OFFSET(ErrorInfo, _impl_.code_)}},
+    // string message = 2;
+    {::_pbi::TcParser::FastUS1,
+     {18, 1, 0,
+      PROTOBUF_FIELD_OFFSET(ErrorInfo, _impl_.message_)}},
+    // bool recoverable = 3;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(ErrorInfo, _impl_.recoverable_), 2>(),
+     {24, 2, 0,
+      PROTOBUF_FIELD_OFFSET(ErrorInfo, _impl_.recoverable_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // string code = 1;
+    {PROTOBUF_FIELD_OFFSET(ErrorInfo, _impl_.code_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string message = 2;
+    {PROTOBUF_FIELD_OFFSET(ErrorInfo, _impl_.message_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // bool recoverable = 3;
+    {PROTOBUF_FIELD_OFFSET(ErrorInfo, _impl_.recoverable_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kBool)},
+    // map<string, string> details = 4;
+    {PROTOBUF_FIELD_OFFSET(ErrorInfo, _impl_.details_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcRepeated | ::_fl::kMap)},
+  }},
+  {{
+      {::_pbi::TcParser::GetMapAuxInfo(
+          1, 0, 9, 9, 0)},
+  }},
+  {{
+    "\33\4\7\0\7\0\0\0"
+    "amlabslicer.proto.ErrorInfo"
+    "code"
+    "message"
+    "details"
+  }},
+};
+PROTOBUF_NOINLINE void ErrorInfo::Clear() {
+// @@protoc_insertion_point(message_clear_start:amlabslicer.proto.ErrorInfo)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _impl_._has_bits_[0];
+  if (BatchCheckHasBit(cached_has_bits, 0x00000003U)) {
+    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+      _impl_.code_.ClearNonDefaultToEmpty();
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+      _impl_.message_.ClearNonDefaultToEmpty();
+    }
+  }
+  if (BatchCheckHasBit(cached_has_bits, 0x0000000cU)) {
+    _impl_.recoverable_ = false;
+    if (CheckHasBitForRepeated(cached_has_bits, 0x00000008U)) {
+      _impl_.details_.Clear();
+    }
+  }
+  _impl_._has_bits_.Clear();
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+::uint8_t* PROTOBUF_NONNULL ErrorInfo::_InternalSerialize(
+    const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
+    ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
+  const ErrorInfo& this_ = static_cast<const ErrorInfo&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+::uint8_t* PROTOBUF_NONNULL ErrorInfo::_InternalSerialize(
+    ::uint8_t* PROTOBUF_NONNULL target,
+    ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+  const ErrorInfo& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    this_.CheckHasBitConsistency();
+  }
+  // @@protoc_insertion_point(serialize_to_array_start:amlabslicer.proto.ErrorInfo)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  cached_has_bits = this_._impl_._has_bits_[0];
+  // string code = 1;
+  if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+    if (!this_._internal_code().empty()) {
+      const ::std::string& _s = this_._internal_code();
+      ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.ErrorInfo.code");
+      target = stream->WriteStringMaybeAliased(1, _s, target);
+    }
+  }
+
+  // string message = 2;
+  if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+    if (!this_._internal_message().empty()) {
+      const ::std::string& _s = this_._internal_message();
+      ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.ErrorInfo.message");
+      target = stream->WriteStringMaybeAliased(2, _s, target);
+    }
+  }
+
+  // bool recoverable = 3;
+  if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+    if (this_._internal_recoverable() != 0) {
+      target = stream->EnsureSpace(target);
+      target = ::_pbi::WireFormatLite::WriteBoolToArray(
+          3, this_._internal_recoverable(), target);
+    }
+  }
+
+  // map<string, string> details = 4;
+  if (CheckHasBitForRepeated(cached_has_bits, 0x00000008U)) {
+    if (!this_._internal_details().empty()) {
+      using MapType = ::google::protobuf::Map<::std::string, ::std::string>;
+      using WireHelper = _pbi::MapEntryFuncs<::std::string, ::std::string,
+                                     _pbi::WireFormatLite::TYPE_STRING,
+                                     _pbi::WireFormatLite::TYPE_STRING>;
+      const auto& field = this_._internal_details();
+
+      if (stream->IsSerializationDeterministic() && field.size() > 1) {
+        for (const auto& entry : ::google::protobuf::internal::MapSorterPtr<MapType>(field)) {
+          target = WireHelper::InternalSerialize(
+              4, entry.first, entry.second, target, stream);
+          ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+              entry.first.data(), static_cast<int>(entry.first.length()),
+ ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.ErrorInfo.details");
+          ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+              entry.second.data(), static_cast<int>(entry.second.length()),
+ ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.ErrorInfo.details");
+        }
+      } else {
+        for (const auto& entry : field) {
+          target = WireHelper::InternalSerialize(
+              4, entry.first, entry.second, target, stream);
+          ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+              entry.first.data(), static_cast<int>(entry.first.length()),
+ ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.ErrorInfo.details");
+          ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+              entry.second.data(), static_cast<int>(entry.second.length()),
+ ::google::protobuf::internal::WireFormatLite::SERIALIZE, "amlabslicer.proto.ErrorInfo.details");
+        }
+      }
+    }
+  }
+
+  if (ABSL_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:amlabslicer.proto.ErrorInfo)
+  return target;
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+::size_t ErrorInfo::ByteSizeLong(const MessageLite& base) {
+  const ErrorInfo& this_ = static_cast<const ErrorInfo&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+::size_t ErrorInfo::ByteSizeLong() const {
+  const ErrorInfo& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  // @@protoc_insertion_point(message_byte_size_start:amlabslicer.proto.ErrorInfo)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void)cached_has_bits;
+
+  ::_pbi::Prefetch5LinesFrom7Lines(&this_);
+  cached_has_bits = this_._impl_._has_bits_[0];
+  if (BatchCheckHasBit(cached_has_bits, 0x0000000fU)) {
+    // string code = 1;
+    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+      if (!this_._internal_code().empty()) {
+        total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                        this_._internal_code());
+      }
+    }
+    // string message = 2;
+    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+      if (!this_._internal_message().empty()) {
+        total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                        this_._internal_message());
+      }
+    }
+    // bool recoverable = 3;
+    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+      if (this_._internal_recoverable() != 0) {
+        total_size += 2;
+      }
+    }
+    // map<string, string> details = 4;
+    if (CheckHasBitForRepeated(cached_has_bits, 0x00000008U)) {
+      total_size +=
+          1 * ::google::protobuf::internal::FromIntSize(this_._internal_details_size());
+      for (const auto& entry : this_._internal_details()) {
+        total_size += _pbi::MapEntryFuncs<::std::string, ::std::string,
+                                       _pbi::WireFormatLite::TYPE_STRING,
+                                       _pbi::WireFormatLite::TYPE_STRING>::ByteSizeLong(entry.first, entry.second);
+      }
+    }
+  }
+  return this_.MaybeComputeUnknownFieldsSize(total_size,
+                                             &this_._impl_._cached_size_);
+}
+
+void ErrorInfo::MergeImpl(::google::protobuf::MessageLite& to_msg,
+                            const ::google::protobuf::MessageLite& from_msg) {
+   auto* const _this =
+      static_cast<ErrorInfo*>(&to_msg);
+  auto& from = static_cast<const ErrorInfo&>(from_msg);
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    from.CheckHasBitConsistency();
+  }
+  // @@protoc_insertion_point(class_specific_merge_from_start:amlabslicer.proto.ErrorInfo)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  cached_has_bits = from._impl_._has_bits_[0];
+  if (BatchCheckHasBit(cached_has_bits, 0x0000000fU)) {
+    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+      if (!from._internal_code().empty()) {
+        _this->_internal_set_code(from._internal_code());
+      } else {
+        if (_this->_impl_.code_.IsDefault()) {
+          _this->_internal_set_code("");
+        }
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+      if (!from._internal_message().empty()) {
+        _this->_internal_set_message(from._internal_message());
+      } else {
+        if (_this->_impl_.message_.IsDefault()) {
+          _this->_internal_set_message("");
+        }
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+      if (from._internal_recoverable() != 0) {
+        _this->_impl_.recoverable_ = from._impl_.recoverable_;
+      }
+    }
+    if (CheckHasBitForRepeated(cached_has_bits, 0x00000008U)) {
+      _this->_impl_.details_.MergeFrom(from._impl_.details_);
+    }
+  }
+  _this->_impl_._has_bits_[0] |= cached_has_bits;
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+}
+
+void ErrorInfo::CopyFrom(const ErrorInfo& from) {
+  // @@protoc_insertion_point(class_specific_copy_from_start:amlabslicer.proto.ErrorInfo)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void ErrorInfo::InternalSwap(ErrorInfo* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
+  using ::std::swap;
+  auto* arena = GetArena();
+  ABSL_DCHECK_EQ(arena, other->GetArena());
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.code_, &other->_impl_.code_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.message_, &other->_impl_.message_, arena);
+  swap(_impl_.recoverable_, other->_impl_.recoverable_);
+  _impl_.details_.InternalSwap(&other->_impl_.details_);
+}
+
+::google::protobuf::Metadata ErrorInfo::GetMetadata() const {
   return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
 }
 // ===================================================================
@@ -5543,8 +8226,8 @@ PROTOBUF_NDEBUG_INLINE SliceResult::Impl_::Impl_(
     [[maybe_unused]] const ::amlabslicer::proto::SliceResult& from_msg)
       : _has_bits_{from._has_bits_},
         _cached_size_{0},
-        message_(arena, from.message_),
-        gcode_(arena, from.gcode_) {}
+        artifacts_{visibility, arena, from.artifacts_},
+        message_(arena, from.message_) {}
 
 SliceResult::SliceResult(
     ::google::protobuf::Arena* PROTOBUF_NULLABLE arena,
@@ -5559,6 +8242,10 @@ SliceResult::SliceResult(
   _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
       from._internal_metadata_);
   new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+  ::uint32_t cached_has_bits = _impl_._has_bits_[0];
+  _impl_.error_ = (CheckHasBit(cached_has_bits, 0x00000004U))
+                ? ::google::protobuf::Message::CopyConstruct(arena, *from._impl_.error_)
+                : nullptr;
   ::memcpy(reinterpret_cast<char*>(&_impl_) +
                offsetof(Impl_, success_),
            reinterpret_cast<const char*>(&from._impl_) +
@@ -5573,16 +8260,16 @@ PROTOBUF_NDEBUG_INLINE SliceResult::Impl_::Impl_(
     [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
     [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
       : _cached_size_{0},
-        message_(arena),
-        gcode_(arena) {}
+        artifacts_{visibility, arena},
+        message_(arena) {}
 
 inline void SliceResult::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
   ::memset(reinterpret_cast<char*>(&_impl_) +
-               offsetof(Impl_, success_),
+               offsetof(Impl_, error_),
            0,
            offsetof(Impl_, filament_used_mm_) -
-               offsetof(Impl_, success_) +
+               offsetof(Impl_, error_) +
                sizeof(Impl_::filament_used_mm_));
 }
 SliceResult::~SliceResult() {
@@ -5597,7 +8284,7 @@ inline void SliceResult::SharedDtor(MessageLite& self) {
   this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   ABSL_DCHECK(this_.GetArena() == nullptr);
   this_._impl_.message_.Destroy();
-  this_._impl_.gcode_.Destroy();
+  delete this_._impl_.error_;
   this_._impl_.~Impl_();
 }
 
@@ -5607,8 +8294,20 @@ inline void* PROTOBUF_NONNULL SliceResult::PlacementNew_(
   return ::new (mem) SliceResult(arena);
 }
 constexpr auto SliceResult::InternalNewImpl_() {
-  return ::google::protobuf::internal::MessageCreator::CopyInit(sizeof(SliceResult),
-                                            alignof(SliceResult));
+  constexpr auto arena_bits = ::google::protobuf::internal::EncodePlacementArenaOffsets({
+      PROTOBUF_FIELD_OFFSET(SliceResult, _impl_.artifacts_) +
+          decltype(SliceResult::_impl_.artifacts_)::
+              InternalGetArenaOffset(
+                  ::google::protobuf::Message::internal_visibility()),
+  });
+  if (arena_bits.has_value()) {
+    return ::google::protobuf::internal::MessageCreator::CopyInit(
+        sizeof(SliceResult), alignof(SliceResult), *arena_bits);
+  } else {
+    return ::google::protobuf::internal::MessageCreator(&SliceResult::PlacementNew_,
+                                 sizeof(SliceResult),
+                                 alignof(SliceResult));
+  }
 }
 constexpr auto SliceResult::InternalGenerateClassData_() {
   return ::google::protobuf::internal::ClassDataFull{
@@ -5644,18 +8343,18 @@ SliceResult::GetClassData() const {
   return SliceResult_class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<3, 6, 0, 45, 2>
+const ::_pbi::TcParseTable<3, 7, 2, 45, 2>
 SliceResult::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(SliceResult, _impl_._has_bits_),
     0, // no _extensions_
-    6, 56,  // max_field_number, fast_idx_mask
+    7, 56,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967232,  // skipmap
+    4294967168,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    6,  // num_field_entries
-    0,  // num_aux_entries
-    offsetof(decltype(_table_), field_names),  // no aux_entries
+    7,  // num_field_entries
+    2,  // num_aux_entries
+    offsetof(decltype(_table_), aux_entries),
     SliceResult_class_data_.base(),
     nullptr,  // post_loop_handler
     ::_pbi::TcParser::GenericFallback,  // fallback
@@ -5665,47 +8364,55 @@ SliceResult::_table_ = {
   }, {{
     {::_pbi::TcParser::MiniParse, {}},
     // bool success = 1;
-    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(SliceResult, _impl_.success_), 2>(),
-     {8, 2, 0,
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(SliceResult, _impl_.success_), 3>(),
+     {8, 3, 0,
       PROTOBUF_FIELD_OFFSET(SliceResult, _impl_.success_)}},
     // string message = 2;
     {::_pbi::TcParser::FastUS1,
-     {18, 0, 0,
+     {18, 1, 0,
       PROTOBUF_FIELD_OFFSET(SliceResult, _impl_.message_)}},
-    // bytes gcode = 3;
-    {::_pbi::TcParser::FastBS1,
-     {26, 1, 0,
-      PROTOBUF_FIELD_OFFSET(SliceResult, _impl_.gcode_)}},
+    // repeated .amlabslicer.proto.Artifact artifacts = 3;
+    {::_pbi::TcParser::FastMtR1,
+     {26, 0, 0,
+      PROTOBUF_FIELD_OFFSET(SliceResult, _impl_.artifacts_)}},
     // int32 total_layers = 4;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(SliceResult, _impl_.total_layers_), 3>(),
-     {32, 3, 0,
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(SliceResult, _impl_.total_layers_), 4>(),
+     {32, 4, 0,
       PROTOBUF_FIELD_OFFSET(SliceResult, _impl_.total_layers_)}},
     // double estimated_time_sec = 5;
     {::_pbi::TcParser::FastF64S1,
-     {41, 4, 0,
+     {41, 5, 0,
       PROTOBUF_FIELD_OFFSET(SliceResult, _impl_.estimated_time_sec_)}},
     // double filament_used_mm = 6;
     {::_pbi::TcParser::FastF64S1,
-     {49, 5, 0,
+     {49, 6, 0,
       PROTOBUF_FIELD_OFFSET(SliceResult, _impl_.filament_used_mm_)}},
-    {::_pbi::TcParser::MiniParse, {}},
+    // .amlabslicer.proto.ErrorInfo error = 7;
+    {::_pbi::TcParser::FastMtS1,
+     {58, 2, 1,
+      PROTOBUF_FIELD_OFFSET(SliceResult, _impl_.error_)}},
   }}, {{
     65535, 65535
   }}, {{
     // bool success = 1;
-    {PROTOBUF_FIELD_OFFSET(SliceResult, _impl_.success_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kBool)},
+    {PROTOBUF_FIELD_OFFSET(SliceResult, _impl_.success_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kBool)},
     // string message = 2;
-    {PROTOBUF_FIELD_OFFSET(SliceResult, _impl_.message_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // bytes gcode = 3;
-    {PROTOBUF_FIELD_OFFSET(SliceResult, _impl_.gcode_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kBytes | ::_fl::kRepAString)},
+    {PROTOBUF_FIELD_OFFSET(SliceResult, _impl_.message_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // repeated .amlabslicer.proto.Artifact artifacts = 3;
+    {PROTOBUF_FIELD_OFFSET(SliceResult, _impl_.artifacts_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
     // int32 total_layers = 4;
-    {PROTOBUF_FIELD_OFFSET(SliceResult, _impl_.total_layers_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
+    {PROTOBUF_FIELD_OFFSET(SliceResult, _impl_.total_layers_), _Internal::kHasBitsOffset + 4, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
     // double estimated_time_sec = 5;
-    {PROTOBUF_FIELD_OFFSET(SliceResult, _impl_.estimated_time_sec_), _Internal::kHasBitsOffset + 4, 0, (0 | ::_fl::kFcOptional | ::_fl::kDouble)},
+    {PROTOBUF_FIELD_OFFSET(SliceResult, _impl_.estimated_time_sec_), _Internal::kHasBitsOffset + 5, 0, (0 | ::_fl::kFcOptional | ::_fl::kDouble)},
     // double filament_used_mm = 6;
-    {PROTOBUF_FIELD_OFFSET(SliceResult, _impl_.filament_used_mm_), _Internal::kHasBitsOffset + 5, 0, (0 | ::_fl::kFcOptional | ::_fl::kDouble)},
+    {PROTOBUF_FIELD_OFFSET(SliceResult, _impl_.filament_used_mm_), _Internal::kHasBitsOffset + 6, 0, (0 | ::_fl::kFcOptional | ::_fl::kDouble)},
+    // .amlabslicer.proto.ErrorInfo error = 7;
+    {PROTOBUF_FIELD_OFFSET(SliceResult, _impl_.error_), _Internal::kHasBitsOffset + 2, 1, (0 | ::_fl::kFcOptional | ::_fl::kMessage | ::_fl::kTvTable)},
   }},
-  // no aux_entries
+  {{
+      {::_pbi::TcParser::GetTable<::amlabslicer::proto::Artifact>()},
+      {::_pbi::TcParser::GetTable<::amlabslicer::proto::ErrorInfo>()},
+  }},
   {{
     "\35\0\7\0\0\0\0\0"
     "amlabslicer.proto.SliceResult"
@@ -5720,15 +8427,19 @@ PROTOBUF_NOINLINE void SliceResult::Clear() {
   (void) cached_has_bits;
 
   cached_has_bits = _impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x00000003U)) {
-    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-      _impl_.message_.ClearNonDefaultToEmpty();
+  if (BatchCheckHasBit(cached_has_bits, 0x00000007U)) {
+    if (CheckHasBitForRepeated(cached_has_bits, 0x00000001U)) {
+      _impl_.artifacts_.Clear();
     }
     if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-      _impl_.gcode_.ClearNonDefaultToEmpty();
+      _impl_.message_.ClearNonDefaultToEmpty();
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+      ABSL_DCHECK(_impl_.error_ != nullptr);
+      _impl_.error_->Clear();
     }
   }
-  if (BatchCheckHasBit(cached_has_bits, 0x0000003cU)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x00000078U)) {
     ::memset(&_impl_.success_, 0, static_cast<::size_t>(
         reinterpret_cast<char*>(&_impl_.filament_used_mm_) -
         reinterpret_cast<char*>(&_impl_.success_)) + sizeof(_impl_.filament_used_mm_));
@@ -5757,7 +8468,7 @@ PROTOBUF_NOINLINE void SliceResult::Clear() {
 
   cached_has_bits = this_._impl_._has_bits_[0];
   // bool success = 1;
-  if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+  if (CheckHasBit(cached_has_bits, 0x00000008U)) {
     if (this_._internal_success() != 0) {
       target = stream->EnsureSpace(target);
       target = ::_pbi::WireFormatLite::WriteBoolToArray(
@@ -5766,7 +8477,7 @@ PROTOBUF_NOINLINE void SliceResult::Clear() {
   }
 
   // string message = 2;
-  if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+  if (CheckHasBit(cached_has_bits, 0x00000002U)) {
     if (!this_._internal_message().empty()) {
       const ::std::string& _s = this_._internal_message();
       ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
@@ -5775,16 +8486,21 @@ PROTOBUF_NOINLINE void SliceResult::Clear() {
     }
   }
 
-  // bytes gcode = 3;
-  if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-    if (!this_._internal_gcode().empty()) {
-      const ::std::string& _s = this_._internal_gcode();
-      target = stream->WriteBytesMaybeAliased(3, _s, target);
+  // repeated .amlabslicer.proto.Artifact artifacts = 3;
+  if (CheckHasBitForRepeated(cached_has_bits, 0x00000001U)) {
+    for (unsigned i = 0, n = static_cast<unsigned>(
+                             this_._internal_artifacts_size());
+         i < n; i++) {
+      const auto& repfield = this_._internal_artifacts().Get(i);
+      target =
+          ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+              3, repfield, repfield.GetCachedSize(),
+              target, stream);
     }
   }
 
   // int32 total_layers = 4;
-  if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+  if (CheckHasBit(cached_has_bits, 0x00000010U)) {
     if (this_._internal_total_layers() != 0) {
       target =
           ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<4>(
@@ -5793,7 +8509,7 @@ PROTOBUF_NOINLINE void SliceResult::Clear() {
   }
 
   // double estimated_time_sec = 5;
-  if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+  if (CheckHasBit(cached_has_bits, 0x00000020U)) {
     if (::absl::bit_cast<::uint64_t>(this_._internal_estimated_time_sec()) != 0) {
       target = stream->EnsureSpace(target);
       target = ::_pbi::WireFormatLite::WriteDoubleToArray(
@@ -5802,12 +8518,19 @@ PROTOBUF_NOINLINE void SliceResult::Clear() {
   }
 
   // double filament_used_mm = 6;
-  if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+  if (CheckHasBit(cached_has_bits, 0x00000040U)) {
     if (::absl::bit_cast<::uint64_t>(this_._internal_filament_used_mm()) != 0) {
       target = stream->EnsureSpace(target);
       target = ::_pbi::WireFormatLite::WriteDoubleToArray(
           6, this_._internal_filament_used_mm(), target);
     }
+  }
+
+  // .amlabslicer.proto.ErrorInfo error = 7;
+  if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+    target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+        7, *this_._impl_.error_, this_._impl_.error_->GetCachedSize(), target,
+        stream);
   }
 
   if (ABSL_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
@@ -5835,42 +8558,47 @@ PROTOBUF_NOINLINE void SliceResult::Clear() {
 
   ::_pbi::Prefetch5LinesFrom7Lines(&this_);
   cached_has_bits = this_._impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x0000003fU)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x0000007fU)) {
+    // repeated .amlabslicer.proto.Artifact artifacts = 3;
+    if (CheckHasBitForRepeated(cached_has_bits, 0x00000001U)) {
+      total_size += 1UL * this_._internal_artifacts_size();
+      for (const auto& msg : this_._internal_artifacts()) {
+        total_size += ::google::protobuf::internal::WireFormatLite::MessageSize(msg);
+      }
+    }
     // string message = 2;
-    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
       if (!this_._internal_message().empty()) {
         total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                         this_._internal_message());
       }
     }
-    // bytes gcode = 3;
-    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-      if (!this_._internal_gcode().empty()) {
-        total_size += 1 + ::google::protobuf::internal::WireFormatLite::BytesSize(
-                                        this_._internal_gcode());
-      }
+    // .amlabslicer.proto.ErrorInfo error = 7;
+    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+      total_size += 1 +
+                    ::google::protobuf::internal::WireFormatLite::MessageSize(*this_._impl_.error_);
     }
     // bool success = 1;
-    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
       if (this_._internal_success() != 0) {
         total_size += 2;
       }
     }
     // int32 total_layers = 4;
-    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
       if (this_._internal_total_layers() != 0) {
         total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
             this_._internal_total_layers());
       }
     }
     // double estimated_time_sec = 5;
-    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+    if (CheckHasBit(cached_has_bits, 0x00000020U)) {
       if (::absl::bit_cast<::uint64_t>(this_._internal_estimated_time_sec()) != 0) {
         total_size += 9;
       }
     }
     // double filament_used_mm = 6;
-    if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+    if (CheckHasBit(cached_has_bits, 0x00000040U)) {
       if (::absl::bit_cast<::uint64_t>(this_._internal_filament_used_mm()) != 0) {
         total_size += 9;
       }
@@ -5888,14 +8616,20 @@ void SliceResult::MergeImpl(::google::protobuf::MessageLite& to_msg,
   if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
     from.CheckHasBitConsistency();
   }
+  ::google::protobuf::Arena* arena = _this->GetArena();
   // @@protoc_insertion_point(class_specific_merge_from_start:amlabslicer.proto.SliceResult)
   ABSL_DCHECK_NE(&from, _this);
   ::uint32_t cached_has_bits = 0;
   (void)cached_has_bits;
 
   cached_has_bits = from._impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x0000003fU)) {
-    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x0000007fU)) {
+    if (CheckHasBitForRepeated(cached_has_bits, 0x00000001U)) {
+      _this->_internal_mutable_artifacts()->InternalMergeFromWithArena(
+          ::google::protobuf::MessageLite::internal_visibility(), arena,
+          from._internal_artifacts());
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
       if (!from._internal_message().empty()) {
         _this->_internal_set_message(from._internal_message());
       } else {
@@ -5904,31 +8638,30 @@ void SliceResult::MergeImpl(::google::protobuf::MessageLite& to_msg,
         }
       }
     }
-    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-      if (!from._internal_gcode().empty()) {
-        _this->_internal_set_gcode(from._internal_gcode());
+    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+      ABSL_DCHECK(from._impl_.error_ != nullptr);
+      if (_this->_impl_.error_ == nullptr) {
+        _this->_impl_.error_ = ::google::protobuf::Message::CopyConstruct(arena, *from._impl_.error_);
       } else {
-        if (_this->_impl_.gcode_.IsDefault()) {
-          _this->_internal_set_gcode("");
-        }
+        _this->_impl_.error_->MergeFrom(*from._impl_.error_);
       }
     }
-    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
       if (from._internal_success() != 0) {
         _this->_impl_.success_ = from._impl_.success_;
       }
     }
-    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
       if (from._internal_total_layers() != 0) {
         _this->_impl_.total_layers_ = from._impl_.total_layers_;
       }
     }
-    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+    if (CheckHasBit(cached_has_bits, 0x00000020U)) {
       if (::absl::bit_cast<::uint64_t>(from._internal_estimated_time_sec()) != 0) {
         _this->_impl_.estimated_time_sec_ = from._impl_.estimated_time_sec_;
       }
     }
-    if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+    if (CheckHasBit(cached_has_bits, 0x00000040U)) {
       if (::absl::bit_cast<::uint64_t>(from._internal_filament_used_mm()) != 0) {
         _this->_impl_.filament_used_mm_ = from._impl_.filament_used_mm_;
       }
@@ -5953,14 +8686,14 @@ void SliceResult::InternalSwap(SliceResult* PROTOBUF_RESTRICT PROTOBUF_NONNULL o
   ABSL_DCHECK_EQ(arena, other->GetArena());
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
+  _impl_.artifacts_.InternalSwap(&other->_impl_.artifacts_);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.message_, &other->_impl_.message_, arena);
-  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.gcode_, &other->_impl_.gcode_, arena);
   ::google::protobuf::internal::memswap<
       PROTOBUF_FIELD_OFFSET(SliceResult, _impl_.filament_used_mm_)
       + sizeof(SliceResult::_impl_.filament_used_mm_)
-      - PROTOBUF_FIELD_OFFSET(SliceResult, _impl_.success_)>(
-          reinterpret_cast<char*>(&_impl_.success_),
-          reinterpret_cast<char*>(&other->_impl_.success_));
+      - PROTOBUF_FIELD_OFFSET(SliceResult, _impl_.error_)>(
+          reinterpret_cast<char*>(&_impl_.error_),
+          reinterpret_cast<char*>(&other->_impl_.error_));
 }
 
 ::google::protobuf::Metadata SliceResult::GetMetadata() const {

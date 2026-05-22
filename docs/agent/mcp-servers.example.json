@@ -1,0 +1,69 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "F:\\2026.3\\AMLabSlicer\\AMLabSlicer"
+      ]
+    },
+    "git": {
+      "command": "uvx",
+      "args": [
+        "mcp-server-git",
+        "--repository",
+        "F:\\2026.3\\AMLabSlicer\\AMLabSlicer"
+      ]
+    },
+    "github": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "GITHUB_PERSONAL_ACCESS_TOKEN",
+        "-e",
+        "GITHUB_TOOLSETS",
+        "ghcr.io/github/github-mcp-server"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "<YOUR_GITHUB_PAT>",
+        "GITHUB_TOOLSETS": "repos,issues,pull_requests,actions"
+      }
+    },
+    "microsoft-learn": {
+      "serverURL": "https://learn.microsoft.com/api/mcp",
+      "transport": "streamable-http"
+    },
+    "context7": {
+      "serverURL": "https://mcp.context7.com/mcp",
+      "transport": "streamable-http"
+    },
+    "memory": {
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ]
+    },
+    "sequential-thinking": {
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ]
+    },
+    "figma-dev-mode": {
+      "serverURL": "http://127.0.0.1:3845/sse",
+      "transport": "sse"
+    }
+  }
+}

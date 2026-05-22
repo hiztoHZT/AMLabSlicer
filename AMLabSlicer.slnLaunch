@@ -1,0 +1,17 @@
+[
+  {
+    "Name": "AMLabSlicer + EngineHost",
+    "Projects": [
+      {
+        "Path": "AMLabSlicer\\AMLabSlicer.UI.csproj",
+        "Action": "Start",
+        "DebugTarget": "AMLabSlicer.UI"
+      },
+      {
+        "Path": "AMLabSlicer.EngineHost\\AMLabSlicer.EngineHost.csproj",
+        "Action": "Start",
+        "DebugTarget": "AMLabSlicer.EngineHost"
+      }
+    ]
+  }
+]

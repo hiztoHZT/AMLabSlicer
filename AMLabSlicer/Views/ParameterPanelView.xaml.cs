@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
 
 namespace AMLabSlicer.Views
 {
@@ -11,6 +12,22 @@ namespace AMLabSlicer.Views
         public ParameterPanelView()
         {
             InitializeComponent();
+        }
+
+        private void ScrollCategoriesLeft_Click(object sender, RoutedEventArgs e)
+        {
+            CategoryScrollViewer.ScrollToHorizontalOffset(Math.Max(0, CategoryScrollViewer.HorizontalOffset - 96));
+        }
+
+        private void ScrollCategoriesRight_Click(object sender, RoutedEventArgs e)
+        {
+            CategoryScrollViewer.ScrollToHorizontalOffset(CategoryScrollViewer.HorizontalOffset + 96);
+        }
+
+        private void CategoryScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            CategoryScrollViewer.ScrollToHorizontalOffset(CategoryScrollViewer.HorizontalOffset - e.Delta);
+            e.Handled = true;
         }
     }
 
