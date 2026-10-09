@@ -5,7 +5,9 @@
              xmlns:converters="clr-namespace:AMLabSlicer.Converters" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" 
+             mc:Ignorable="d"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True"
              d:DesignHeight="600" d:DesignWidth="1000">
 
     <UserControl.Resources>
@@ -13,65 +15,65 @@
         <converters:HalfWidthConverter x:Key="HalfWidthConv"/>
     </UserControl.Resources>
 
-    <Grid x:Name="MainContainer">
+    <Grid x:Name="MainContainer"
+          Background="{DynamicResource WindowBackgroundBrush}">
         <Grid.ColumnDefinitions>
             <!-- 左侧面板，可折叠 -->
-            <ColumnDefinition>
-                <ColumnDefinition.Style>
-                    <Style TargetType="ColumnDefinition">
-                        <Setter Property="Width" Value="320"/>
-                        <Setter Property="MinWidth" Value="320"/>
-                        <Setter Property="MaxWidth" Value="{Binding ActualWidth, ElementName=MainContainer, Converter={StaticResource HalfWidthConv}}"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsParameterPanelOpen}" Value="False">
-                                <Setter Property="Width" Value="0"/>
-                                <Setter Property="MinWidth" Value="0"/>
-                                <Setter Property="MaxWidth" Value="0"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </ColumnDefinition.Style>
-            </ColumnDefinition>
+            <ColumnDefinition x:Name="LeftPanelColumn"
+                              Width="320"
+                              MinWidth="280"
+                              MaxWidth="{Binding ActualWidth, ElementName=MainContainer, Converter={StaticResource HalfWidthConv}}"/>
 
-            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition x:Name="PanelSplitterColumn" Width="4"/>
             <ColumnDefinition Width="*" MinWidth="320"/>
         </Grid.ColumnDefinitions>
 
         <!-- 左侧整体容器：上=大纲，下=参数 -->
-        <DockPanel Grid.Column="0"
-                   Visibility="{Binding IsParameterPanelOpen, Converter={StaticResource BoolToVis}}">
+        <Border x:Name="LeftPanelHost"
+                Grid.Column="0"
+                Style="{StaticResource WorkspacePanelBorderStyle}"
+                CornerRadius="6,0,0,6"
+                ClipToBounds="True">
+            <Grid Background="{DynamicResource SplitterTrackBrush}">
+                <Grid.RowDefinitions>
+                    <RowDefinition x:Name="OutlinerRow" Height="220" MinHeight="120"/>
+                    <RowDefinition Height="4"/>
+                    <RowDefinition Height="*" MinHeight="160"/>
+                </Grid.RowDefinitions>
 
             <!-- 对象大纲 (Outliner) — 固定高度，可用 GridSplitter 调整 -->
-            <views:OutlinerPanelView DockPanel.Dock="Top"  MinHeight="200"/>
+            <views:OutlinerPanelView Grid.Row="0"/>
 
             <!-- 拖动分隔条 -->
-            <GridSplitter DockPanel.Dock="Top" Height="4"
-                          HorizontalAlignment="Stretch" VerticalAlignment="Center"
-                          Background="{DynamicResource GridSplitterBrush}"
-                          ShowsPreview="True" Cursor="SizeNS"/>
+            <GridSplitter Grid.Row="1"
+                          ResizeDirection="Rows"
+                          ResizeBehavior="PreviousAndNext"
+                          Style="{StaticResource WorkspaceHorizontalSplitterStyle}"/>
 
             <!-- 参数面板 -->
-            <views:ParameterPanelView/>
-        </DockPanel>
+            <views:ParameterPanelView Grid.Row="2"/>
+            </Grid>
+        </Border>
 
-        <GridSplitter Grid.Column="1" Width="5"
-                      HorizontalAlignment="Center" VerticalAlignment="Stretch" 
-                      Background="{DynamicResource GridSplitterBrush}" ShowsPreview="True"
-                      Visibility="{Binding IsParameterPanelOpen, Converter={StaticResource BoolToVis}}"/>
+        <GridSplitter x:Name="MainSplitter"
+                      Grid.Column="1"
+                      Style="{StaticResource WorkspaceVerticalSplitterStyle}"/>
 
-        <views:ModelPreviewView x:Name="ModelPreview" Grid.Column="2"/>
+        <Border x:Name="ViewportHost"
+                Grid.Column="2"
+                Style="{StaticResource WorkspaceViewportBorderStyle}"
+                CornerRadius="0,6,6,0"
+                ClipToBounds="True">
+            <views:ModelPreviewView x:Name="ModelPreview"/>
+        </Border>
 
         <!-- 开始切片按钮 -->
         <Button Grid.Column="2" 
                 Content="开始切片" 
                 HorizontalAlignment="Right" 
                 VerticalAlignment="Bottom" 
-                Margin="0,0,20,20" 
-                Padding="20,10" 
-                FontSize="16" 
-                FontWeight="Bold" 
-                Background="{DynamicResource AccentBrush}" 
-                Foreground="White" 
+                Margin="0,0,22,22"
+                Style="{StaticResource PrimaryActionButtonStyle}"
                 Command="{Binding StartSlicingCommand}" />
     </Grid>
 </UserControl>

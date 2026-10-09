@@ -44,7 +44,11 @@ namespace AMLabSlicer.ViewModel
         [ObservableProperty]
         private bool _splitUndoable = false; // 拆分操作是否可撤销（默认关，占用内存较大）
 
-        [ObservableProperty]
-        private int _undoStackDepth = 25; // 撤销栈深度
+        private int _undoStackDepth = 25;
+        public int UndoStackDepth
+        {
+            get => _undoStackDepth;
+            set => SetProperty(ref _undoStackDepth, Math.Max(0, value));
+        }
     }
 }

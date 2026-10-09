@@ -1,3 +1,4 @@
+using AMLabSlicer.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HelixToolkit.SharpDX;
@@ -7,14 +8,11 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using AMLabSlicer.Core.Parameters;
 using AMLabSlicer.State;
-using Grpc.Net.Client;
 using AMLabSlicer.Grpc;
-using System.Windows;
 using System.Threading.Tasks;
 using System.Linq;
 using System;
 using System.IO;
-using Grpc.Core;
 using HelixToolkit.SharpDX.Model.Scene;
 
 namespace AMLabSlicer.ViewModel
@@ -39,8 +37,8 @@ namespace AMLabSlicer.ViewModel
         [NotifyPropertyChangedFor(nameof(IsFaceMode))]
         private ViewportMode _viewportMode = ViewportMode.ObjectMode;
 
-        public bool IsObjectMode => _viewportMode == ViewportMode.ObjectMode;
-        public bool IsFaceMode => _viewportMode == ViewportMode.FaceMode;
+        public bool IsObjectMode => ViewportMode == ViewportMode.ObjectMode;
+        public bool IsFaceMode => ViewportMode == ViewportMode.FaceMode;
 
         private void CacheCurrentParameterValues()
         {
@@ -49,43 +47,6 @@ namespace AMLabSlicer.ViewModel
 
             _parameterValuesByAlgorithm[_activeParameterAlgorithmId] =
                 _parameterStore.GetAllParameters().ToDictionary(p => p.Key, p => p.Value);
-        }
-
-        private static ParameterValue ToGrpcParameterValue(object? value, UIControlType controlType)
-        {
-            if (value == null)
-                return new ParameterValue { StringValue = "" };
-
-            if (controlType == UIControlType.CheckBox)
-            {
-                if (value is bool boolValue)
-                    return new ParameterValue { BoolValue = boolValue };
-
-                return new ParameterValue { BoolValue = bool.TryParse(value.ToString(), out var parsed) && parsed };
-            }
-
-            if (controlType == UIControlType.NumericBox || controlType == UIControlType.Slider)
-            {
-                if (value is int intValue)
-                    return new ParameterValue { IntValue = intValue };
-
-                if (value is long longValue)
-                    return new ParameterValue { IntValue = longValue };
-
-                if (value is double doubleValue)
-                    return new ParameterValue { DoubleValue = doubleValue };
-
-                if (value is float floatValue)
-                    return new ParameterValue { DoubleValue = floatValue };
-
-                if (double.TryParse(value.ToString(), NumberStyles.Float, CultureInfo.CurrentCulture, out var parsedDouble) ||
-                    double.TryParse(value.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out parsedDouble))
-                {
-                    return new ParameterValue { DoubleValue = parsedDouble };
-                }
-            }
-
-            return new ParameterValue { StringValue = value.ToString() ?? "" };
         }
 
         private static string GroupStateKey(string algorithmId, string category, string subcategory)
@@ -197,288 +158,194 @@ namespace AMLabSlicer.ViewModel
         private readonly Dictionary<string, bool> _subcategoryExpandedStates = new();
         private string _activeParameterAlgorithmId = "";
         
+        private readonly ISlicingService _slicingService;
+        private readonly ISliceRequestFactory _sliceRequestFactory;
+        private readonly IUserDialogService _dialogs;
+        private int _parameterRequestVersion;
+        public AMLabSlicer.Core.Commands.CommandManager History { get; } = new();
         public PreferencesViewModel AppPrefs { get; }
 
-        public PrepareWorkspaceViewModel(IParameterStore parameterStore, PreferencesViewModel appPrefs)
+        public PrepareWorkspaceViewModel(IParameterStore parameterStore, PreferencesViewModel appPrefs,
+            ISlicingService slicingService, ISliceRequestFactory sliceRequestFactory, IUserDialogService dialogs)
         {
             _parameterStore = parameterStore;
             AppPrefs = appPrefs;
+            _slicingService = slicingService;
+            _sliceRequestFactory = sliceRequestFactory;
+            _dialogs = dialogs;
 
-            // 初始化算法切换事件
-            _ = InitializeGrpcAsync();
 
             // 在工作区初始化时，立刻生成切片平台网格
             GeneratePlatformGrid();
         }
 
-        private GrpcChannel? _grpcChannel;
-        private SlicerService.SlicerServiceClient? _grpcClient;
-
-        private async Task InitializeGrpcAsync()
+        [RelayCommand]
+        private async Task InitializeAsync()
         {
             try
             {
-                _grpcChannel = GrpcChannel.ForAddress("http://localhost:50051", new GrpcChannelOptions 
-                { 
-                    MaxReceiveMessageSize = null, 
-                    MaxSendMessageSize = null 
-                });
-                _grpcClient = new SlicerService.SlicerServiceClient(_grpcChannel);
-
-                var response = await _grpcClient.GetAvailableAlgorithmsAsync(new Empty());
-                
-                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                var response = await _slicingService.GetAlgorithmsAsync();
+                SlicingAlgorithms.Clear();
+                foreach (var alg in response.Algorithms)
                 {
-                    SlicingAlgorithms.Clear();
-                    foreach (var alg in response.Algorithms)
-                    {
-                        SlicingAlgorithms.Add(alg);
-                    }
+                    SlicingAlgorithms.Add(alg);
+                }
 
-                    if (SlicingAlgorithms.Count > 0)
-                    {
-                        SelectedAlgorithm = SlicingAlgorithms[0];
-                    }
-                });
+                if (SlicingAlgorithms.Count > 0)
+                {
+                    SelectedAlgorithm = SlicingAlgorithms[0];
+                }
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show("无法连接到后端引擎 (amlabslicer.engine)。\n请确保后端服务已在 http://localhost:50051 运行。\n" + ex.Message, "连接失败", MessageBoxButton.OK, MessageBoxImage.Warning);
+                _dialogs.ShowMessage("无法连接到后端引擎 (amlabslicer.engine)。\n请确保后端服务已在 http://localhost:50051 运行。\n" + ex.Message, "连接失败");
             }
         }
 
         private async Task RebuildParametersForAlgorithmAsync(string algorithm)
         {
-            if (_grpcClient == null) return;
+            var requestVersion = ++_parameterRequestVersion;
 
             try
             {
                 CacheCurrentParameterValues();
-                var response = await _grpcClient.GetAlgorithmParametersAsync(new AlgorithmRequest { AlgorithmId = algorithm });
+                var response = await _slicingService.GetParametersAsync(algorithm);
+                if (requestVersion != _parameterRequestVersion || SelectedAlgorithm?.AlgorithmId != algorithm)
+                    return;
 
                 // 缓存旧参数用于继承
                 _parameterValuesByAlgorithm.TryGetValue(algorithm, out var previousValues);
 
-                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                _parameterStore.ClearAll();
+
+                foreach (var pDef in response.Parameters)
                 {
-                    _parameterStore.ClearAll();
-
-                    foreach (var pDef in response.Parameters)
+                    var param = new SliceParameter
                     {
-                        var param = new SliceParameter
-                        {
-                            Key = pDef.Key,
-                            DisplayName = pDef.DisplayName,
-                            Category = pDef.Category,
-                            Subcategory = pDef.Subcategory,
-                            Order = pDef.Order,
-                            ControlType = (UIControlType)pDef.ControlType,
-                            Unit = pDef.Unit,
-                            Description = pDef.Description,
-                            MinValue = pDef.MinValue,
-                            MaxValue = pDef.MaxValue,
-                            Step = pDef.Step,
-                            IsAdvanced = pDef.IsAdvanced,
-                            VisibleIf = pDef.VisibleIf,
-                            EnabledIf = pDef.EnabledIf
-                        };
+                        Key = pDef.Key,
+                        DisplayName = pDef.DisplayName,
+                        Category = pDef.Category,
+                        Subcategory = pDef.Subcategory,
+                        Order = pDef.Order,
+                        ControlType = (UIControlType)pDef.ControlType,
+                        Unit = pDef.Unit,
+                        Description = pDef.Description,
+                        MinValue = pDef.MinValue,
+                        MaxValue = pDef.MaxValue,
+                        Step = pDef.Step,
+                        IsAdvanced = pDef.IsAdvanced,
+                        VisibleIf = pDef.VisibleIf,
+                        EnabledIf = pDef.EnabledIf
+                    };
 
-                        if (param.ControlType == UIControlType.ComboBox)
+                    if (param.ControlType == UIControlType.ComboBox)
+                    {
+                        param.Options = pDef.Options.ToList();
+                    }
+
+                    if (previousValues != null && previousValues.TryGetValue(pDef.Key, out var oldVal))
+                    {
+                        param.Value = oldVal;
+                    }
+                    else
+                    {
+                        if (param.ControlType == UIControlType.CheckBox)
                         {
-                            param.Options = pDef.Options.ToList();
+                            param.Value = bool.TryParse(pDef.DefaultValue, out bool b) && b;
                         }
-
-                        if (previousValues != null && previousValues.TryGetValue(pDef.Key, out var oldVal))
+                        else if (param.ControlType == UIControlType.NumericBox || param.ControlType == UIControlType.Slider)
                         {
-                            param.Value = oldVal;
+                            if (double.TryParse(pDef.DefaultValue, NumberStyles.Float, CultureInfo.InvariantCulture, out double d)) param.Value = d;
                         }
                         else
                         {
-                            if (param.ControlType == UIControlType.CheckBox)
+                            param.Value = pDef.DefaultValue;
+                            if (param.ControlType == UIControlType.ComboBox)
                             {
-                                param.Value = bool.TryParse(pDef.DefaultValue, out bool b) && b;
-                            }
-                            else if (param.ControlType == UIControlType.NumericBox || param.ControlType == UIControlType.Slider)
-                            {
-                                if (double.TryParse(pDef.DefaultValue, out double d)) param.Value = d;
-                            }
-                            else
-                            {
-                                param.Value = pDef.DefaultValue;
-                                if (param.ControlType == UIControlType.ComboBox)
-                                {
-                                    param.Options = pDef.Options.ToList();
-                                }
+                                param.Options = pDef.Options.ToList();
                             }
                         }
-
-                        _parameterStore.RegisterParameter(param);
                     }
 
-                    var orderedParameters = response.Parameters
-                        .Select(pDef => _parameterStore.GetParameterRaw(pDef.Key))
-                        .Where(p => p != null)
-                        .Cast<SliceParameter>()
-                        .ToList();
+                    _parameterStore.RegisterParameter(param);
+                }
 
-                    Parameters.Clear();
-                    foreach (var p in orderedParameters)
-                    {
-                        Parameters.Add(p);
-                    }
+                var orderedParameters = response.Parameters
+                    .Select(pDef => _parameterStore.GetParameterRaw(pDef.Key))
+                    .Where(p => p != null)
+                    .Cast<SliceParameter>()
+                    .ToList();
 
-                    RebuildParameterGroups(orderedParameters, algorithm);
+                Parameters.Clear();
+                foreach (var p in orderedParameters)
+                {
+                    Parameters.Add(p);
+                }
 
-                    _activeParameterAlgorithmId = algorithm;
-                });
+                RebuildParameterGroups(orderedParameters, algorithm);
+
+                _activeParameterAlgorithmId = algorithm;
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show("获取参数列表失败: " + ex.Message);
+                if (requestVersion == _parameterRequestVersion)
+                    _dialogs.ShowMessage("获取参数列表失败: " + ex.Message);
             }
+        }
+
+        [RelayCommand]
+        private void AutoArrange()
+        {
+            if (LoadedModel is not SceneNodeGroupModel3D model) return;
+            try { History.ExecuteCommand(SceneArrangement.CreateCommand(model.GroupNode.Items)); }
+            catch (InvalidOperationException ex) { _dialogs.ShowMessage(ex.Message, "自动摆放"); }
         }
 
         [RelayCommand]
         private async Task StartSlicingAsync()
         {
-            if (_grpcClient == null)
+            if (SelectedAlgorithm == null || SelectedAlgorithm.AlgorithmId != _activeParameterAlgorithmId)
             {
-                MessageBox.Show("gRPC 客户端未初始化。无法连接到后端引擎。");
+                _dialogs.ShowMessage("请等待所选算法参数加载完成后再切片。");
                 return;
             }
 
             try
             {
-                var algorithmId = SelectedAlgorithm?.AlgorithmId ?? "";
-                var req = new SliceRequest
+                var req = _sliceRequestFactory.Create(SelectedAlgorithm.AlgorithmId,
+                    _parameterStore.GetAllParameters(),
+                    OutlinerItems.Where(item => item.Node != null)
+                        .Select(item => new SceneObject(item.Name, item.Node!)));
+
+                if (req.Objects.Count == 0)
                 {
-                    AlgorithmId = algorithmId,
-                    RequestId = Guid.NewGuid().ToString("N"),
-                    FiveAxisConfig = new FiveAxisConfig { IsEnabled = false }
-                };
-                foreach (var p in _parameterStore.GetAllParameters())
-                {
-                    req.Parameters[p.Key] = ToGrpcParameterValue(p.Value, p.ControlType);
+                    _dialogs.ShowMessage("请先导入可切片的模型。");
+                    return;
                 }
 
-                // 将场景中加载的模型转化为 MeshObject
-                // 注意：OutlinerItem.Node 是 GroupNode (pivotNode)，
-                // 实际 MeshNode 在其子树中，需要递归遍历
-                long objectId = 1;
-                foreach (var item in OutlinerItems)
+                await foreach (var response in _slicingService.SliceAsync(req))
                 {
-                    if (item.Node == null) continue;
-
-                    // 遍历该 outliner 节点的整个子树，收集所有 MeshNode
-                    foreach (var descendant in item.Node.Traverse())
+                    if (response.MsgCase != SliceServerMessage.MsgOneofCase.Result) continue;
+                    if (!response.Result.Success)
                     {
-                        if (descendant is MeshNode meshNode && meshNode.Geometry is MeshGeometry3D geometry)
-                        {
-                            if (geometry.Positions == null || geometry.Indices == null) continue;
-
-                            var mo = new MeshObject
-                            {
-                                Id = objectId++,
-                                Name = item.Name,
-                                Units = "mm",
-                                CoordinateSystem = "world",
-                                TransformApplied = true
-                            };
-
-                            // 将顶点坐标变换到世界坐标系（考虑 pivot/平移等变换）
-                            var worldMatrix = System.Numerics.Matrix4x4.Identity;
-                            var stack = new System.Collections.Generic.Stack<SceneNode>();
-                            SceneNode? cur = meshNode;
-                            while (cur != null) { stack.Push(cur); cur = cur.Parent; }
-                            while (stack.Count > 0)
-                                worldMatrix = worldMatrix * stack.Pop().ModelMatrix;
-
-                            var posArray = geometry.Positions.ToArray();
-                            var floatArray = new float[posArray.Length * 3];
-                            for (int i = 0; i < posArray.Length; i++)
-                            {
-                                // 变换到世界坐标
-                                var wp = System.Numerics.Vector3.Transform(posArray[i], worldMatrix);
-                                floatArray[i * 3] = wp.X;
-                                floatArray[i * 3 + 1] = wp.Y;
-                                floatArray[i * 3 + 2] = wp.Z;
-                            }
-                            var posBytes = new byte[floatArray.Length * 4];
-                            Buffer.BlockCopy(floatArray, 0, posBytes, 0, posBytes.Length);
-                            mo.Vertices = Google.Protobuf.ByteString.CopyFrom(posBytes);
-
-                            var indicesArray = geometry.Indices.ToArray();
-                            var indicesBytes = new byte[indicesArray.Length * 4];
-                            Buffer.BlockCopy(indicesArray, 0, indicesBytes, 0, indicesBytes.Length);
-                            mo.Indices = Google.Protobuf.ByteString.CopyFrom(indicesBytes);
-
-                            req.Objects.Add(mo);
-                        }
+                        _dialogs.ShowMessage($"切片失败: {response.Result.Message}", "错误");
+                        continue;
                     }
+                    var artifact = response.Result.Artifacts.FirstOrDefault(a => a.Kind == "gcode");
+                    if (artifact == null || artifact.Data.Length == 0)
+                    {
+                        _dialogs.ShowMessage("切片成功，但后端没有返回 G-code artifact。", "结果缺失");
+                        continue;
+                    }
+                    var path = _dialogs.SelectGCodeDestination();
+                    if (path == null) continue;
+                    await File.WriteAllBytesAsync(path, artifact.Data.ToByteArray());
+                    _dialogs.ShowMessage($"文件已保存至：\n{path}", "切片完成");
                 }
-
-                // 开启双端通信流
-                using var call = _grpcClient.Slice();
-                
-                // 1. 客户端发送切片请求
-                await call.RequestStream.WriteAsync(new SliceClientMessage { StartRequest = req });
-
-                // 2. 接收服务端不断传回的进度、日志和最终结果
-                await Task.Run(async () =>
-                {
-                    await foreach (var response in call.ResponseStream.ReadAllAsync())
-                    {
-                        if (response.MsgCase == SliceServerMessage.MsgOneofCase.Log)
-                        {
-                            Console.WriteLine($"[Backend Log]: {response.Log.Text}");
-                        }
-                        else if (response.MsgCase == SliceServerMessage.MsgOneofCase.Progress)
-                        {
-                            // 此处未来可绑定到 UI 进度条
-                            Console.WriteLine($"[Progress]: {response.Progress.Progress * 100}% - {response.Progress.CurrentStage}");
-                        }
-                        else if (response.MsgCase == SliceServerMessage.MsgOneofCase.Result)
-                        {
-                            Application.Current.Dispatcher.Invoke(() =>
-                            {
-                                if (response.Result.Success)
-                                {
-                                    var dlg = new Microsoft.Win32.SaveFileDialog
-                                    {
-                                        Title = "保存切片 G-Code 文件",
-                                        Filter = "G-Code Files (*.gcode)|*.gcode|All Files (*.*)|*.*",
-                                        DefaultExt = ".gcode",
-                                        FileName = "slice_output.gcode"
-                                    };
-
-                                    if (dlg.ShowDialog() == true)
-                                    {
-                                        var gcodeArtifact = response.Result.Artifacts.FirstOrDefault(a => a.Kind == "gcode");
-                                        if (gcodeArtifact == null || gcodeArtifact.Data.Length == 0)
-                                        {
-                                            MessageBox.Show("切片成功，但后端没有返回 G-code artifact。", "结果缺失", MessageBoxButton.OK, MessageBoxImage.Warning);
-                                            return;
-                                        }
-
-                                        File.WriteAllBytes(dlg.FileName, gcodeArtifact.Data.ToByteArray());
-                                        MessageBox.Show($"文件已保存至：\n{dlg.FileName}", "切片完成", MessageBoxButton.OK, MessageBoxImage.Information);
-                                    }
-                                }
-                                else
-                                {
-                                    MessageBox.Show($"切片失败: {response.Result.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                                }
-                            });
-                        }
-                    }
-                });
-
-                // 通知服务端客户端发送完毕
-                await call.RequestStream.CompleteAsync();
             }
             catch (Exception ex)
             {
-                MessageBox.Show("发送切片请求失败: " + ex.Message);
+                _dialogs.ShowMessage("发送切片请求失败: " + ex.Message);
             }
         }
         /// <summary>
@@ -492,8 +359,7 @@ namespace AMLabSlicer.ViewModel
             int width = 225;
             int depth = 225;
             
-            int halfWidth = width / 2;
-            int halfDepth = depth / 2;
+
 
             // 1. 沿着 X 轴画线（平行于 Y 轴的线）
             for (int x = 0; x <= width; x++)

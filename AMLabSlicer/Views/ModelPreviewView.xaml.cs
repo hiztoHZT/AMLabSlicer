@@ -1,3 +1,5 @@
+using AMLabSlicer.Services;
+using System.ComponentModel;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Media3D;
@@ -212,7 +214,10 @@ namespace AMLabSlicer.Views
         // ══════════════════════════════════════
         // 内部状态
         // ══════════════════════════════════════
-        public AMLabSlicer.Core.Commands.CommandManager CommandDispatcher { get; } = new();
+        public AMLabSlicer.Core.Commands.CommandManager CommandDispatcher =>
+            _attachedWorkspace?.History ?? _detachedHistory;
+        private readonly AMLabSlicer.Core.Commands.CommandManager _detachedHistory = new();
+        private PrepareWorkspaceViewModel? _attachedWorkspace;
 
         private bool     _isDragging;
         private Point    _lastMousePos;
@@ -282,6 +287,8 @@ namespace AMLabSlicer.Views
             DataContextChanged += OnDataContextChanged;
 
             InitializeViewCube2D();
+            Loaded += OnViewLoaded;
+            Unloaded += OnViewUnloaded;
         }
 
         /// <summary>
@@ -309,34 +316,64 @@ namespace AMLabSlicer.Views
 
         private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            if (e.NewValue is PrepareWorkspaceViewModel vm)
+            if (IsLoaded) AttachWorkspace(e.NewValue as PrepareWorkspaceViewModel);
+        }
+
+        private void OnViewLoaded(object sender, RoutedEventArgs e)
+        {
+            AttachWorkspace(GetVM());
+            CompositionTarget.Rendering -= UpdateViewCubeCanvas;
+            CompositionTarget.Rendering += UpdateViewCubeCanvas;
+        }
+
+        private void OnViewUnloaded(object sender, RoutedEventArgs e)
+        {
+            CompositionTarget.Rendering -= UpdateViewCubeCanvas;
+            AttachWorkspace(null);
+        }
+
+        private void AttachWorkspace(PrepareWorkspaceViewModel? workspace)
+        {
+            if (ReferenceEquals(_attachedWorkspace, workspace)) return;
+            if (_attachedWorkspace != null)
             {
-                _prefs = vm.AppPrefs;
-                ApplyCameraMode();
-                _prefs.PropertyChanged += (_, pe) =>
-                {
-                    if (pe.PropertyName == nameof(PreferencesViewModel.UseOrthographic)) ApplyCameraMode();
-                    if (pe.PropertyName == nameof(PreferencesViewModel.UndoStackDepth))
-                        CommandDispatcher.MaxDepth = _prefs.UndoStackDepth;
-                };
-                CommandDispatcher.MaxDepth = _prefs.UndoStackDepth;
-
-                // Undo/Redo 后刷新输入栏（若有活跃变换）
-                CommandDispatcher.CommandExecuted += (_, __) =>
-                {
-                    if (!string.IsNullOrEmpty(_activeTransformKey) &&
-                        TransformInputBar.Visibility == Visibility.Visible)
-                        PopulateInputBar();
-                };
-
-                vm.PropertyChanged += (_, pe) =>
-                {
-                    if (pe.PropertyName == nameof(PrepareWorkspaceViewModel.ViewportMode))
-                        OnViewportModeChanged(vm.ViewportMode);
-                };
-                RefreshToolbarEnabled();
-                UpdateStatusInfo();
+                _attachedWorkspace.PropertyChanged -= WorkspacePropertyChanged;
+                _attachedWorkspace.History.CommandExecuted -= HistoryChanged;
+                _attachedWorkspace.AppPrefs.PropertyChanged -= PreferencesChanged;
             }
+            _attachedWorkspace = workspace;
+            _prefs = workspace?.AppPrefs;
+            if (workspace != null)
+            {
+                workspace.PropertyChanged += WorkspacePropertyChanged;
+                workspace.History.CommandExecuted += HistoryChanged;
+                workspace.AppPrefs.PropertyChanged += PreferencesChanged;
+                workspace.History.MaxDepth = workspace.AppPrefs.UndoStackDepth;
+                ApplyCameraMode();
+            }
+            RefreshToolbarEnabled();
+            UpdateStatusInfo();
+        }
+
+        private void PreferencesChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(PreferencesViewModel.UseOrthographic)) ApplyCameraMode();
+            if (e.PropertyName == nameof(PreferencesViewModel.UndoStackDepth) && _prefs != null)
+                CommandDispatcher.MaxDepth = _prefs.UndoStackDepth;
+        }
+
+        private void WorkspacePropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(PrepareWorkspaceViewModel.ViewportMode) && _attachedWorkspace != null)
+                OnViewportModeChanged(_attachedWorkspace.ViewportMode);
+        }
+
+        private void HistoryChanged(object? sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(_activeTransformKey) && TransformInputBar.Visibility == Visibility.Visible)
+                PopulateInputBar();
+            RefreshObjectHighlight();
+            UpdateStatusInfo();
         }
 
         // ══════════════════════════════════════
@@ -418,7 +455,7 @@ namespace AMLabSlicer.Views
 
                 if (_editingMeshNode?.Geometry is HxMesh)
                 {
-                    BuildTopologyAsync(_editingMeshNode);
+                    _ = BuildTopologyAsync(_editingMeshNode);
                     RefreshFaceOverlay();
                 }
                 else
@@ -434,15 +471,25 @@ namespace AMLabSlicer.Views
             UpdateStatusInfo();
         }
 
-        private async void BuildTopologyAsync(MeshNode mn)
+        private async Task BuildTopologyAsync(MeshNode mn)
         {
-            if (mn.Geometry is not HxMesh geo) return;
-            var idxList = geo.Indices?.ToList() ?? new List<int>();
-            await Task.Run(() =>
+            try
             {
-                _halfEdge = new HalfEdgeMesh();
-                _halfEdge.Build(idxList);
-            });
+                if (mn.Geometry is not HxMesh geo) return;
+                var idxList = geo.Indices?.ToList() ?? new List<int>();
+                var topology = await Task.Run(() =>
+                {
+                    var mesh = new HalfEdgeMesh();
+                    mesh.Build(idxList);
+                    return mesh;
+                });
+                if (ReferenceEquals(_editingMeshNode, mn) && GetVM()?.IsFaceMode == true)
+                    _halfEdge = topology;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceError("Topology build failed: {0}", ex);
+            }
         }
 
         // ══════════════════════════════════════
@@ -822,21 +869,22 @@ namespace AMLabSlicer.Views
             _isModalTransformActive = false;
             Mouse.OverrideCursor = null;
             MainViewport.ReleaseMouseCapture();
-            
-            if (!commit)
+            var selectedNode = SelectedNode;
+
+            if (!commit && selectedNode != null)
             {
-                SelectedNode.ModelMatrix = _modalInitialMatrix;
+                selectedNode.ModelMatrix = _modalInitialMatrix;
             }
-            else
+            else if (selectedNode != null)
             {
-                if (_modalInitialMatrix != SelectedNode.ModelMatrix)
+                if (_modalInitialMatrix != selectedNode.ModelMatrix)
                 {
                     if (_modalMode == "G" || _modalMode == "S" || _modalMode == "R")
                     {
                         // 约束移动后检查贴地
-                        ApplyZFloor(SelectedNode); 
+                        ApplyZFloor(selectedNode);
                     }
-                    CommandDispatcher.Push(new TransformCommand(SelectedNode, _modalInitialMatrix, SelectedNode.ModelMatrix, $"模态 {_modalMode} 变换"));
+                    CommandDispatcher.Push(new TransformCommand(selectedNode, _modalInitialMatrix, selectedNode.ModelMatrix, $"模态 {_modalMode} 变换"));
                 }
             }
             
@@ -1341,103 +1389,11 @@ namespace AMLabSlicer.Views
         // ══════════════════════════════════════
         // Z 贴地约束
         // ══════════════════════════════════════
-        private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<object, Vector3[]> _geometryVertexCache = new();
-
-        /// <summary>
-        /// 避免 BoundsWithTransform 在某些状态下返回非有限值（NaN/Infinity）导致推飞模型。
-        /// 开户 fast: true 模式时，仅对网格自身原本的 8 个本地包围盒角点进行矩阵变换并做极值提取(极快且适合渲染高亮边框，但多重旋转会虚胖)。
-        /// fast: false 时，通过缓存顶点极速遍历计算精确的 World AABB(适用贴地)。
-        /// </summary>
         private static bool TryComputeWorldAabb(SceneNode node, out Vector3 min, out Vector3 max, bool fast = false)
-        {
-            min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
-            max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
-            bool any = false;
-
-            if (node == null) return false;
-
-            try
-            {
-                foreach (var n in node.Traverse())
-                {
-                    if (n is MeshNode mn && mn.Geometry != null)
-                    {
-                        var worldM = GetWorldModelMatrix(mn);
-                        
-                        if (fast)
-                        {
-                            var bound = mn.Geometry.Bound;
-                            Vector3[] corners = new Vector3[] {
-                                new Vector3(bound.Minimum.X, bound.Minimum.Y, bound.Minimum.Z),
-                                new Vector3(bound.Minimum.X, bound.Minimum.Y, bound.Maximum.Z),
-                                new Vector3(bound.Minimum.X, bound.Maximum.Y, bound.Minimum.Z),
-                                new Vector3(bound.Minimum.X, bound.Maximum.Y, bound.Maximum.Z),
-                                new Vector3(bound.Maximum.X, bound.Minimum.Y, bound.Minimum.Z),
-                                new Vector3(bound.Maximum.X, bound.Minimum.Y, bound.Maximum.Z),
-                                new Vector3(bound.Maximum.X, bound.Maximum.Y, bound.Minimum.Z),
-                                new Vector3(bound.Maximum.X, bound.Maximum.Y, bound.Maximum.Z)
-                            };
-                            for (int i = 0; i < 8; i++)
-                            {
-                                var wp = Vector3.Transform(corners[i], worldM);
-                                if (wp.X < min.X) min.X = wp.X; else if (wp.X > max.X) max.X = wp.X;
-                                if (wp.Y < min.Y) min.Y = wp.Y; else if (wp.Y > max.Y) max.Y = wp.Y;
-                                if (wp.Z < min.Z) min.Z = wp.Z; else if (wp.Z > max.Z) max.Z = wp.Z;
-                            }
-                            any = true;
-                        }
-                        else
-                        {
-                            if (!_geometryVertexCache.TryGetValue(mn.Geometry, out Vector3[]? pts) || pts == null)
-                            {
-                                pts = mn.Geometry.Positions?.ToArray() ?? Array.Empty<Vector3>();
-                                _geometryVertexCache.Add(mn.Geometry, pts);
-                            }
-
-                            int count = pts.Length;
-                            for (int i = 0; i < count; i++)
-                            {
-                                var wp = Vector3.Transform(pts[i], worldM);
-                                if (wp.X < min.X) min.X = wp.X; else if (wp.X > max.X) max.X = wp.X;
-                                if (wp.Y < min.Y) min.Y = wp.Y; else if (wp.Y > max.Y) max.Y = wp.Y;
-                                if (wp.Z < min.Z) min.Z = wp.Z; else if (wp.Z > max.Z) max.Z = wp.Z;
-                            }
-                            if (count > 0) any = true;
-                        }
-                    }
-                }
-            }
-            catch
-            {
-                return false;
-            }
-
-            if (!any) return false;
-
-            bool finite =
-                !(float.IsNaN(min.X) || float.IsInfinity(min.X)) &&
-                !(float.IsNaN(min.Y) || float.IsInfinity(min.Y)) &&
-                !(float.IsNaN(min.Z) || float.IsInfinity(min.Z)) &&
-                !(float.IsNaN(max.X) || float.IsInfinity(max.X)) &&
-                !(float.IsNaN(max.Y) || float.IsInfinity(max.Y)) &&
-                !(float.IsNaN(max.Z) || float.IsInfinity(max.Z));
-
-            return finite;
-        }
+            => SceneTransforms.TryComputeWorldAabb(node, out min, out max, fast);
 
         private static Matrix4x4 GetWorldModelMatrix(SceneNode node)
-        {
-            // Vector3.Transform 使用的是“点 * 矩阵”语义，因此层级应按 local->parent 顺序累乘。
-            var m = Matrix4x4.Identity;
-            SceneNode? cur = node;
-            while (cur != null)
-            {
-                m = m * cur.ModelMatrix;
-                cur = cur.Parent;
-            }
-
-            return m;
-        }
+            => SceneTransforms.GetWorldMatrix(node);
 
         private static void ApplyZFloor(SceneNode node)
         {
@@ -1578,33 +1534,30 @@ namespace AMLabSlicer.Views
                 ?? SelectedNode?.Items?.OfType<MeshNode>().FirstOrDefault();
             if (meshNode?.Geometry is not HxMesh) return;
 
-            var topo = new HalfEdgeMesh();
-            topo.Build(meshNode.Geometry.Indices?.ToList() ?? new());
-            if (topo.GetAllConnectedComponents().Count <= 1)
+            var parts = MeshComponentSplitter.Split(meshNode);
+            if (parts.Count == 0)
             {
                 MessageBox.Show("该模型只有一个连通分量，无需拆分。", "拆分", MessageBoxButton.OK);
                 return;
             }
 
-            var parentGroup = meshNode.Parent as GroupNode ?? SelectedNode?.Parent as GroupNode;
+            var parentGroup = meshNode.Parent as GroupNode;
             if (parentGroup == null) return;
 
-            int idx = 1;
-            var childMeshes = meshNode.Items.OfType<MeshNode>().ToList();
-            if (!childMeshes.Any()) childMeshes.Add(meshNode);
-            foreach (var child in childMeshes)
-            {
-                var wrap = new GroupNode { Name = $"{meshNode.Name ?? "Part"}_{idx++}" };
-                parentGroup.AddChildNode(wrap);
-                wrap.AddChildNode(child);
-            }
-            parentGroup.RemoveChildNode(meshNode);
-            SelectedNode = null;
-
             var vm = GetVM();
-            var rootOvm = vm?.OutlinerItems.FirstOrDefault();
-            if (rootOvm != null) rootOvm.Children.Clear();
-            if (_prefs?.SplitUndoable != true) CommandDispatcher.Clear();
+            var rootNode = vm == null ? null : FindRootNode(meshNode, vm.LoadedModel as SceneNodeGroupModel3D);
+            var rootOvm = vm?.OutlinerItems.FirstOrDefault(item => item.Node == rootNode);
+            if (rootOvm == null) return;
+
+            var command = new SplitMeshCommand(parentGroup, meshNode, parts, rootOvm.Children);
+            if (_prefs?.SplitUndoable == true)
+                CommandDispatcher.ExecuteCommand(command);
+            else
+            {
+                command.Execute();
+                CommandDispatcher.Clear();
+            }
+            SelectedNode = null;
         }
 
         // ══════════════════════════════════════
@@ -1616,63 +1569,7 @@ namespace AMLabSlicer.Views
             if (!RequestConfirm("自动重排场景中所有对象。", "自动摆放", ref flag)) return;
             if (_prefs != null) _prefs.EnableArrangeConfirm = flag;
 
-            var vm = GetVM();
-            if (vm?.LoadedModel is not SceneNodeGroupModel3D gm) return;
-
-            var children = gm.GroupNode.Items
-                .Where(n => n is MeshNode || n is GroupNode).ToList();
-            // 用可靠的 world AABB 替代 BoundsWithTransform，避免在某些状态下返回 Infinity/NaN
-            var bounds = new List<(SceneNode node, Vector3 min, Vector3 max, float area)>();
-            foreach (var child in children)
-            {
-                if (TryComputeWorldAabb(child, out var min, out var max))
-                {
-                    float w = max.X - min.X;
-                    float h = max.Y - min.Y;
-                    float area = w * h;
-                    bounds.Add((child, min, max, area));
-                }
-                else
-                {
-                    // 兜底：尽可能避免推飞（若依旧不可信则该节点会被跳过）
-                    var b = child.BoundsWithTransform;
-                    bool finite =
-                        !(float.IsNaN(b.Minimum.X) || float.IsInfinity(b.Minimum.X)) &&
-                        !(float.IsNaN(b.Minimum.Y) || float.IsInfinity(b.Minimum.Y)) &&
-                        !(float.IsNaN(b.Minimum.Z) || float.IsInfinity(b.Minimum.Z)) &&
-                        !(float.IsNaN(b.Maximum.X) || float.IsInfinity(b.Maximum.X)) &&
-                        !(float.IsNaN(b.Maximum.Y) || float.IsInfinity(b.Maximum.Y)) &&
-                        !(float.IsNaN(b.Maximum.Z) || float.IsInfinity(b.Maximum.Z));
-                    if (!finite) continue;
-
-                    float w = b.Maximum.X - b.Minimum.X;
-                    float h = b.Maximum.Y - b.Minimum.Y;
-                    bounds.Add((child, b.Minimum, b.Maximum, w * h));
-                }
-            }
-
-            bounds.Sort((a, b) => b.area.CompareTo(a.area));
-
-            float curX = -112.5f, curY = -112.5f, rowH = 0;
-            const float pad = 5f;
-            var cmds = new List<ICommandAction>();
-            foreach (var it in bounds)
-            {
-                var child = it.node;
-                float w = it.max.X - it.min.X, d = it.max.Y - it.min.Y;
-                if (curX + w > 112.5f && curX > -112.5f)
-                    { curX = -112.5f; curY += rowH + pad; rowH = 0; }
-
-                float dz = -it.min.Z;
-                if (Math.Abs(dz) > 1e5f) continue; // bounds 异常兜底
-                // 世界坐标推移，避免对象带旋转时沿局部轴推移导致摆放错误
-                var newMat =
-                    Matrix4x4.CreateTranslation(curX - it.min.X, curY - it.min.Y, dz) *
-                    child.ModelMatrix;
-                cmds.Add(new TransformCommand(child, child.ModelMatrix, newMat, "摆放"));
-                curX += w + pad; rowH = Math.Max(rowH, d);
-            }
-            CommandDispatcher.ExecuteCommand(new BatchCommand(cmds, "自动摆放"));
+            GetVM()?.AutoArrangeCommand.Execute(null);
         }
 
         // ══════════════════════════════════════
@@ -2436,15 +2333,6 @@ namespace AMLabSlicer.Views
         // ══════════════════════════════════════
         // 相机
         // ══════════════════════════════════════
-        public void SetPreferences(PreferencesViewModel prefs)
-        {
-            _prefs = prefs;
-            _prefs.PropertyChanged += (_, e) =>
-            {
-                if (e.PropertyName == nameof(PreferencesViewModel.UseOrthographic)) ApplyCameraMode();
-            };
-        }
-
         private void ApplyCameraMode()
         {
             if (_prefs?.UseOrthographic == true) SetOrthographicCamera();
@@ -2475,7 +2363,7 @@ namespace AMLabSlicer.Views
 
         private void ApplyRotation(double dx, double dy)
         {
-            var cam   = MainViewport.Camera;
+            if (MainViewport.Camera is not { } cam) return;
             var look  = cam.LookDirection; look.Normalize();
             var up    = cam.UpDirection;   up.Normalize();
             var right = Vector3D.CrossProduct(look, up); right.Normalize();
@@ -2489,7 +2377,7 @@ namespace AMLabSlicer.Views
 
         private void ApplyPan(double dx, double dy)
         {
-            var cam   = MainViewport.Camera;
+            if (MainViewport.Camera is not { } cam || MainViewport.ActualWidth <= 0) return;
             var look  = cam.LookDirection; look.Normalize();
             var up    = cam.UpDirection;   up.Normalize();
             var right = Vector3D.CrossProduct(look, up); right.Normalize();
@@ -2648,21 +2536,21 @@ namespace AMLabSlicer.Views
         private class BaseFace
         {
             public Vector3D Normal;
-            public System.Windows.Shapes.Polygon Shape;
-            public Vector3D[] Corners;
+            public required System.Windows.Shapes.Polygon Shape;
+            public required Vector3D[] Corners;
         }
 
         private class ZonePoly
         {
             public Vector3D ZoneDir;
-            public System.Windows.Shapes.Polygon Shape;
-            public Vector3D[] Corners;
+            public required System.Windows.Shapes.Polygon Shape;
+            public required Vector3D[] Corners;
         }
 
         private List<BaseFace> _baseFaces = new();
         private List<ZonePoly> _zonePolys = new();
-        private System.Windows.Shapes.Line _axisX, _axisY, _axisZ;
-        private TextBlock _lblX, _lblY, _lblZ;
+        private System.Windows.Shapes.Line _axisX = null!, _axisY = null!, _axisZ = null!;
+        private TextBlock _lblX = null!, _lblY = null!, _lblZ = null!;
         private Dictionary<Vector3D, TextBlock> _faceTexts = new();
 
         private void InitializeViewCube2D()
@@ -2733,8 +2621,16 @@ namespace AMLabSlicer.Views
                         };
 
                         // 参考拓竹：悬停时赋予明显的蓝色高亮区
-                        poly.MouseEnter += (s, e) => { (s as System.Windows.Shapes.Polygon).Fill = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(100, 0, 119, 255)); };
-                        poly.MouseLeave += (s, e) => { (s as System.Windows.Shapes.Polygon).Fill = System.Windows.Media.Brushes.Transparent; };
+                        poly.MouseEnter += (sender, _) =>
+                        {
+                            if (sender is System.Windows.Shapes.Polygon shape)
+                                shape.Fill = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(100, 0, 119, 255));
+                        };
+                        poly.MouseLeave += (sender, _) =>
+                        {
+                            if (sender is System.Windows.Shapes.Polygon shape)
+                                shape.Fill = System.Windows.Media.Brushes.Transparent;
+                        };
 
                         _zonePolys.Add(new ZonePoly { ZoneDir = new Vector3D(x, y, z), Shape = poly, Corners = corners });
                         ViewCubeCanvas.Children.Add(poly);
@@ -2769,10 +2665,9 @@ namespace AMLabSlicer.Views
             _faceTexts[new Vector3D(0, 0, 1)] = CreateLabel("顶部", faceColor, true);
             _faceTexts[new Vector3D(0, 0, -1)] = CreateLabel("底部", faceColor, true);
 
-            CompositionTarget.Rendering += UpdateViewCubeCanvas;
         }
 
-        private void UpdateViewCubeCanvas(object sender, EventArgs e)
+        private void UpdateViewCubeCanvas(object? sender, EventArgs e)
         {
             if (MainViewport.Camera == null) return;
             var look = MainViewport.Camera.LookDirection;

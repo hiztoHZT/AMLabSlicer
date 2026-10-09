@@ -79,6 +79,13 @@ namespace AMLabSlicer.Views
             var workArea = monitorInfo.WorkArea;
             var monitorArea = monitorInfo.MonitorArea;
 
+            var window = HwndSource.FromHwnd(hwnd)?.RootVisual as Window;
+            var dpiScale = GetDpiScale(window);
+            var minWidth = window?.MinWidth > 0 ? window.MinWidth : 800;
+            var minHeight = window?.MinHeight > 0 ? window.MinHeight : 600;
+
+            minMaxInfo.MinTrackSize.X = (int)Math.Ceiling(minWidth * dpiScale.X);
+            minMaxInfo.MinTrackSize.Y = (int)Math.Ceiling(minHeight * dpiScale.Y);
             minMaxInfo.MaxPosition.X = workArea.Left - monitorArea.Left;
             minMaxInfo.MaxPosition.Y = workArea.Top - monitorArea.Top;
             minMaxInfo.MaxSize.X = workArea.Right - workArea.Left;
@@ -86,6 +93,23 @@ namespace AMLabSlicer.Views
 
             Marshal.StructureToPtr(minMaxInfo, lParam, false);
             return true;
+        }
+
+        private static PointD GetDpiScale(Window? window)
+        {
+            if (window == null)
+            {
+                return new PointD(1, 1);
+            }
+
+            var source = PresentationSource.FromVisual(window);
+            if (source?.CompositionTarget == null)
+            {
+                return new PointD(1, 1);
+            }
+
+            var transform = source.CompositionTarget.TransformToDevice;
+            return new PointD(transform.M11, transform.M22);
         }
 
         [DllImport("user32.dll")]
@@ -99,6 +123,18 @@ namespace AMLabSlicer.Views
         {
             public int X;
             public int Y;
+        }
+
+        private readonly struct PointD
+        {
+            public PointD(double x, double y)
+            {
+                X = x;
+                Y = y;
+            }
+
+            public double X { get; }
+            public double Y { get; }
         }
 
         [StructLayout(LayoutKind.Sequential)]

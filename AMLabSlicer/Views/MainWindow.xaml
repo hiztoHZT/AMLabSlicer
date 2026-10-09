@@ -5,11 +5,12 @@
         xmlns:viewmodel="clr-namespace:AMLabSlicer.ViewModel"
         xmlns:views="clr-namespace:AMLabSlicer.Views"
         Title="AMLab Slicer" Height="720" Width="1280" Background="{DynamicResource WindowBackgroundBrush}" TextElement.Foreground="{DynamicResource PrimaryTextBrush}" MinHeight="600" MinWidth="800"
-        WindowStyle="None" AllowsTransparency="False">
+        WindowStyle="None" AllowsTransparency="False" ResizeMode="CanResize"
+        UseLayoutRounding="True" SnapsToDevicePixels="True">
 
 
     <WindowChrome.WindowChrome>
-        <WindowChrome CaptionHeight="30" ResizeBorderThickness="5" GlassFrameThickness="0" CornerRadius="0"/>
+        <WindowChrome CaptionHeight="36" ResizeBorderThickness="6" GlassFrameThickness="0" CornerRadius="12"/>
     </WindowChrome.WindowChrome>
 
     <Window.Resources>
@@ -20,12 +21,16 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="30"/>
-            <RowDefinition Height="40"/>
+            <RowDefinition Height="36"/>
+            <RowDefinition Height="36"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Background="{DynamicResource TitleBarBackgroundBrush}">
+        <Border Grid.Row="0"
+                Background="{DynamicResource TitleBarBackgroundBrush}"
+                BorderBrush="{DynamicResource SurfaceBorderBrush}"
+                BorderThickness="0,0,0,1">
+        <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
@@ -33,8 +38,8 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <svg:SvgViewbox Source="/Assets/Images/AMLab_logo_rgb.svg" Width="25" Height="25" Margin="10 5 0 0"/>
-            <Menu Grid.Column="1" Background="Transparent" FontSize="13" VerticalAlignment="Center" WindowChrome.IsHitTestVisibleInChrome="True" Margin="0 5 0 0">
+            <svg:SvgViewbox Source="/Assets/Images/AMLab_logo_rgb.svg" Width="25" Height="25" Margin="12,0,6,0" VerticalAlignment="Center"/>
+            <Menu Grid.Column="1" Background="Transparent" FontSize="13" VerticalAlignment="Center" WindowChrome.IsHitTestVisibleInChrome="True">
 
                 <MenuItem Header="文件" Style="{StaticResource TopLevelHeaderStyle}">
                     <MenuItem Header="载入模型..." Command="{Binding LoadModelCommand}" Style="{StaticResource SubmenuItemStyle}"/>
@@ -52,18 +57,46 @@
                 </MenuItem>
             </Menu>
 
-            <StackPanel Grid.Column="3" Orientation="Horizontal" WindowChrome.IsHitTestVisibleInChrome="True">
+            <StackPanel Grid.Column="3" Orientation="Horizontal" WindowChrome.IsHitTestVisibleInChrome="True" VerticalAlignment="Stretch" Margin="0,0,6,0">
                 <Button Content="—" Width="45" Style="{StaticResource WindowButtonStyle}" Click="BtnMinimize_Click"/>
                 <Button Content="☐" Width="45" Style="{StaticResource WindowButtonStyle}" Click="BtnMaximize_Click"/>
                 <Button Content="✕" Width="45" Style="{StaticResource CloseButtonStyle}" Click="BtnClose_Click"/>
             </StackPanel>
         </Grid>
+        </Border>
 
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Background="{DynamicResource ToolbarBackgroundBrush}">
-            <Button Content="准 备" Width="120" Background="{DynamicResource WindowBackgroundBrush}" Foreground="{DynamicResource PrimaryTextBrush}" BorderThickness="0" FontWeight="Bold" FontSize="14"/>
-            <Button Content="预 览" Width="120" Background="Transparent" Foreground="{DynamicResource SecondaryTextBrush}" BorderThickness="0" FontSize="14"/>
-            <Button Content="设 备" Width="120" Background="Transparent" Foreground="{DynamicResource SecondaryTextBrush}" BorderThickness="0" FontSize="14"/>
-        </StackPanel>
+        <Border Grid.Row="1"
+                Background="{DynamicResource ToolbarBackgroundBrush}"
+                BorderBrush="{DynamicResource SurfaceBorderBrush}"
+                BorderThickness="0,0,0,1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="44"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="44"/>
+                </Grid.ColumnDefinitions>
+
+                <Button Grid.Column="0"
+                        Style="{StaticResource SidebarToggleButtonStyle}"
+                        Command="{Binding CurrentWorkspace.TogglePanelCommand}"
+                        WindowChrome.IsHitTestVisibleInChrome="True"/>
+
+                <StackPanel Grid.Column="1"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Stretch">
+                    <Button Content="准备" Style="{StaticResource WorkspaceNavButtonStyle}" Tag="active"/>
+                    <Button Content="预览" Style="{StaticResource WorkspaceNavButtonStyle}"/>
+                    <Button Content="设备" Style="{StaticResource WorkspaceNavButtonStyle}"/>
+                </StackPanel>
+
+                <!-- Legacy nav removed:
+                <Button Content="准 备" Style="{StaticResource WorkspaceNavButtonStyle}" Tag="active"/>
+                <Button Content="预 览" Style="{StaticResource WorkspaceNavButtonStyle}"/>
+                <Button Content="设 备" Style="{StaticResource WorkspaceNavButtonStyle}"/>
+                -->
+            </Grid>
+        </Border>
 
         <ContentControl Grid.Row="2" Content="{Binding CurrentWorkspace}" />
     </Grid>

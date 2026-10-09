@@ -16,15 +16,16 @@
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
             <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="Padding" Value="9,5"/>
             <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="IsEnabled" Value="False"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="Bd" Background="{TemplateBinding Background}"
-                                CornerRadius="4" Padding="{TemplateBinding Padding}">
+                                CornerRadius="6" Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -32,7 +33,7 @@
                                 <Setter Property="Opacity" Value="0.35"/>
                             </Trigger>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#33FFFFFF"/>
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource ButtonHoverBrush}"/>
                             </Trigger>
                             <Trigger Property="Tag" Value="active">
                                 <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AccentBrush}"/>
@@ -54,19 +55,83 @@
         <Style x:Key="Sep" TargetType="Separator">
             <Setter Property="Width" Value="1"/>
             <Setter Property="Height" Value="16"/>
-            <Setter Property="Background" Value="#44FFFFFF"/>
-            <Setter Property="Margin" Value="4,0"/>
+            <Setter Property="Background" Value="{DynamicResource SurfaceBorderBrush}"/>
+            <Setter Property="Margin" Value="5,0"/>
         </Style>
 
         <!-- 输入框样式 -->
         <Style x:Key="TxfStyle" TargetType="TextBox">
-            <Setter Property="Background" Value="#22FFFFFF"/>
+            <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}"/>
             <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
-            <Setter Property="BorderBrush" Value="#44FFFFFF"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="4,2"/>
+            <Setter Property="Padding" Value="7,3"/>
+            <Setter Property="FontSize" Value="12"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="CaretBrush" Value="{DynamicResource PrimaryTextBrush}"/>
+            <Setter Property="SelectionBrush" Value="{DynamicResource AccentBrush}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="Bd"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="5"
+                                SnapsToDevicePixels="True">
+                            <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource ControlFocusBorderBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="FloatingToolbarBorderStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource OverlayPanelBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SurfaceBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="8,5"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+        </Style>
+
+        <Style x:Key="TransformActionButtonStyle" TargetType="Button">
+            <Setter Property="Padding" Value="10,4"/>
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="5" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AccentHoverBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="TransformSecondaryButtonStyle" TargetType="Button" BasedOn="{StaticResource TransformActionButtonStyle}">
+            <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+        </Style>
+
+        <Style x:Key="TransformCloseButtonStyle" TargetType="Button" BasedOn="{StaticResource TransformSecondaryButtonStyle}">
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
         </Style>
     </UserControl.Resources>
 
@@ -74,7 +139,7 @@
 
         <!-- 3D 视口 -->
         <hx:Viewport3DX x:Name="MainViewport"
-                        BackgroundColor="#393939"
+                        BackgroundColor="#333333"
                         ShowCoordinateSystem="False"
                         ShowViewCube="False"
                         CoordinateSystemLabelForeground="{DynamicResource PrimaryTextColor}"
@@ -90,11 +155,11 @@
                         PreviewMouseMove="MainViewport_PreviewMouseMove"
                         PreviewMouseWheel="MainViewport_PreviewMouseWheel">
 
-            <hx:AmbientLight3D Color="#404040"/>
+            <hx:AmbientLight3D Color="#4D4D4D"/>
             <hx:DirectionalLight3D Direction="{Binding Camera.LookDirection, ElementName=MainViewport}" Color="#CCCCCC"/>
 
-            <hx:LineGeometryModel3D Geometry="{Binding MinorGridGeometry}" Color="#2A2A2A" Thickness="0.5"/>
-            <hx:LineGeometryModel3D Geometry="{Binding MajorGridGeometry}" Color="#555555" Thickness="1"/>
+            <hx:LineGeometryModel3D Geometry="{Binding MinorGridGeometry}" Color="#4D4D4D" Thickness="0.5"/>
+            <hx:LineGeometryModel3D Geometry="{Binding MajorGridGeometry}" Color="#666666" Thickness="1"/>
             <hx:Element3DPresenter Content="{Binding LoadedModel}"/>
             <hx:LineGeometryModel3D Geometry="{Binding ObjectHighlightGeometry, ElementName=Me}"
                                     Transform="{Binding ObjectHighlightTransform, ElementName=Me}"
@@ -149,8 +214,7 @@
             <!-- ── 物体模式工具栏 ── -->
             <Border Grid.Row="0" x:Name="ObjectToolbar"
                     HorizontalAlignment="Center"
-                    Background="{DynamicResource ToolbarBackgroundBrush}"
-                    CornerRadius="8" Padding="6,4"
+                    Style="{StaticResource FloatingToolbarBorderStyle}"
                     Visibility="{Binding IsObjectMode, Converter={StaticResource B2V}}">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
                     <Button x:Name="BtnMove"   Content="G 移动"   Style="{StaticResource TBBtn}" Click="ToolBtn_Click" Tag="G"/>
@@ -171,11 +235,10 @@
             <!-- ── 面模式工具栏 ── -->
             <Border Grid.Row="0"
                     HorizontalAlignment="Center"
-                    Background="#CC1A3A5C"
-                    CornerRadius="8" Padding="6,4"
+                    Style="{StaticResource FloatingToolbarBorderStyle}"
                     Visibility="{Binding IsFaceMode, Converter={StaticResource B2V}}">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <Border Background="#2266CC" CornerRadius="4" Padding="8,3" Margin="0,0,8,0">
+                    <Border Background="{DynamicResource MutedAccentBrush}" CornerRadius="6" Padding="8,3" Margin="0,0,8,0">
                         <TextBlock Text="● 面  模  式" Foreground="White" FontWeight="Bold" FontSize="11"/>
                     </Border>
                     <Button x:Name="FBtnClick"  Content="Q 点选"  Style="{StaticResource FBBtn}" Click="FaceTool_Click" Tag="Q"/>
@@ -216,40 +279,36 @@
             <!-- ── 变换精确输入栏（G/R/S激活后显示）── -->
             <Border x:Name="TransformInputBar" Grid.Row="1"
                     HorizontalAlignment="Center" Margin="0,6,0,0"
-                    Background="{DynamicResource ToolbarBackgroundBrush}"
-                    CornerRadius="6" Padding="12,6"
+                    Style="{StaticResource FloatingToolbarBorderStyle}"
                     Visibility="Collapsed">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <!-- 模式标签 -->
                     <TextBlock x:Name="TransformLabel" Text="移动"
                                Foreground="{DynamicResource AccentBrush}"
-                               FontWeight="Bold" FontSize="13"
+                               FontWeight="Bold" FontSize="12"
                                VerticalAlignment="Center" Margin="0,0,12,0"/>
                     <!-- X -->
                     <TextBlock x:Name="LblX" Text="X" FontWeight="Bold" Foreground="#FF6680"
                                VerticalAlignment="Center" Margin="0,0,4,0"/>
-                    <TextBox x:Name="TxfX" Width="64" Style="{StaticResource TxfStyle}"
+                    <TextBox x:Name="TxfX" Width="72" Style="{StaticResource TxfStyle}"
                              TextChanged="TransformBox_Changed" KeyDown="TransformBox_KeyDown"/>
                     <!-- Y -->
                     <TextBlock x:Name="LblY" Text="Y" FontWeight="Bold" Foreground="#66FF88"
                                VerticalAlignment="Center" Margin="10,0,4,0"/>
-                    <TextBox x:Name="TxfY" Width="64" Style="{StaticResource TxfStyle}"
+                    <TextBox x:Name="TxfY" Width="72" Style="{StaticResource TxfStyle}"
                              TextChanged="TransformBox_Changed" KeyDown="TransformBox_KeyDown"/>
                     <!-- Z（仅旋转和缩放显示）-->
                     <TextBlock x:Name="LblZ" Text="Z" FontWeight="Bold" Foreground="#6699FF"
                                VerticalAlignment="Center" Margin="10,0,4,0"/>
-                    <TextBox x:Name="TxfZ" Width="64" Style="{StaticResource TxfStyle}"
+                    <TextBox x:Name="TxfZ" Width="72" Style="{StaticResource TxfStyle}"
                              TextChanged="TransformBox_Changed" KeyDown="TransformBox_KeyDown"/>
                     <!-- 按钮 -->
-                    <Button Content="✓ 确认" Margin="12,0,0,0" Padding="10,4" Click="ApplyTransform_Click"
-                            Background="{DynamicResource AccentBrush}" Foreground="White"
-                            BorderThickness="0" IsEnabled="True"/>
-                    <Button Content="↺ 重置" Margin="4,0,0,0" Padding="8,4" Click="ResetTransform_Click"
-                            Background="#33FFFFFF" Foreground="{DynamicResource PrimaryTextBrush}"
-                            BorderThickness="0" IsEnabled="True"/>
-                    <Button Content="✕" Margin="4,0,0,0" Padding="6,4" Click="CloseInputBar_Click"
-                            Background="Transparent" Foreground="{DynamicResource SecondaryTextBrush}"
-                            BorderThickness="0" IsEnabled="True"/>
+                    <Button Content="✓ 确认" Margin="12,0,0,0" Click="ApplyTransform_Click"
+                            Style="{StaticResource TransformActionButtonStyle}" IsEnabled="True"/>
+                    <Button Content="↺ 重置" Margin="4,0,0,0" Click="ResetTransform_Click"
+                            Style="{StaticResource TransformSecondaryButtonStyle}" IsEnabled="True"/>
+                    <Button Content="✕" Margin="4,0,0,0" Click="CloseInputBar_Click"
+                            Style="{StaticResource TransformCloseButtonStyle}" IsEnabled="True"/>
                 </StackPanel>
             </Border>
         </Grid>
@@ -295,7 +354,7 @@
         <Canvas x:Name="ViewCubeCanvas"
                 Width="100" Height="100"
                 HorizontalAlignment="Left" VerticalAlignment="Bottom"
-                Margin="30, 0, 0, 60"
+                Margin="20, 0, 0, 20"
                 Background="#01000000"
                 IsHitTestVisible="True"
                 MouseLeftButtonDown="ViewCubeCanvas_MouseLeftButtonDown"
@@ -304,7 +363,9 @@
         </Canvas>
 
         <!-- 左侧面板折叠按钮 -->
-        <Button Command="{Binding TogglePanelCommand}"
+        <!-- Legacy viewport panel toggle moved to the main toolbar.
+        <Button Visibility="Collapsed"
+                Command="{Binding TogglePanelCommand}"
                 Width="24" Height="24" HorizontalAlignment="Left" VerticalAlignment="Top"
                 Margin="2" Background="{DynamicResource MenuItemBackgroundBrush}"
                 BorderThickness="0" Cursor="Hand" FontSize="11">
@@ -319,6 +380,7 @@
                 </Style>
             </Button.Style>
         </Button>
+        -->
 
     </Grid>
 </UserControl>

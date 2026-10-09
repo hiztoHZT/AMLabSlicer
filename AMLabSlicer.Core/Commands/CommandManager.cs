@@ -8,7 +8,29 @@ namespace AMLabSlicer.Core.Commands
         private readonly Stack<ICommandAction> _undoStack = new Stack<ICommandAction>();
         private readonly Stack<ICommandAction> _redoStack = new Stack<ICommandAction>();
 
-        public int MaxDepth { get; set; } = 25;
+        private int _maxDepth = 25;
+        public int MaxDepth
+        {
+            get => _maxDepth;
+            set
+            {
+                if (value < 0) throw new ArgumentOutOfRangeException(nameof(value));
+                if (_maxDepth == value) return;
+                _maxDepth = value;
+                Trim(_undoStack);
+                Trim(_redoStack);
+                CommandExecuted?.Invoke(this, EventArgs.Empty);
+            }
+        }
+
+        private void Trim(Stack<ICommandAction> stack)
+        {
+            if (stack.Count <= MaxDepth) return;
+            var newest = stack.ToArray();
+            stack.Clear();
+            for (int i = MaxDepth - 1; i >= 0; i--)
+                stack.Push(newest[i]);
+        }
 
         public event EventHandler? CommandExecuted;
 
@@ -20,25 +42,17 @@ namespace AMLabSlicer.Core.Commands
         /// </summary>
         public void Push(ICommandAction command)
         {
+            ArgumentNullException.ThrowIfNull(command);
             _undoStack.Push(command);
             _redoStack.Clear();
 
-            // 限制最大深度
-            if (_undoStack.Count > MaxDepth)
-            {
-                // 用数组倒腾或者更高级的数据结构截断栈底。简单起见：
-                var array = _undoStack.ToArray();
-                _undoStack.Clear();
-                for (int i = array.Length - 2; i >= 0; i--)
-                {
-                    _undoStack.Push(array[i]);
-                }
-            }
+            Trim(_undoStack);
             CommandExecuted?.Invoke(this, EventArgs.Empty);
         }
 
         public void ExecuteCommand(ICommandAction command)
         {
+            ArgumentNullException.ThrowIfNull(command);
             command.Execute();
             Push(command);
         }
@@ -47,8 +61,9 @@ namespace AMLabSlicer.Core.Commands
         {
             if (CanUndo)
             {
-                var cmd = _undoStack.Pop();
+                var cmd = _undoStack.Peek();
                 cmd.Undo();
+                _undoStack.Pop();
                 _redoStack.Push(cmd);
                 CommandExecuted?.Invoke(this, EventArgs.Empty);
             }
@@ -58,9 +73,11 @@ namespace AMLabSlicer.Core.Commands
         {
             if (CanRedo)
             {
-                var cmd = _redoStack.Pop();
+                var cmd = _redoStack.Peek();
                 cmd.Execute();
+                _redoStack.Pop();
                 _undoStack.Push(cmd);
+                Trim(_undoStack);
                 CommandExecuted?.Invoke(this, EventArgs.Empty);
             }
         }

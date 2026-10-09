@@ -8,6 +8,9 @@
 #include <sstream>
 #include <memory>
 #include <functional>
+#include <cstring>
+#include <limits>
+#include <stdexcept>
 
 #include <grpcpp/grpcpp.h>
 #include "slicer.grpc.pb.h"
@@ -286,6 +289,13 @@ public:
                 {
                     size_t vertBytes = obj.vertices().size();
                     size_t idxBytes  = obj.indices().size();
+                    const size_t floatCount = vertBytes / sizeof(float);
+                    const size_t indexCount = idxBytes / sizeof(int);
+                    const size_t maxCount = static_cast<size_t>(std::numeric_limits<int>::max());
+                    if (vertBytes % (3 * sizeof(float)) != 0 || idxBytes % (3 * sizeof(int)) != 0 ||
+                        allVerts.size() > maxCount || floatCount > maxCount - allVerts.size() ||
+                        allIndices.size() > maxCount || indexCount > maxCount - allIndices.size())
+                        return Status(::grpc::StatusCode::INVALID_ARGUMENT, "Invalid mesh buffer length");
                     int nFloats = (int)(vertBytes / sizeof(float));
                     int nInts   = (int)(idxBytes / sizeof(int));
 
@@ -313,9 +323,14 @@ public:
 
                     int prevIdxSize = (int)allIndices.size();
                     allIndices.resize(prevIdxSize + nInts);
-                    const int* srcIdx = reinterpret_cast<const int*>(obj.indices().data());
                     for (int i = 0; i < nInts; ++i)
-                        allIndices[prevIdxSize + i] = srcIdx[i] + vertOffset;
+                    {
+                        int index;
+                        std::memcpy(&index, obj.indices().data() + i * sizeof(int), sizeof(int));
+                        if (index < 0 || index >= nFloats / 3)
+                            return Status(::grpc::StatusCode::INVALID_ARGUMENT, "Mesh index is out of range");
+                        allIndices[prevIdxSize + i] = index + vertOffset;
+                    }
 
                     vertOffset += nFloats / 3;
                 }
@@ -377,10 +392,20 @@ public:
                 };
 
                 // 执行切片
-                std::string gcode = fdm::SliceMesh(
-                    allVerts.data(), (int)allVerts.size() / 3,
-                    allIndices.data(), (int)allIndices.size(),
-                    params, progressCb);
+                std::string gcode;
+                try
+                {
+                    gcode = fdm::SliceMesh(allVerts.data(), (int)allVerts.size() / 3,
+                        allIndices.data(), (int)allIndices.size(), params, progressCb);
+                }
+                catch (const std::invalid_argument& error)
+                {
+                    return Status(::grpc::StatusCode::INVALID_ARGUMENT, error.what());
+                }
+                catch (const std::exception& error)
+                {
+                    return Status(::grpc::StatusCode::INTERNAL, error.what());
+                }
 
                 // 发送结果
                 SliceServerMessage resultMsg;

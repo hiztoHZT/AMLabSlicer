@@ -1,0 +1,12 @@
+cmake_minimum_required(VERSION 3.20)
+project(AMLabSlicerNativeRegression LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 17)
+set(FDM "${CMAKE_CURRENT_SOURCE_DIR}/../../AMLabSlicer.Engine.FDM/slicer")
+add_executable(native_regression regression.cpp "${FDM}/FdmSlicer.cpp" "${FDM}/MeshCutter.cpp"
+    "${FDM}/Infill.cpp" "${FDM}/GCodeWriter.cpp")
+target_include_directories(native_regression PRIVATE "${FDM}")
+if(MSVC)
+    target_compile_options(native_regression PRIVATE /utf-8)
+endif()
+enable_testing()
+add_test(NAME native_regression COMMAND native_regression)

@@ -49,6 +49,12 @@ enum ControlType {
     FILE_PICKER = 6;
 }
 
+message ParameterOption {
+    string value = 1;
+    string display_name = 2;
+    string description = 3;
+}
+
 message ParameterTemplate {
     string key = 1;
     string display_name = 2;
@@ -67,6 +73,11 @@ message ParameterTemplate {
     bool is_advanced = 15;
     string visible_if = 16;
     string enabled_if = 17;
+    string value_expression = 18;
+    string expression_language = 19;
+    int32 category_order = 20;
+    int32 subcategory_order = 21;
+    repeated ParameterOption option_templates = 22;
 }
 
 message ParameterTemplateList {

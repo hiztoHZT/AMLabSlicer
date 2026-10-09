@@ -26,7 +26,7 @@ namespace AMLabSlicer.ViewModel
         [ObservableProperty]
         private string _editingName = string.Empty;
 
-        public bool IsNotRenaming => !_isRenaming;
+        public bool IsNotRenaming => !IsRenaming;
 
         [ObservableProperty]
         private bool _isSelected;

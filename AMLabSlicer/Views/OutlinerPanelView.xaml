@@ -6,15 +6,18 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" MinHeight="80" d:DesignHeight="180" MinWidth="280">
 
-    <Border Background="{DynamicResource ToolbarBackgroundBrush}"
-            BorderBrush="{DynamicResource ControlBorderBrush}" BorderThickness="0,0,0,1">
-        <DockPanel>
+    <Border Background="{DynamicResource SurfaceBrush}"
+            BorderBrush="{DynamicResource SurfaceBorderBrush}"
+            BorderThickness="0,0,0,1"
+            CornerRadius="0"
+            ClipToBounds="True">
+            <DockPanel>
             
 
             <TreeView x:Name="OutlinerTree"
                       ItemsSource="{Binding OutlinerItems}"
                       Background="Transparent" BorderThickness="0"
-                      Margin="4,4,4,4">
+                      Margin="6">
 
                 <TreeView.ItemContainerStyle>
                     <Style TargetType="TreeViewItem">
@@ -48,7 +51,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
 
-                                            <Border x:Name="Bd" Grid.ColumnSpan="2" Background="Transparent" Padding="{TemplateBinding Padding}"/>
+                                            <Border x:Name="Bd" Grid.ColumnSpan="2" Background="Transparent" Padding="{TemplateBinding Padding}" CornerRadius="7" Margin="2,1"/>
 
                                             <ToggleButton x:Name="Expander" Grid.Column="0" 
                                           IsChecked="{Binding Path=IsExpanded, RelativeSource={RelativeSource TemplatedParent}}" 
@@ -134,6 +137,6 @@
                     </HierarchicalDataTemplate>
                 </TreeView.ItemTemplate>
             </TreeView>
-        </DockPanel>
+            </DockPanel>
     </Border>
 </UserControl>

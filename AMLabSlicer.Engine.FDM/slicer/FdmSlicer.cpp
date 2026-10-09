@@ -4,6 +4,7 @@
 #include "GCodeWriter.h"
 #include <algorithm>
 #include <cmath>
+#include <stdexcept>
 
 namespace fdm {
 
@@ -18,6 +19,24 @@ std::string SliceMesh(
     const SliceParams& params,
     ProgressCallback progressCb)
 {
+    auto positive = [](float value) { return std::isfinite(value) && value > 0; };
+    if (!vertices || !indices || vertexCount <= 0 || indexCount <= 0 || indexCount % 3 != 0)
+        throw std::invalid_argument("A non-empty triangle mesh is required");
+    if (!positive(params.layerHeight) || !positive(params.initialLayerHeight) ||
+        !positive(params.lineWidth) || !positive(params.filamentDiameter) ||
+        !positive(params.speedPrint) || !positive(params.speedTravel) || !positive(params.speedLayer0) ||
+        !positive(params.retractionSpeed) || params.wallLineCount < 0 ||
+        !std::isfinite(params.infillDensity) || params.infillDensity < 0 || params.infillDensity > 100 ||
+        !std::isfinite(params.retractionAmount) || params.retractionAmount < 0 ||
+        !std::isfinite(params.nozzleTemp) || !std::isfinite(params.bedTemp) ||
+        !std::isfinite(params.fanSpeed) || params.fanSpeed < 0 || params.fanSpeed > 100)
+        throw std::invalid_argument("Invalid slicing parameters");
+    for (size_t i = 0; i < static_cast<size_t>(vertexCount) * 3; ++i)
+        if (!std::isfinite(vertices[i])) throw std::invalid_argument("Non-finite mesh vertex");
+    for (int i = 0; i < indexCount; ++i)
+        if (indices[i] < 0 || indices[i] >= vertexCount)
+            throw std::invalid_argument("Mesh index is out of range");
+
     // 1. 构建三角形列表
     std::vector<Triangle> triangles;
     int triCount = indexCount / 3;
@@ -45,14 +64,25 @@ std::string SliceMesh(
     if (progressCb) progressCb(0.05f, "网格预处理完成");
 
     // 2. 计算分层
+    constexpr double kMaxLayerCount = 1'000'000.0;
+    const double remainingHeight = std::max(0.0,
+        static_cast<double>(globalZMax) - (static_cast<double>(globalZMin) + params.initialLayerHeight));
+    const double projectedLayerCount = 1.0 + std::ceil(remainingHeight / params.layerHeight);
+    if (!std::isfinite(projectedLayerCount) || projectedLayerCount > kMaxLayerCount)
+        throw std::invalid_argument("Requested layer count exceeds the safety limit");
+
     std::vector<float> zHeights;
+    zHeights.reserve(static_cast<size_t>(projectedLayerCount));
     float z = globalZMin + params.initialLayerHeight * 0.5f;
     zHeights.push_back(z);
     z = globalZMin + params.initialLayerHeight;
 
     while (z < globalZMax)
     {
-        z += params.layerHeight;
+        const float nextZ = z + params.layerHeight;
+        if (!std::isfinite(nextZ) || nextZ <= z)
+            throw std::invalid_argument("Layer height is too small for the mesh coordinate range");
+        z = nextZ;
         zHeights.push_back(z);
     }
 

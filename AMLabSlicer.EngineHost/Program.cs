@@ -239,7 +239,6 @@ namespace AMLabSlicer.EngineHost
                         await responseStream.WriteAsync(engineResponse, context.CancellationToken);
                     }
 
-                    await CompleteRequestStreamAsync(engineCall.RequestStream);
                     await requestPump;
                 }
                 catch (RpcException ex)
@@ -266,13 +265,16 @@ namespace AMLabSlicer.EngineHost
                     if (message.MsgCase == SliceClientMessage.MsgOneofCase.CancelRequest)
                     {
                         await target.WriteAsync(new SliceClientMessage { CancelRequest = true }, cancellationToken);
-                        await CompleteRequestStreamAsync(target);
                         return;
                     }
                 }
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
+            }
+            finally
+            {
+                await CompleteRequestStreamAsync(target);
             }
         }
 
