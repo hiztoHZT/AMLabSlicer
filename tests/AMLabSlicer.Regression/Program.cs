@@ -11,14 +11,22 @@ using HelixToolkit.SharpDX.Model.Scene;
 internal static class Program
 {
     [STAThread]
-    private static int Main()
+    private static int Main(string[] args)
     {
         var dispatcher = Dispatcher.CurrentDispatcher;
         SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(dispatcher));
         int result = 1;
         dispatcher.InvokeAsync(async () =>
         {
-            try { await RunAsync(); result = 0; }
+            try
+            {
+                if (args is ["--plugin-probe", var removeDirectory, var removeData, var removeCount, "--remove"])
+                    await PluginRuntimeChecks.RunAsync(removeDirectory, removeData, int.Parse(removeCount), remove: true);
+                else if (args is ["--plugin-probe", var directory, var data, var count])
+                    await PluginRuntimeChecks.RunAsync(directory, data, int.Parse(count));
+                else await RunAsync();
+                result = 0;
+            }
             catch (Exception ex) { Console.Error.WriteLine(ex); }
             finally { dispatcher.BeginInvokeShutdown(DispatcherPriority.Background); }
         });
@@ -150,6 +158,7 @@ internal static class Program
         Check(value == before - 1, "main window undo uses workspace history without a view");
         main.RedoCommand.Execute(null);
         Check(value == before, "main window redo uses workspace history without a view");
+        await PreferencesAndAgentChecks.RunAsync(Check, dialogs);
         Console.WriteLine("All regression checks passed.");
     }
 
@@ -175,6 +184,8 @@ internal sealed class FakeDialogs : IUserDialogService
     public string? SelectGCodeDestination() => null;
     public void ShowMessage(string message, string title = "提示") => Messages.Add(message);
     public void OpenPreferences() { }
+    public string? ExtensionsSection { get; private set; }
+    public void OpenExtensions(string section = "Agent") => ExtensionsSection = section;
 }
 
 internal sealed class FakeImporter : IModelImportService

@@ -1,0 +1,63 @@
+<UserControl x:Class="AMLabSlicer.Plugins.Agent.Views.AgentChatPanelView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:loc="clr-namespace:AMLabSlicer.Plugin.Wpf.Localization;assembly=AMLabSlicer.Plugin.Wpf"
+             FontFamily="{DynamicResource UiFontFamily}" FontSize="{DynamicResource UiFontSize}"
+             Foreground="{DynamicResource PrimaryTextBrush}" Background="{DynamicResource SurfaceBrush}">
+    <UserControl.Resources><BooleanToVisibilityConverter x:Key="BoolToVis"/></UserControl.Resources>
+    <Grid Margin="8">
+        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+        <DockPanel Margin="0,0,0,8">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                <Button Content="{loc:Text Key='新对话'}" Command="{Binding NewConversationCommand}" Style="{StaticResource SecondaryActionButtonStyle}" Margin="0,0,4,0"/>
+                <Button Content="{loc:Text Key='设置'}" Command="{Binding OpenSettingsCommand}" Style="{StaticResource SecondaryActionButtonStyle}"/>
+            </StackPanel>
+            <TextBlock Text="Agent" FontWeight="SemiBold" FontSize="{DynamicResource UiTitleFontSize}" VerticalAlignment="Center"/>
+        </DockPanel>
+        <TextBlock Grid.Row="1" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,8" TextWrapping="Wrap">
+            <TextBlock.Style><Style TargetType="TextBlock">
+                <Setter Property="Text" Value="{Binding ConnectionSummary}"/>
+                <Style.Triggers><DataTrigger Binding="{Binding Preferences.AgentModel}" Value=""><Setter Property="Text" Value="{loc:Text Key='尚未配置模型'}"/></DataTrigger></Style.Triggers>
+            </Style></TextBlock.Style>
+        </TextBlock>
+        <ScrollViewer x:Name="MessageScroll" Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <ItemsControl ItemsSource="{Binding Messages}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Margin="0,0,0,8" Padding="8" CornerRadius="{StaticResource UiCornerRadius}" BorderThickness="1" BorderBrush="{DynamicResource SurfaceBorderBrush}">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="{DynamicResource SurfaceElevatedBrush}"/>
+                                    <Style.Triggers><DataTrigger Binding="{Binding IsUser}" Value="True"><Setter Property="Background" Value="{DynamicResource MutedAccentBrush}"/></DataTrigger></Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <StackPanel>
+                                <DockPanel Margin="0,0,0,4">
+                                    <TextBlock DockPanel.Dock="Right" Text="{loc:LocalizedBinding DeliveryStatus}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                    <TextBlock Text="{loc:LocalizedBinding Sender}" FontWeight="SemiBold"/>
+                                </DockPanel>
+                                <TextBox IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="0" Padding="0"
+                                         BorderThickness="0" Background="Transparent" VerticalContentAlignment="Top">
+                                    <TextBox.Style><Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                                        <Setter Property="Text" Value="{Binding Text, Mode=OneWay}"/>
+                                        <Style.Triggers><DataTrigger Binding="{Binding Role}" Value="system"><Setter Property="Text" Value="{loc:LocalizedBinding Text}"/></DataTrigger></Style.Triggers>
+                                    </Style></TextBox.Style>
+                                </TextBox>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+        <TextBlock Grid.Row="3" Text="{loc:LocalizedBinding Status}" Foreground="{DynamicResource SecondaryTextBrush}" TextWrapping="Wrap" Margin="0,8"/>
+        <StackPanel Grid.Row="4">
+            <TextBox x:Name="ChatInput" Text="{Binding Input, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap"
+                     Height="90" Padding="8" VerticalContentAlignment="Top" VerticalScrollBarVisibility="Auto" PreviewKeyDown="ChatInput_PreviewKeyDown"/>
+            <Grid Margin="0,8,0,0">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                <TextBlock Text="{loc:Text Key='Ctrl+Enter 发送'}" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center"/>
+                <Button Grid.Column="1" Content="{loc:Text Key='停止'}" Command="{Binding SendCancelCommand}" Style="{StaticResource SecondaryActionButtonStyle}" Margin="4,0"/>
+                <Button Grid.Column="2" Content="{loc:Text Key='发送'}" Command="{Binding SendCommand}" Style="{StaticResource PrimaryActionButtonStyle}"/>
+            </Grid>
+        </StackPanel>
+    </Grid>
+</UserControl>

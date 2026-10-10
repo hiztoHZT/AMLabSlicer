@@ -20,4 +20,17 @@
   <ItemGroup>
     <Protobuf Include="..\Protos\slicer.proto" GrpcServices="Both" />
   </ItemGroup>
+  <Target Name="StageEngineHostRuntime" AfterTargets="Build">
+    <PropertyGroup>
+      <EngineHostPackage>$(MSBuildThisFileDirectory)bin/$(Configuration)/package/</EngineHostPackage>
+      <FdmRuntimeSource>$(MSBuildThisFileDirectory)../AMLabSlicer.Engine.FDM/build/Release/</FdmRuntimeSource>
+    </PropertyGroup>
+    <ItemGroup>
+      <HostRuntimeFiles Include="$(TargetPath);$(TargetDir)$(AssemblyName).exe;$(TargetDir)$(AssemblyName).deps.json;$(TargetDir)$(AssemblyName).runtimeconfig.json"/>
+      <HostRuntimeFiles Include="@(ReferenceCopyLocalPaths)"/>
+      <FdmRuntimeFiles Include="$(FdmRuntimeSource)*.dll;$(FdmRuntimeSource)fdm_engine.exe"/>
+    </ItemGroup>
+    <Copy SourceFiles="@(HostRuntimeFiles)" DestinationFolder="$(EngineHostPackage)" SkipUnchangedFiles="true"/>
+    <Copy SourceFiles="@(FdmRuntimeFiles)" DestinationFolder="$(EngineHostPackage)engines/fdm/" SkipUnchangedFiles="true"/>
+  </Target>
 </Project>

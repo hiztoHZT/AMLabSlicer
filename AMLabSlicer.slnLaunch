@@ -9,7 +9,7 @@
       },
       {
         "Path": "AMLabSlicer.EngineHost\\AMLabSlicer.EngineHost.csproj",
-        "Action": "Start",
+        "Action": "None",
         "DebugTarget": "AMLabSlicer.EngineHost"
       }
     ]

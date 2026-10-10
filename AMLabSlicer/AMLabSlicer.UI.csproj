@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <Content Include="Assets\ico\AMLAS.ico" />
+    <Content Include="Extensions\README.md" Link="extensions\README.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
@@ -47,6 +48,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../AMLabSlicer.Plugin.Wpf/AMLabSlicer.Plugin.Wpf.csproj"/>
+    <ProjectReference Include="../AMLabSlicer.Plugins.Agent/AMLabSlicer.Plugins.Agent.csproj" ReferenceOutputAssembly="false"/>
+    <ProjectReference Include="../AMLabSlicer.EngineHost/AMLabSlicer.EngineHost.csproj" ReferenceOutputAssembly="false"/>
     <ProjectReference Include="..\AMLabSlicer.Core\AMLabSlicer.Core.csproj" />
     <ProjectReference Include="..\AMLabSlicer.Occt\AMLabSlicer.Occt.csproj" />
   </ItemGroup>
@@ -67,5 +71,22 @@
     <Warning Text="Native engine output not found at $(EngineOutputDir). Build AMLabSlicer.Occt.Native (x64) first." Condition="!Exists('$(EngineOutputDir)')" />
   </Target>
 
+  <Target Name="CopyAgentPlugin" AfterTargets="Build">
+    <PropertyGroup><AgentPackageSource>$(MSBuildThisFileDirectory)../AMLabSlicer.Plugins.Agent/bin/$(Configuration)/package/</AgentPackageSource></PropertyGroup>
+    <ItemGroup><AgentPackage Include="$(AgentPackageSource)**/*"/></ItemGroup>
+    <Copy SourceFiles="@(AgentPackage)" DestinationFiles="@(AgentPackage->'$(TargetDir)extensions/amlab.agent/1.0.0/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true"/>
+  </Target>
+  <Target Name="PublishAgentPlugin" AfterTargets="Publish">
+    <ItemGroup><AgentPublishPackage Include="$(MSBuildThisFileDirectory)../AMLabSlicer.Plugins.Agent/bin/$(Configuration)/package/**/*"/></ItemGroup>
+    <Copy SourceFiles="@(AgentPublishPackage)" DestinationFiles="@(AgentPublishPackage->'$(PublishDir)extensions/amlab.agent/1.0.0/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true"/>
+  </Target>
+  <Target Name="CopyEngineHostRuntime" AfterTargets="Build">
+    <ItemGroup><EngineHostRuntime Include="$(MSBuildThisFileDirectory)../AMLabSlicer.EngineHost/bin/$(Configuration)/package/**/*"/></ItemGroup>
+    <Copy SourceFiles="@(EngineHostRuntime)" DestinationFiles="@(EngineHostRuntime->'$(TargetDir)enginehost/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true"/>
+  </Target>
+  <Target Name="PublishEngineHostRuntime" AfterTargets="Publish">
+    <ItemGroup><EngineHostPublishRuntime Include="$(MSBuildThisFileDirectory)../AMLabSlicer.EngineHost/bin/$(Configuration)/package/**/*"/></ItemGroup>
+    <Copy SourceFiles="@(EngineHostPublishRuntime)" DestinationFiles="@(EngineHostPublishRuntime->'$(PublishDir)enginehost/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true"/>
+  </Target>
 </Project>
 

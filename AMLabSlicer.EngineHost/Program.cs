@@ -74,7 +74,7 @@ namespace AMLabSlicer.EngineHost
             }
         }
 
-        public async Task WaitForEnginesReady(int timeoutMs = 10000)
+        public async Task WaitForEnginesReady(int timeoutMs = 10000, CancellationToken cancellationToken = default)
         {
             Console.WriteLine("[EngineHost] Waiting for registered engines...");
             var stopwatch = Stopwatch.StartNew();
@@ -91,14 +91,16 @@ namespace AMLabSlicer.EngineHost
                         {
                             await client.GetAvailableAlgorithmsAsync(
                                 new Empty(),
-                                deadline: DateTime.UtcNow.AddSeconds(2));
+                                deadline: DateTime.UtcNow.AddSeconds(2), cancellationToken: cancellationToken);
                             ready = true;
                             Console.WriteLine($"[EngineHost] Engine ready: {registration.Algorithm.AlgorithmId} ({stopwatch.ElapsedMilliseconds}ms)");
                         }
                     }
+                    catch when (cancellationToken.IsCancellationRequested) { return; }
                     catch
                     {
-                        await Task.Delay(300);
+                        try { await Task.Delay(300, cancellationToken); }
+                        catch (OperationCanceledException) { return; }
                     }
                 }
 
@@ -318,13 +320,13 @@ namespace AMLabSlicer.EngineHost
 
             builder.WebHost.ConfigureKestrel(options =>
             {
-                options.ListenLocalhost(50051, o => o.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http2);
+                options.ListenLocalhost(builder.Configuration.GetValue<int?>("EngineHost:Port") ?? 50051,
+                    o => o.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http2);
             });
 
-            var registry = new EngineRegistry();
-            registry.RegisterAndLaunch(CreateFdmAlgorithmInfo(), "http://localhost:50100", FindFdmEngine());
-
-            await registry.WaitForEnginesReady(timeoutMs: 15000);
+            using var registry = new EngineRegistry();
+            registry.RegisterAndLaunch(CreateFdmAlgorithmInfo(), "http://localhost:50100",
+                builder.Configuration["EngineHost:EngineExecutable"] ?? Environment.GetEnvironmentVariable("AMLAB_FDM_ENGINE") ?? FindFdmEngine());
 
             builder.Services.AddSingleton(registry);
             builder.Services.AddGrpc(options =>
@@ -333,9 +335,10 @@ namespace AMLabSlicer.EngineHost
                 options.MaxSendMessageSize = null;
             });
 
-            var app = builder.Build();
+            await using var app = builder.Build();
             app.MapGrpcService<EngineHostService>();
             app.MapGet("/", () => "AMLabSlicer EngineHost - gRPC engine router");
+            app.MapEngineHostShutdown();
 
             app.Lifetime.ApplicationStopping.Register(() =>
             {
@@ -351,7 +354,10 @@ namespace AMLabSlicer.EngineHost
                 Console.WriteLine($"    - {algorithm.AlgorithmId}: {algorithm.DisplayName}");
             Console.WriteLine("========================================");
 
-            await app.RunAsync();
+            // Listen before engine warm-up so a closing UI can stop a starting host too.
+            await app.StartAsync();
+            await registry.WaitForEnginesReady(timeoutMs: 15000, cancellationToken: app.Lifetime.ApplicationStopping);
+            await app.WaitForShutdownAsync();
         }
 
         private static AlgorithmInfo CreateFdmAlgorithmInfo()
@@ -375,6 +381,8 @@ namespace AMLabSlicer.EngineHost
         {
             var candidates = new[]
             {
+                Path.Combine(AppContext.BaseDirectory, "engines", "fdm", "fdm_engine.exe"),
+                Path.Combine(AppContext.BaseDirectory, "fdm_engine.exe"),
                 Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "AMLabSlicer.Engine.FDM", "build", "Release", "fdm_engine.exe"),
                 Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "AMLabSlicer.Engine.FDM", "build", "Release", "fdm_engine.exe")),
                 @"F:\2026.3\AMLabSlicer\AMLabSlicer\AMLabSlicer.Engine.FDM\build\Release\fdm_engine.exe",

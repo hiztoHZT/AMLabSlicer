@@ -15,7 +15,7 @@ using AMLabSlicer.ViewModel;
 
 namespace AMLabSlicer.Views
 {
-    public partial class PreferencesWindow : Window
+    public partial class PreferencesWindow : ThemedWindow
     {
         public PreferencesWindow(PreferencesViewModel viewModel)
         {

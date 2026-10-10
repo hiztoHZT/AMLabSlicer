@@ -1,0 +1,66 @@
+<views:ThemedWindow x:Class="AMLabSlicer.Views.ExtensionsWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:loc="clr-namespace:AMLabSlicer.Plugin.Wpf.Localization;assembly=AMLabSlicer.Plugin.Wpf"
+    xmlns:views="clr-namespace:AMLabSlicer.Views" Title="{loc:Text Key='插件'}" Width="780" Height="620" MinWidth="640" MinHeight="480" WindowStartupLocation="CenterOwner">
+<Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <Style x:Key="SettingsLabel" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="Margin" Value="0,0,12,0"/>
+        </Style>
+        <Style x:Key="SettingsHint" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="Margin" Value="0,4,0,8"/>
+        </Style>
+        <Style x:Key="SettingsHeading" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="{DynamicResource UiTitleFontSize}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+    </Window.Resources>
+    <Grid Margin="16">
+        <Grid.ColumnDefinitions><ColumnDefinition Width="150"/><ColumnDefinition Width="12"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+        <ListBox ItemsSource="{Binding Sections}" SelectedItem="{Binding SelectedSection}" Style="{StaticResource SectionNavigationStyle}"><ListBox.ItemTemplate><DataTemplate><TextBlock Text="{loc:LocalizedBinding .}" TextWrapping="Wrap"/></DataTemplate></ListBox.ItemTemplate></ListBox>
+        <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Margin="0,0,8,0">
+                <ContentControl x:Name="PluginSettingsContent" Content="{Binding SelectedSettingsPage}" Visibility="{Binding IsPluginSection, Converter={StaticResource BoolToVis}}"/>
+                <StackPanel Visibility="{Binding IsManagementSection, Converter={StaticResource BoolToVis}}">
+                    <Border Style="{StaticResource SettingsCardStyle}"><StackPanel>
+                        <TextBlock Text="{loc:Text Key='插件管理'}" Style="{StaticResource SettingsHeading}"/>
+<CheckBox Content="{loc:Text Key='启用侧栏动画'}" IsChecked="{Binding Preferences.EnablePanelAnimations}" Margin="0,4"/>
+<CheckBox Content="{loc:Text Key='启动时打开右侧插件面板'}" IsChecked="{Binding Preferences.OpenDeveloperPanelOnStartup}" Margin="0,4"/>
+<TextBlock Text="{loc:Text Key='右侧面板宽度（300–600）'}" Margin="0,4"/>
+<TextBox Text="{Binding Preferences.DeveloperPanelWidth, UpdateSourceTrigger=LostFocus}" Margin="0,4,0,8"/>
+                        <TextBlock Text="{loc:Text Key='交互插件只显示在主窗口右侧。插件的全部配置在这里修改。'}" Style="{StaticResource SettingsHint}"/>
+                        <TextBlock Text="{loc:Text Key='插件目录'}"/>
+                        <TextBox Text="{Binding DirectoryPath, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap" Margin="0,4,0,8"/>
+                        <StackPanel Orientation="Horizontal">
+                            <Button Content="{loc:Text Key='打开目录'}" Command="{Binding OpenDirectoryCommand}" Style="{StaticResource SecondaryActionButtonStyle}" Margin="0,0,8,0"/>
+                            <Button Content="{loc:Text Key='安装 ZIP'}" Command="{Binding InstallCommand}" Style="{StaticResource SecondaryActionButtonStyle}" Margin="0,0,8,0"/>
+                            <Button Content="{loc:Text Key='刷新清单'}" Command="{Binding RefreshCommand}" Style="{StaticResource SecondaryActionButtonStyle}"/>
+                        </StackPanel>
+                        <TextBlock Text="{loc:LocalizedBinding Status}" Style="{StaticResource SettingsHint}" Margin="0,12,0,0"/>
+                    </StackPanel></Border>
+                    <ItemsControl ItemsSource="{Binding Packages}">
+                        <ItemsControl.ItemTemplate><DataTemplate>
+                            <Border Style="{StaticResource SettingsCardStyle}"><StackPanel>
+                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding Version}" Margin="0,4"/>
+                                <TextBlock Text="{loc:LocalizedBinding State}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <TextBlock Text="{Binding Location}" TextWrapping="Wrap" Margin="0,4"/>
+<StackPanel Orientation="Horizontal">
+<Button Content="{loc:Text Key='启用'}" Command="{Binding DataContext.EnableCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" Style="{StaticResource SecondaryActionButtonStyle}" Margin="0,4,8,0"/>
+<Button Content="{loc:Text Key='停用'}" Command="{Binding DataContext.DisableCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" Style="{StaticResource SecondaryActionButtonStyle}" Margin="0,4"/>
+<Button Content="{loc:Text Key='卸载'}" Command="{Binding DataContext.RemoveCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" Style="{StaticResource SecondaryActionButtonStyle}" Margin="8,4,0,0"/>
+</StackPanel>
+                            </StackPanel></Border>
+                        </DataTemplate></ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock Text="{loc:Text Key='安装包后需手动启用。停用后的重新启用和版本更新需重启；加载的 DLL 不进行热卸载。'}" Style="{StaticResource SettingsHint}"/>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</views:ThemedWindow>

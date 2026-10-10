@@ -9,5 +9,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../../AMLabSlicer/AMLabSlicer.UI.csproj" />
+    <ProjectReference Include="../../AMLabSlicer.Plugins.Agent/AMLabSlicer.Plugins.Agent.csproj" />
   </ItemGroup>
 </Project>

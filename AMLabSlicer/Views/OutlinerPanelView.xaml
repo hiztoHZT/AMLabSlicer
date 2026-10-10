@@ -1,6 +1,7 @@
 <UserControl x:Class="AMLabSlicer.Views.OutlinerPanelView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:loc="clr-namespace:AMLabSlicer.Plugin.Wpf.Localization;assembly=AMLabSlicer.Plugin.Wpf"
              xmlns:vm="clr-namespace:AMLabSlicer.ViewModel"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -14,7 +15,7 @@
             <DockPanel>
             
 
-            <TreeView x:Name="OutlinerTree"
+            <TreeView FontSize="{DynamicResource UiFontSize}" x:Name="OutlinerTree"
                       ItemsSource="{Binding OutlinerItems}"
                       Background="Transparent" BorderThickness="0"
                       Margin="6">
@@ -30,8 +31,8 @@
                         <Setter Property="ContextMenu">
                             <Setter.Value>
                                 <ContextMenu>
-                                    <MenuItem Header="重命名 (F2)" Command="{Binding RenameCommand}"/>
-                                    <MenuItem Header="隐藏 / 显示" Command="{Binding ToggleVisibilityCommand}"/>
+                                    <MenuItem Header="{loc:Text Key='重命名 (F2)'}" Command="{Binding RenameCommand}"/>
+                                    <MenuItem Header="{loc:Text Key='隐藏 / 显示'}" Command="{Binding ToggleVisibilityCommand}"/>
                                 </ContextMenu>
                             </Setter.Value>
                         </Setter>
@@ -51,7 +52,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
 
-                                            <Border x:Name="Bd" Grid.ColumnSpan="2" Background="Transparent" Padding="{TemplateBinding Padding}" CornerRadius="7" Margin="2,1"/>
+                                            <Border x:Name="Bd" Grid.ColumnSpan="2" Background="Transparent" Padding="{TemplateBinding Padding}" CornerRadius="{StaticResource UiCornerRadius}" Margin="2,1"/>
 
                                             <ToggleButton x:Name="Expander" Grid.Column="0" 
                                           IsChecked="{Binding Path=IsExpanded, RelativeSource={RelativeSource TemplatedParent}}" 
@@ -75,7 +76,7 @@
                                             </ToggleButton>
 
                                             <ContentPresenter x:Name="PART_Header" Grid.Column="1" 
-                                              ContentSource="Header" 
+                                              ContentSource="Header" MinHeight="{DynamicResource UiParameterRowHeight}" VerticalAlignment="Center"
                                               HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"/>
                                         </Grid>
 
@@ -91,6 +92,7 @@
                                         </Trigger>
                                         <Trigger Property="IsSelected" Value="True">
                                             <Setter TargetName="Bd" Property="Background" Value="{DynamicResource SelectionHighlightBrush}"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
                                         </Trigger>
                                     </ControlTemplate.Triggers>
                                 </ControlTemplate>
@@ -110,14 +112,14 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
-                            <!-- 面片组图标 or 普通图标 -->
+                            <!-- 模型对象图标 -->
                             <TextBlock Grid.Column="0"
-                                       Text="{Binding IsFaceGroup, Converter={x:Static vm:OutlinerIconConverter.Instance}}"
-                                       FontSize="11" VerticalAlignment="Center"
+                                       Text="○"
+                                       FontSize="{DynamicResource UiSmallFontSize}" VerticalAlignment="Center"
                                        Foreground="{DynamicResource AccentBrush}"/>
 
                             <!-- 名称（正常 / 重命名编辑框 切换） -->
-                            <TextBlock Grid.Column="1" Text="{Binding Name}"
+                            <TextBlock Grid.Column="1" Text="{Binding Name}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Name}"
                                        VerticalAlignment="Center" Margin="2,0"
                                        Visibility="{Binding IsRenaming, Converter={x:Static vm:InverseBoolToVisConverter.Instance}}"/>
                             <TextBox Grid.Column="1" Text="{Binding EditingName, UpdateSourceTrigger=PropertyChanged}"
@@ -129,7 +131,7 @@
                             <!-- 可见性开关 -->
                             <CheckBox Grid.Column="2"
                                       IsChecked="{Binding IsVisible, Mode=TwoWay}"
-                                      ToolTip="显示/隐藏"
+                                      ToolTip="{loc:Text Key='显示/隐藏'}"
                                       VerticalAlignment="Center"
                                       HorizontalAlignment="Right"
                                       Margin="0,0,4,0"/>

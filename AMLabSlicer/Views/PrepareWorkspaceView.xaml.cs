@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using AMLabSlicer.ViewModel;
@@ -17,6 +18,10 @@ namespace AMLabSlicer.Views
 
         private INotifyPropertyChanged? _workspaceViewModel;
         private double _lastOpenPanelWidth = DefaultPanelWidth;
+        private double _lastAgentPanelWidth = 360;
+        private PreferencesViewModel? _preferences;
+        private bool _updatingPanelConstraints;
+        private double _availableWorkspaceWidth;
 
         public PrepareWorkspaceView()
         {
@@ -27,17 +32,62 @@ namespace AMLabSlicer.Views
             DataContextChanged += PrepareWorkspaceView_DataContextChanged;
             LeftPanelHost.SizeChanged += WorkspaceHost_SizeChanged;
             ViewportHost.SizeChanged += WorkspaceHost_SizeChanged;
+            AgentPanelHost.SizeChanged += WorkspaceHost_SizeChanged;
+            AgentContentHost.SizeChanged += WorkspaceHost_SizeChanged;
+            OutlinerHost.SizeChanged += WorkspaceHost_SizeChanged;
+            ParameterHost.SizeChanged += WorkspaceHost_SizeChanged;
+            MainSplitter.DragCompleted += (_, _) => { _lastOpenPanelWidth = LeftPanelColumn.ActualWidth; UpdatePanelConstraints(settlePanels: true); };
+        }
+
+        protected override Size MeasureOverride(Size constraint)
+        {
+            CheckAvailableWidth(constraint.Width);
+            CheckAvailableHeight(constraint.Height);
+            return base.MeasureOverride(constraint);
+        }
+
+        protected override Size ArrangeOverride(Size arrangeBounds)
+        {
+            CheckAvailableWidth(arrangeBounds.Width);
+            CheckAvailableHeight(arrangeBounds.Height);
+            return base.ArrangeOverride(arrangeBounds);
+        }
+
+        private void CheckAvailableWidth(double width)
+        {
+            width -= MainContainer.Margin.Left + MainContainer.Margin.Right;
+            if (!double.IsFinite(width) || width <= 0 || Math.Abs(width - _availableWorkspaceWidth) < .01) return;
+            _availableWorkspaceWidth = width;
+            UpdatePanelConstraints(settlePanels: true);
+        }
+
+        private void CheckAvailableHeight(double height)
+        {
+            height -= MainContainer.Margin.Top + MainContainer.Margin.Bottom;
+            if (!double.IsFinite(height) || height <= 0) return;
+            // The upper fixed row must fit the current window, not just the size at the last drag.
+            var maximumOutlinerHeight = Math.Max(0, height - SplitterWidth - ParameterRow.MinHeight);
+            OutlinerRow.MinHeight = Math.Min(120, maximumOutlinerHeight);
+            OutlinerRow.MaxHeight = maximumOutlinerHeight;
+            if (OutlinerRow.Height.IsAbsolute && OutlinerRow.Height.Value > maximumOutlinerHeight)
+                OutlinerRow.Height = new GridLength(maximumOutlinerHeight);
+            if (!ParameterRow.Height.IsStar) ParameterRow.Height = new GridLength(1, GridUnitType.Star);
         }
 
         private void PrepareWorkspaceView_Loaded(object sender, RoutedEventArgs e)
         {
             UpdateRoundedClip(LeftPanelHost);
             UpdateRoundedClip(ViewportHost);
+            UpdateRoundedClip(AgentPanelHost);
+            UpdateRoundedClip(AgentContentHost);
+            UpdateRoundedClip(OutlinerHost);
+            UpdateRoundedClip(ParameterHost);
 
             if (DataContext is PrepareWorkspaceViewModel vm)
             {
                 AttachWorkspaceViewModel(vm);
                 ApplyParameterPanelState(vm.IsParameterPanelOpen, immediate: true);
+                ApplyAgentPanelState(vm.IsAgentPanelOpen, immediate: true);
             }
         }
 
@@ -53,6 +103,7 @@ namespace AMLabSlicer.Views
             if (e.NewValue is PrepareWorkspaceViewModel vm)
             {
                 ApplyParameterPanelState(vm.IsParameterPanelOpen, immediate: true);
+                ApplyAgentPanelState(vm.IsAgentPanelOpen, immediate: true);
             }
         }
 
@@ -63,11 +114,18 @@ namespace AMLabSlicer.Views
 
             if (_workspaceViewModel != null)
                 _workspaceViewModel.PropertyChanged -= WorkspaceViewModel_PropertyChanged;
+            if (_preferences != null) _preferences.PropertyChanged -= Preferences_PropertyChanged;
 
             _workspaceViewModel = viewModel;
 
             if (_workspaceViewModel != null)
                 _workspaceViewModel.PropertyChanged += WorkspaceViewModel_PropertyChanged;
+            _preferences = (viewModel as PrepareWorkspaceViewModel)?.AppPrefs;
+            if (_preferences != null)
+            {
+                _lastAgentPanelWidth = _preferences.DeveloperPanelWidth;
+                _preferences.PropertyChanged += Preferences_PropertyChanged;
+            }
         }
 
         private static void WorkspaceHost_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -136,17 +194,97 @@ namespace AMLabSlicer.Views
 
         private void WorkspaceViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName != nameof(PrepareWorkspaceViewModel.IsParameterPanelOpen) ||
-                sender is not PrepareWorkspaceViewModel vm)
-            {
-                return;
-            }
+            if (sender is not PrepareWorkspaceViewModel vm) return;
+            if (e.PropertyName == nameof(PrepareWorkspaceViewModel.IsParameterPanelOpen))
+                Dispatcher.Invoke(() => ApplyParameterPanelState(vm.IsParameterPanelOpen, immediate: false));
+            if (e.PropertyName == nameof(PrepareWorkspaceViewModel.IsAgentPanelOpen))
+                Dispatcher.Invoke(() => ApplyAgentPanelState(vm.IsAgentPanelOpen, immediate: false));
+        }
 
-            Dispatcher.Invoke(() => ApplyParameterPanelState(vm.IsParameterPanelOpen, immediate: false));
+        private void Preferences_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(PreferencesViewModel.DeveloperPanelWidth) && _preferences != null)
+            {
+                _lastAgentPanelWidth = _preferences.DeveloperPanelWidth;
+                if (DataContext is PrepareWorkspaceViewModel { IsAgentPanelOpen: true }) ApplyAgentPanelState(true, true);
+            }
+        }
+        private void UpdatePanelConstraints(bool settlePanels = false)
+        {
+            if (_updatingPanelConstraints || _availableWorkspaceWidth <= 0) return;
+            _updatingPanelConstraints = true;
+            try
+            {
+                var vm = DataContext as PrepareWorkspaceViewModel;
+                var leftOpen = vm?.IsParameterPanelOpen != false;
+                var rightOpen = vm?.IsAgentPanelOpen == true;
+                var leftRequest = LeftPanelColumn.Width.IsAbsolute && LeftPanelColumn.Width.Value > 0 ? LeftPanelColumn.Width.Value : _lastOpenPanelWidth;
+                var rightRequest = AgentPanelColumn.Width.IsAbsolute && AgentPanelColumn.Width.Value > 0 ? AgentPanelColumn.Width.Value : _lastAgentPanelWidth;
+                var fitted = WorkspacePanelSizing.Fit(_availableWorkspaceWidth, leftRequest, rightRequest, leftOpen, rightOpen);
+                // Reset minima before changing maxima: both panels must fit in the same budget.
+                var previousLeftMinimum = LeftPanelColumn.MinWidth;
+                var previousRightMinimum = AgentPanelColumn.MinWidth;
+                LeftPanelColumn.MinWidth = 0; AgentPanelColumn.MinWidth = 0;
+                LeftPanelColumn.MaxWidth = Math.Max(fitted.LeftMinimum, Math.Min(640, _availableWorkspaceWidth - fitted.Right - 300 - (leftOpen ? 4 : 0) - (rightOpen ? 4 : 0)));
+                AgentPanelColumn.MaxWidth = Math.Max(fitted.RightMinimum, Math.Min(600, _availableWorkspaceWidth - fitted.Left - 300 - (leftOpen ? 4 : 0) - (rightOpen ? 4 : 0)));
+                if (settlePanels)
+                {
+                    LeftPanelColumn.BeginAnimation(ColumnDefinition.WidthProperty, null); LeftPanelHost.BeginAnimation(OpacityProperty, null);
+                    AgentPanelColumn.BeginAnimation(ColumnDefinition.WidthProperty, null); AgentPanelHost.BeginAnimation(OpacityProperty, null);
+                    LeftPanelColumn.Width = new GridLength(fitted.Left); AgentPanelColumn.Width = new GridLength(fitted.Right);
+                    LeftPanelColumn.MinWidth = fitted.LeftMinimum; AgentPanelColumn.MinWidth = fitted.RightMinimum;
+                    LeftPanelHost.Visibility = MainSplitter.Visibility = leftOpen ? Visibility.Visible : Visibility.Collapsed;
+                    AgentPanelHost.Visibility = AgentSplitter.Visibility = rightOpen ? Visibility.Visible : Visibility.Collapsed;
+                    LeftPanelHost.Opacity = leftOpen ? 1 : 0; AgentPanelHost.Opacity = rightOpen ? 1 : 0;
+                    PanelSplitterColumn.Width = new GridLength(leftOpen ? 4 : 0); AgentSplitterColumn.Width = new GridLength(rightOpen ? 4 : 0);
+                }
+                else
+                {
+                    LeftPanelColumn.MinWidth = Math.Min(previousLeftMinimum, LeftPanelColumn.MaxWidth);
+                    AgentPanelColumn.MinWidth = Math.Min(previousRightMinimum, AgentPanelColumn.MaxWidth);
+                }
+            }
+            finally { _updatingPanelConstraints = false; }
+        }
+        private void AgentSplitter_DragCompleted(object sender, DragCompletedEventArgs e)
+        {
+            UpdatePanelConstraints(settlePanels: true);
+            if (_preferences != null && AgentPanelColumn.ActualWidth >= 300)
+                _preferences.DeveloperPanelWidth = AgentPanelColumn.ActualWidth;
+        }
+        private void ApplyAgentPanelState(bool isOpen, bool immediate)
+        {
+            immediate |= _preferences?.EnablePanelAnimations == false;
+            if (immediate) { AgentPanelColumn.BeginAnimation(ColumnDefinition.WidthProperty, null); AgentPanelHost.BeginAnimation(OpacityProperty, null); }
+            UpdatePanelConstraints();
+            AgentPanelColumn.MinWidth = 0;
+            if (isOpen)
+            {
+                AgentPanelHost.Visibility = Visibility.Visible;
+                AgentSplitter.Visibility = Visibility.Visible;
+                AgentSplitterColumn.Width = new GridLength(SplitterWidth);
+                var target = Math.Min(_lastAgentPanelWidth, AgentPanelColumn.MaxWidth);
+                if (immediate)
+                {
+                    AgentPanelColumn.Width = new GridLength(target); AgentPanelHost.Opacity = 1;
+                    AgentPanelColumn.MinWidth = Math.Min(300, target); UpdatePanelConstraints();
+                }
+                else AnimatePanel(AgentPanelColumn, AgentPanelHost, target, 1, () => { AgentPanelColumn.MinWidth = Math.Min(300, target); UpdatePanelConstraints(); });
+            }
+            else
+            {
+                if (AgentPanelColumn.ActualWidth > 1) _lastAgentPanelWidth = AgentPanelColumn.ActualWidth;
+                void Hide() { AgentSplitterColumn.Width = new GridLength(0); AgentPanelHost.Visibility = Visibility.Collapsed; AgentSplitter.Visibility = Visibility.Collapsed; UpdatePanelConstraints(); }
+                if (immediate) { AgentPanelColumn.Width = new GridLength(0); AgentPanelHost.Opacity = 0; Hide(); }
+                else AnimatePanel(AgentPanelColumn, AgentPanelHost, 0, 0, Hide);
+            }
         }
 
         private void ApplyParameterPanelState(bool isOpen, bool immediate)
         {
+            immediate |= _preferences?.EnablePanelAnimations == false;
+            if (immediate) { LeftPanelColumn.BeginAnimation(ColumnDefinition.WidthProperty, null); LeftPanelHost.BeginAnimation(OpacityProperty, null); }
+            UpdatePanelConstraints();
             if (isOpen)
             {
                 LeftPanelHost.Visibility = Visibility.Visible;
@@ -163,7 +301,7 @@ namespace AMLabSlicer.Views
                     return;
                 }
 
-                AnimatePanel(targetWidth, 1, () => RestoreOpenPanelMinimum(targetWidth));
+                AnimatePanel(LeftPanelColumn, LeftPanelHost, targetWidth, 1, () => RestoreOpenPanelMinimum(targetWidth));
                 return;
             }
 
@@ -178,14 +316,16 @@ namespace AMLabSlicer.Views
                 LeftPanelHost.Opacity = 0;
                 LeftPanelHost.Visibility = Visibility.Collapsed;
                 MainSplitter.Visibility = Visibility.Collapsed;
+                UpdatePanelConstraints();
                 return;
             }
 
-            AnimatePanel(0, 0, () =>
+            AnimatePanel(LeftPanelColumn, LeftPanelHost, 0, 0, () =>
             {
                 PanelSplitterColumn.Width = new GridLength(0);
                 LeftPanelHost.Visibility = Visibility.Collapsed;
                 MainSplitter.Visibility = Visibility.Collapsed;
+                UpdatePanelConstraints();
             });
         }
 
@@ -201,16 +341,17 @@ namespace AMLabSlicer.Views
         private void RestoreOpenPanelMinimum(double targetWidth)
         {
             LeftPanelColumn.MinWidth = Math.Min(MinimumOpenPanelWidth, Math.Max(0, targetWidth));
+            UpdatePanelConstraints();
         }
 
-        private void AnimatePanel(double targetWidth, double targetOpacity, Action? completed)
+        private void AnimatePanel(ColumnDefinition column, Border host, double targetWidth, double targetOpacity, Action? completed)
         {
-            LeftPanelColumn.BeginAnimation(ColumnDefinition.WidthProperty, null);
-            LeftPanelHost.BeginAnimation(OpacityProperty, null);
+            column.BeginAnimation(ColumnDefinition.WidthProperty, null);
+            host.BeginAnimation(OpacityProperty, null);
 
-            var currentWidth = Math.Max(0, LeftPanelColumn.ActualWidth);
-            LeftPanelColumn.Width = new GridLength(currentWidth);
-            LeftPanelHost.Opacity = Math.Max(0, Math.Min(1, LeftPanelHost.Opacity));
+            var currentWidth = Math.Max(0, column.ActualWidth);
+            column.Width = new GridLength(currentWidth);
+            host.Opacity = Math.Max(0, Math.Min(1, host.Opacity));
 
             var widthAnimation = new GridLengthAnimation
             {
@@ -222,10 +363,10 @@ namespace AMLabSlicer.Views
 
             widthAnimation.Completed += (_, _) =>
             {
-                LeftPanelColumn.BeginAnimation(ColumnDefinition.WidthProperty, null);
-                LeftPanelHost.BeginAnimation(OpacityProperty, null);
-                LeftPanelColumn.Width = new GridLength(targetWidth);
-                LeftPanelHost.Opacity = targetOpacity;
+                column.BeginAnimation(ColumnDefinition.WidthProperty, null);
+                host.BeginAnimation(OpacityProperty, null);
+                column.Width = new GridLength(targetWidth);
+                host.Opacity = targetOpacity;
                 completed?.Invoke();
             };
 
@@ -235,8 +376,8 @@ namespace AMLabSlicer.Views
                 FillBehavior = FillBehavior.Stop
             };
 
-            LeftPanelColumn.BeginAnimation(ColumnDefinition.WidthProperty, widthAnimation);
-            LeftPanelHost.BeginAnimation(OpacityProperty, opacityAnimation);
+            column.BeginAnimation(ColumnDefinition.WidthProperty, widthAnimation);
+            host.BeginAnimation(OpacityProperty, opacityAnimation);
         }
 
         private sealed class GridLengthAnimation : AnimationTimeline

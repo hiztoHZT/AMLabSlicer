@@ -87,6 +87,8 @@ namespace AMLabSlicer.ViewModel
 
         [RelayCommand]
         private void OpenPreferences() => _dialogs.OpenPreferences();
+        [RelayCommand] private void OpenExtensions() => _dialogs.OpenExtensions("amlab.agent");
+        [RelayCommand] private void OpenExtensionManagement() => _dialogs.OpenExtensions("插件管理");
 
         [RelayCommand]
         private void Undo() => (CurrentWorkspace as PrepareWorkspaceViewModel)?.History.Undo();

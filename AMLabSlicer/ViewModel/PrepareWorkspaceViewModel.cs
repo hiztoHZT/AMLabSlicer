@@ -7,7 +7,6 @@ using System.Numerics;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using AMLabSlicer.Core.Parameters;
-using AMLabSlicer.State;
 using AMLabSlicer.Grpc;
 using System.Threading.Tasks;
 using System.Linq;
@@ -30,15 +29,6 @@ namespace AMLabSlicer.ViewModel
         // 存放细网格数据 (每 1mm 一根)
         [ObservableProperty]
         private Geometry3D? _minorGridGeometry;
-
-        // 视口模式状态机
-        [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(IsObjectMode))]
-        [NotifyPropertyChangedFor(nameof(IsFaceMode))]
-        private ViewportMode _viewportMode = ViewportMode.ObjectMode;
-
-        public bool IsObjectMode => ViewportMode == ViewportMode.ObjectMode;
-        public bool IsFaceMode => ViewportMode == ViewportMode.FaceMode;
 
         private void CacheCurrentParameterValues()
         {
@@ -99,20 +89,24 @@ namespace AMLabSlicer.ViewModel
                 SelectedParameterCategory = category;
         }
 
-        [RelayCommand]
-        private void ToggleViewportMode()
-        {
-            ViewportMode = ViewportMode == ViewportMode.ObjectMode
-                ? ViewportMode.FaceMode
-                : ViewportMode.ObjectMode;
-        }
-
         // 左侧面板开关状态
         [ObservableProperty]
         private bool _isParameterPanelOpen = true;
 
         [RelayCommand]
         private void TogglePanel() => IsParameterPanelOpen = !IsParameterPanelOpen;
+
+        [ObservableProperty] private bool _isAgentPanelOpen;
+        [RelayCommand] private void ToggleAgentPanel() => IsAgentPanelOpen = !IsAgentPanelOpen;
+        public ObservableCollection<WorkspacePanelEntry> ExtensionPanels { get; }
+        [ObservableProperty] private WorkspacePanelEntry? _selectedExtensionPanel;
+        [RelayCommand] private void SelectExtensionPanel(WorkspacePanelEntry entry)
+        {
+            if (!ExtensionPanels.Contains(entry)) return;
+            foreach (var panel in ExtensionPanels) panel.IsSelected = ReferenceEquals(panel, entry);
+            SelectedExtensionPanel = entry; IsAgentPanelOpen = true;
+        }
+        [RelayCommand] private void OpenExtensionManagement() => _dialogs.OpenExtensions("插件管理");
 
         // 面向大纲视图的模型节点树
         public ObservableCollection<OutlinerNodeViewModel> OutlinerItems { get; } = new ObservableCollection<OutlinerNodeViewModel>();
@@ -166,10 +160,22 @@ namespace AMLabSlicer.ViewModel
         public PreferencesViewModel AppPrefs { get; }
 
         public PrepareWorkspaceViewModel(IParameterStore parameterStore, PreferencesViewModel appPrefs,
-            ISlicingService slicingService, ISliceRequestFactory sliceRequestFactory, IUserDialogService dialogs)
+            ISlicingService slicingService, ISliceRequestFactory sliceRequestFactory, IUserDialogService dialogs, PluginManager? plugins = null)
         {
             _parameterStore = parameterStore;
             AppPrefs = appPrefs;
+            ExtensionPanels = plugins?.Panels ?? new();
+            SelectedExtensionPanel = ExtensionPanels.FirstOrDefault();
+            if (SelectedExtensionPanel is not null) SelectedExtensionPanel.IsSelected = true;
+            ExtensionPanels.CollectionChanged += (_, _) =>
+            {
+                if (SelectedExtensionPanel is null || !ExtensionPanels.Contains(SelectedExtensionPanel))
+                {
+                    SelectedExtensionPanel = ExtensionPanels.FirstOrDefault();
+                    if (SelectedExtensionPanel is not null) SelectedExtensionPanel.IsSelected = true;
+                }
+            };
+            IsAgentPanelOpen = appPrefs.OpenDeveloperPanelOnStartup;
             _slicingService = slicingService;
             _sliceRequestFactory = sliceRequestFactory;
             _dialogs = dialogs;

@@ -1,0 +1,1 @@
+namespace AMLabSlicer.Plugins.Agent.Views; public partial class AgentSettingsView : System.Windows.Controls.UserControl { public AgentSettingsView() { InitializeComponent(); } }

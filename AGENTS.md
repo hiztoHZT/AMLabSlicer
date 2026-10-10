@@ -24,6 +24,13 @@
 - 颜色与共用尺寸集中在主题资源中维护；保持 MVVM、既有绑定与业务行为。
 - 如需调整设计基准，同步更新设计标准和相关共用样式，避免各视图使用不同规范。
 
+## 插件开发规则
+
+- 插件开发遵守 `docs/PLUGIN_DEVELOPMENT_STANDARD.md`；Agent 为独立 `AMLabSlicer.Plugins.Agent` 项目，经 AssemblyLoadContext 加载，不能重新内置到主程序。
+- 交互插件返回 UserControl，界面只能由宿主显示在右侧插件面板；不得自行创建或显示窗口、修改左侧/中央布局。
+- 插件配置只能在顶部“插件”窗口对应设置页编辑。右侧“设置”只导航，不放配置编辑控件。
+- 插件只能依赖共享 SDK，不引用 AMLabSlicer.UI；保留 MVVM、主题资源及生命周期清理。
+
 ## 常用入口
 
 - `Protos/slicer.proto`：服务契约、参数模板、流式切片消息。

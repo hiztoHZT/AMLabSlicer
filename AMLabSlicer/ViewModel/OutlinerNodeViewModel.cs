@@ -51,10 +51,6 @@ namespace AMLabSlicer.ViewModel
 
         public ObservableCollection<OutlinerNodeViewModel> Children { get; } = new();
 
-        // 面片组数据
-        public System.Collections.Generic.List<int>? FaceIndices { get; set; }
-        public bool IsFaceGroup => FaceIndices != null;
-
         public SceneNode Node => _node;
 
         public OutlinerNodeViewModel(SceneNode node, string defaultName)
@@ -91,7 +87,7 @@ namespace AMLabSlicer.ViewModel
         }
 
         /// <summary>
-        /// 构建大纲树，目前仅保留物体顶层节点，后续动态添加面组作为子节点
+        /// 构建模型对象大纲节点
         /// </summary>
         public static OutlinerNodeViewModel BuildTree(SceneNode rootNode, string name = "模型对象")
         {
@@ -101,16 +97,6 @@ namespace AMLabSlicer.ViewModel
     }
 
     // ─── 简单内联 Converter（避免额外文件）──────────────
-
-    /// <summary>节点类型图标：面片组显示◆，普通网格显示○</summary>
-    public class OutlinerIconConverter : IValueConverter
-    {
-        public static readonly OutlinerIconConverter Instance = new();
-        public object Convert(object v, Type t, object p, CultureInfo c)
-            => v is bool b && b ? "◆" : "○";
-        public object ConvertBack(object v, Type t, object p, CultureInfo c)
-            => throw new NotSupportedException();
-    }
 
     /// <summary>bool → Visibility（True→Visible）</summary>
     public class BoolToVisConverter : IValueConverter

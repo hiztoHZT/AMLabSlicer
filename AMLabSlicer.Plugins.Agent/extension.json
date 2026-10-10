@@ -1,0 +1,11 @@
+{
+  "id": "amlab.agent",
+  "name": "Agent",
+  "version": "1.0.0",
+  "apiVersion": 1,
+  "targetFramework": "net8.0-windows",
+  "architecture": "x64",
+  "entryAssembly": "AMLabSlicer.Plugins.Agent.dll",
+  "entryType": "AMLabSlicer.Plugins.Agent.AgentPlugin",
+  "icon": "A"
+}

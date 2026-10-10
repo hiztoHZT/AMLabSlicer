@@ -91,7 +91,7 @@ namespace AMLabSlicer.Views
 
             if (!string.IsNullOrEmpty(warning))
             {
-                MessageBox.Show(Window.GetWindow(textBox), warning, "参数超出范围", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageDialogWindow.ShowMessage(Window.GetWindow(textBox), warning, "参数超出范围", warning: true);
             }
         }
 

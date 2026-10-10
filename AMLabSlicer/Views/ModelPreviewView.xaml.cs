@@ -16,8 +16,6 @@ using System.Numerics;
 using System.Linq;
 using System.Collections.Generic;
 using AMLabSlicer.Core.Commands;
-using AMLabSlicer.Core.Topology;
-using AMLabSlicer.State;
 using HxMesh = HelixToolkit.SharpDX.MeshGeometry3D;
 using HxHit  = HelixToolkit.SharpDX.HitTestResult;
 using HxLine = HelixToolkit.SharpDX.LineGeometry3D;
@@ -79,76 +77,6 @@ namespace AMLabSlicer.Views
             set => SetValue(IsObjectHighlightVisibleProperty, value);
         }
 
-        public static readonly DependencyProperty FaceWireframeGeometryProperty =
-            DependencyProperty.Register(nameof(FaceWireframeGeometry), typeof(HxLine),
-                typeof(ModelPreviewView), new PropertyMetadata(null));
-
-        public HxLine? FaceWireframeGeometry
-        {
-            get => (HxLine?)GetValue(FaceWireframeGeometryProperty);
-            set => SetValue(FaceWireframeGeometryProperty, value);
-        }
-
-        public static readonly DependencyProperty FaceCenterDotGeometryProperty =
-            DependencyProperty.Register(nameof(FaceCenterDotGeometry), typeof(HxLine),
-                typeof(ModelPreviewView), new PropertyMetadata(null));
-
-        public HxLine? FaceCenterDotGeometry
-        {
-            get => (HxLine?)GetValue(FaceCenterDotGeometryProperty);
-            set => SetValue(FaceCenterDotGeometryProperty, value);
-        }
-
-        public static readonly DependencyProperty IsFaceCenterDotVisibleProperty =
-            DependencyProperty.Register(nameof(IsFaceCenterDotVisible), typeof(bool),
-                typeof(ModelPreviewView), new PropertyMetadata(false));
-
-        public bool IsFaceCenterDotVisible
-        {
-            get => (bool)GetValue(IsFaceCenterDotVisibleProperty);
-            set => SetValue(IsFaceCenterDotVisibleProperty, value);
-        }
-
-        public static readonly DependencyProperty FaceSelectionEdgeGeometryProperty =
-            DependencyProperty.Register(nameof(FaceSelectionEdgeGeometry), typeof(HxLine),
-                typeof(ModelPreviewView), new PropertyMetadata(null));
-
-        public HxLine? FaceSelectionEdgeGeometry
-        {
-            get => (HxLine?)GetValue(FaceSelectionEdgeGeometryProperty);
-            set => SetValue(FaceSelectionEdgeGeometryProperty, value);
-        }
-
-        public static readonly DependencyProperty FaceSelectionGeometryProperty =
-            DependencyProperty.Register(nameof(FaceSelectionGeometry), typeof(HxMesh),
-                typeof(ModelPreviewView), new PropertyMetadata(null));
-
-        public HxMesh? FaceSelectionGeometry
-        {
-            get => (HxMesh?)GetValue(FaceSelectionGeometryProperty);
-            set => SetValue(FaceSelectionGeometryProperty, value);
-        }
-
-        public static readonly DependencyProperty IsFaceOverlayVisibleProperty =
-            DependencyProperty.Register(nameof(IsFaceOverlayVisible), typeof(bool),
-                typeof(ModelPreviewView), new PropertyMetadata(false));
-
-        public bool IsFaceOverlayVisible
-        {
-            get => (bool)GetValue(IsFaceOverlayVisibleProperty);
-            set => SetValue(IsFaceOverlayVisibleProperty, value);
-        }
-
-        public static readonly DependencyProperty IsFaceSelectionVisibleProperty =
-            DependencyProperty.Register(nameof(IsFaceSelectionVisible), typeof(bool),
-                typeof(ModelPreviewView), new PropertyMetadata(false));
-
-        public bool IsFaceSelectionVisible
-        {
-            get => (bool)GetValue(IsFaceSelectionVisibleProperty);
-            set => SetValue(IsFaceSelectionVisibleProperty, value);
-        }
-
         public static readonly DependencyProperty ModalConstraintGeometryProperty =
             DependencyProperty.Register(nameof(ModalConstraintGeometry), typeof(HxLine),
                 typeof(ModelPreviewView), new PropertyMetadata(null));
@@ -199,7 +127,7 @@ namespace AMLabSlicer.Views
             if (!string.IsNullOrEmpty(v._activeTransformKey))
                 v.DeactivateTransform(commit: false);
 
-            v.IsManipulatorVisible = hasNode && v.GetVM()?.IsObjectMode == true;
+            v.IsManipulatorVisible = hasNode;
             v.RefreshToolbarEnabled();
 
 
@@ -250,26 +178,6 @@ namespace AMLabSlicer.Views
 
         // ── 底面拾取 ──
         private bool _isFacePickMode;
-
-        // ── 面模式 ──
-        private HalfEdgeMesh?          _halfEdge;
-        private MeshNode?              _editingMeshNode;
-        private readonly HashSet<int>  _selectedFaces = new();
-        private string                 _faceSelTool = "Q";
-        private bool                   _isXRay;
-        private OutlinerNodeViewModel? _editingFaceGroup;
-        private bool                   _faceGroupDirty;
-        private bool                   _isFaceBrushing;
-        private bool                   _isFaceRangeSelecting;
-        private bool                   _isLassoSelecting;
-        private Point                  _lastFaceBrushPos;
-        private Point                  _rangeStartPos;
-        private Point                  _rangeCurrentPos;
-        private readonly List<Point>   _lassoPoints = new();
-        private double                 _brushRadiusPx = 14.0;
-        private bool                   _linkedSelectObjectMode;
-        private const bool             StrictCenterPickInXRay = true;
-        private const float            CenterPickRatio = 0.14f;
 
         private enum DragMode { None, Rotate, Pan }
 
@@ -337,7 +245,6 @@ namespace AMLabSlicer.Views
             if (ReferenceEquals(_attachedWorkspace, workspace)) return;
             if (_attachedWorkspace != null)
             {
-                _attachedWorkspace.PropertyChanged -= WorkspacePropertyChanged;
                 _attachedWorkspace.History.CommandExecuted -= HistoryChanged;
                 _attachedWorkspace.AppPrefs.PropertyChanged -= PreferencesChanged;
             }
@@ -345,7 +252,6 @@ namespace AMLabSlicer.Views
             _prefs = workspace?.AppPrefs;
             if (workspace != null)
             {
-                workspace.PropertyChanged += WorkspacePropertyChanged;
                 workspace.History.CommandExecuted += HistoryChanged;
                 workspace.AppPrefs.PropertyChanged += PreferencesChanged;
                 workspace.History.MaxDepth = workspace.AppPrefs.UndoStackDepth;
@@ -360,12 +266,6 @@ namespace AMLabSlicer.Views
             if (e.PropertyName == nameof(PreferencesViewModel.UseOrthographic)) ApplyCameraMode();
             if (e.PropertyName == nameof(PreferencesViewModel.UndoStackDepth) && _prefs != null)
                 CommandDispatcher.MaxDepth = _prefs.UndoStackDepth;
-        }
-
-        private void WorkspacePropertyChanged(object? sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(PrepareWorkspaceViewModel.ViewportMode) && _attachedWorkspace != null)
-                OnViewportModeChanged(_attachedWorkspace.ViewportMode);
         }
 
         private void HistoryChanged(object? sender, EventArgs e)
@@ -383,7 +283,7 @@ namespace AMLabSlicer.Views
         private void RefreshToolbarEnabled()
         {
             bool has = SelectedNode != null;
-            foreach (var b in new[] { BtnMove, BtnRotate, BtnScale, BtnFace, BtnSplit, BtnDelete, BtnMode })
+            foreach (var b in new[] { BtnMove, BtnRotate, BtnScale, BtnFace, BtnSplit, BtnDelete })
                 b.IsEnabled = has;
         }
 
@@ -396,108 +296,12 @@ namespace AMLabSlicer.Views
                           ? "active" : null;
         }
 
-        private void SetFaceToolActive(string? tag)
-        {
-            foreach (var b in new[] { FBtnClick, FBtnBox, FBtnBrush, FBtnLasso, FBtnAll, FBtnXRay, FBtnLinked })
-                b.Tag = null;
-            if (tag == null) return;
-            var target = tag switch
-            {
-                "Q" => FBtnClick, "W" => FBtnBox, "E" => FBtnBrush, "R" => FBtnLasso,
-                "T" => FBtnXRay,  "L" => FBtnLinked, _ => null
-            };
-            if (target != null) target.Tag = "active";
-        }
-
-        // ══════════════════════════════════════
-        // 视口模式切换
-        // ══════════════════════════════════════
-        private void OnViewportModeChanged(ViewportMode mode)
-        {
-            if (mode == ViewportMode.ObjectMode)
-            {
-                if (_isXRay) ToggleXRay(false);
-                _selectedFaces.Clear();
-                _halfEdge = null;
-                _editingMeshNode = null;
-                _editingFaceGroup = null;
-                _faceGroupDirty = false;
-                _isFaceBrushing = false;
-                _isFaceRangeSelecting = false;
-                _isLassoSelecting = false;
-                IsManipulatorVisible = SelectedNode != null;
-                Cursor = Cursors.Arrow;
-                HideSelectionOverlays();
-                ClearFaceHighlight();
-                ClearFaceOverlay();
-                RefreshToolbarEnabled();
-                RefreshObjectHighlight();
-            }
-            else
-            {
-                IsManipulatorVisible = false;
-                DeactivateTransform(commit: false);
-                _selectedFaces.Clear();
-                _editingFaceGroup = null;
-                _faceGroupDirty = false;
-                _isFaceBrushing = false;
-                _isFaceRangeSelecting = false;
-                _isLassoSelecting = false;
-                HideSelectionOverlays();
-
-                _editingMeshNode = SelectedNode switch
-                {
-                    MeshNode mn => mn,
-                    // pivot 外层通常是 GroupNode，真正的 MeshNode 在其子树中，因此要遍历整个后代。
-                    SceneNode sn => sn.Traverse().OfType<MeshNode>().FirstOrDefault(),
-                    _ => null
-                };
-
-                if (_editingMeshNode?.Geometry is HxMesh)
-                {
-                    _ = BuildTopologyAsync(_editingMeshNode);
-                    RefreshFaceOverlay();
-                }
-                else
-                {
-                    var vm = GetVM();
-                    if (vm != null) vm.ViewportMode = ViewportMode.ObjectMode;
-                    return;
-                }
-
-                SetFaceTool("Q");
-            }
-
-            UpdateStatusInfo();
-        }
-
-        private async Task BuildTopologyAsync(MeshNode mn)
-        {
-            try
-            {
-                if (mn.Geometry is not HxMesh geo) return;
-                var idxList = geo.Indices?.ToList() ?? new List<int>();
-                var topology = await Task.Run(() =>
-                {
-                    var mesh = new HalfEdgeMesh();
-                    mesh.Build(idxList);
-                    return mesh;
-                });
-                if (ReferenceEquals(_editingMeshNode, mn) && GetVM()?.IsFaceMode == true)
-                    _halfEdge = topology;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Trace.TraceError("Topology build failed: {0}", ex);
-            }
-        }
-
         // ══════════════════════════════════════
         // 键盘路由
         // ══════════════════════════════════════
         private void OnPreviewKeyDown(object sender, KeyEventArgs e)
         {
-            // 防止 TextBox 内的按键被拦截（Tab、Enter 除外）
+            // 快捷键和撤销重做
             // Ctrl+Z / Ctrl+Shift+Z
             if (e.Key == Key.Z && Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
             {
@@ -514,15 +318,6 @@ namespace AMLabSlicer.Views
                 return;  
             }
 
-            // Tab 切换模式（不打断 TextBox 内部切焦点）
-            if (e.Key == Key.Tab && e.OriginalSource is not TextBox)
-            {
-                var vmTab = GetVM();
-                if (vmTab != null && (vmTab.IsFaceMode || SelectedNode != null))
-                    vmTab.ToggleViewportModeCommand.Execute(null);
-                e.Handled = true; return;
-            }
-
             // Escape：退出当前状态
             if (e.Key == Key.Escape)
             {
@@ -535,9 +330,7 @@ namespace AMLabSlicer.Views
                     { SelectedNode = null; e.Handled = true; return; }
             }
 
-            var vm = GetVM();
-            if (vm?.IsFaceMode == true)  { HandleFaceModeKey(e); return; }
-            if (vm?.IsObjectMode == true) HandleObjectModeKey(e);
+            HandleObjectModeKey(e);
         }
 
         private void HandleObjectModeKey(KeyEventArgs e)
@@ -559,29 +352,13 @@ namespace AMLabSlicer.Views
             }
         }
 
-        private void HandleFaceModeKey(KeyEventArgs e)
-        {
-            switch (e.Key)
-            {
-                case Key.Q: SetFaceTool("Q"); e.Handled = true; break;
-                case Key.W: SetFaceTool("W"); e.Handled = true; break;
-                case Key.E: SetFaceTool("E"); e.Handled = true; break;
-                case Key.R: SetFaceTool("R"); e.Handled = true; break;
-                case Key.A: SelectAllFaces(); e.Handled = true; break;
-                case Key.T: ToggleXRay(!_isXRay); e.Handled = true; break;
-                case Key.L: SelectLinkedFaces(); e.Handled = true; break;
-                case Key.S: SaveFaceGroup(true);  e.Handled = true; break;
-                case Key.D: SaveFaceGroup(false); e.Handled = true; break;
-            }
-        }
-
         // ══════════════════════════════════════
         // 工具栏点击：从 Content 字符串取 Tag
         // ══════════════════════════════════════
         private void ToolBtn_Click(object sender, RoutedEventArgs e)
         {
             if (sender is not Button btn) return;
-            // Content 格式：  "G  移动" / "Tab ▶ 面模式"
+            // Content starts with the stable transform shortcut (G/R/S/F/A/B/X).
             string raw = btn.Content?.ToString() ?? string.Empty;
             string tag = raw.TrimStart().Split(' ')[0];
 
@@ -594,43 +371,8 @@ namespace AMLabSlicer.Views
                 case "A": ConfirmAndAutoArrange(); break;
                 case "B": ConfirmAndSplit(); break;
                 case "X": ConfirmAndDelete(); break;
-                case "Tab":
-                {
-                    var vm = GetVM();
-                    if (vm != null && (vm.IsFaceMode || SelectedNode != null))
-                        vm.ToggleViewportModeCommand.Execute(null);
-                    break;
-                }
+
             }
-        }
-
-        private void FaceTool_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is not Button btn) return;
-            string tag = btn.Content?.ToString()?.TrimStart().Split(' ')[0] ?? string.Empty;
-            switch (tag)
-            {
-                case "Q": case "W": case "E": case "R": SetFaceTool(tag); break;
-                case "A": SelectAllFaces(); break;
-                case "T": ToggleXRay(!_isXRay); break;
-                case "L": SelectLinkedFaces(); break;
-                case "S": SaveFaceGroup(true); break;
-                case "D": SaveFaceGroup(false); break;
-                case "Tab": GetVM()?.ToggleViewportModeCommand.Execute(null); break;
-            }
-        }
-
-        private void BrushSizeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            _brushRadiusPx = Math.Clamp(e.NewValue, 4.0, 60.0);
-            if (BrushSizeText != null) BrushSizeText.Text = ((int)Math.Round(_brushRadiusPx)).ToString();
-            if (_isFaceBrushing || _faceSelTool == "E")
-                UpdateBrushPreview(_lastFaceBrushPos);
-        }
-
-        private void LinkedModeCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            _linkedSelectObjectMode = LinkedModeCombo.SelectedIndex == 1;
         }
 
         // ══════════════════════════════════════
@@ -1223,8 +965,7 @@ namespace AMLabSlicer.Views
 
         private void RefreshObjectHighlight(bool fast = false)
         {
-            var vm = GetVM();
-            if (SelectedNode == null || vm?.IsObjectMode != true)
+            if (SelectedNode == null)
             {
                 ObjectHighlightGeometry = null;
                 ObjectHighlightTransform = System.Windows.Media.Media3D.Transform3D.Identity;
@@ -1285,105 +1026,10 @@ namespace AMLabSlicer.Views
             ObjectManipulator.SizeScale = gizmoScale;
         }
 
-
-        private void RefreshFaceOverlay()
-        {
-            if (_editingMeshNode?.Geometry is not HxMesh geo)
-            {
-                ClearFaceOverlay();
-                return;
-            }
-
-            var positions = geo.Positions;
-            var indices = geo.Indices;
-            if (positions == null || indices == null)
-            {
-                ClearFaceOverlay();
-                return;
-            }
-
-            var world = GetWorldModelMatrix(_editingMeshNode);
-            var edgeBuilder = new LineBuilder();
-            var dotBuilder = new LineBuilder();
-            float dotSize = 0.12f;
-            int dotStride = indices.Count > 120000 ? 6 : 1;
-            int triId = 0;
-            for (int i = 0; i + 2 < indices.Count; i += 3)
-            {
-                int i0 = indices[i];
-                int i1 = indices[i + 1];
-                int i2 = indices[i + 2];
-                if (i0 < 0 || i1 < 0 || i2 < 0 || i0 >= positions.Count || i1 >= positions.Count || i2 >= positions.Count) continue;
-
-                var p0 = Vector3.Transform(positions[i0], world);
-                var p1 = Vector3.Transform(positions[i1], world);
-                var p2 = Vector3.Transform(positions[i2], world);
-
-                edgeBuilder.AddLine(p0, p1);
-                edgeBuilder.AddLine(p1, p2);
-                edgeBuilder.AddLine(p2, p0);
-
-                if (_isXRay && (triId % dotStride == 0))
-                {
-                    var c = (p0 + p1 + p2) / 3f;
-                    dotBuilder.AddLine(new Vector3(c.X - dotSize, c.Y, c.Z), new Vector3(c.X + dotSize, c.Y, c.Z));
-                    dotBuilder.AddLine(new Vector3(c.X, c.Y - dotSize, c.Z), new Vector3(c.X, c.Y + dotSize, c.Z));
-                }
-                triId++;
-            }
-
-            FaceWireframeGeometry = edgeBuilder.ToLineGeometry3D();
-            FaceCenterDotGeometry = _isXRay ? dotBuilder.ToLineGeometry3D() : null;
-            IsFaceCenterDotVisible = _isXRay;
-            IsFaceOverlayVisible = true;
-        }
-
-        private void ClearFaceOverlay()
-        {
-            FaceWireframeGeometry = null;
-            FaceCenterDotGeometry = null;
-            FaceSelectionGeometry = null;
-            FaceSelectionEdgeGeometry = null;
-            IsFaceOverlayVisible = false;
-            IsFaceCenterDotVisible = false;
-            IsFaceSelectionVisible = false;
-        }
-
         private void UpdateStatusInfo()
         {
-            var vm = GetVM();
-            bool faceMode = vm?.IsFaceMode == true;
-            ModeInfoText = faceMode ? "模式：面编辑模式" : "模式：物体模式";
-
-            if (!faceMode)
-            {
-                SelectionInfoText = SelectedNode == null ? string.Empty : $"选择：{SelectedNode.Name}";
-                return;
-            }
-
-            string objName = SelectedNode?.Name
-                ?? _editingMeshNode?.Name
-                ?? string.Empty;
-
-            if (string.IsNullOrWhiteSpace(objName))
-            {
-                SelectionInfoText = string.Empty;
-                return;
-            }
-
-            if (_selectedFaces.Count == 0)
-            {
-                SelectionInfoText = $"选择：{objName}";
-                return;
-            }
-
-            if (_editingFaceGroup != null && !_faceGroupDirty)
-            {
-                SelectionInfoText = $"选择：{objName}-{_editingFaceGroup.Name}";
-                return;
-            }
-
-            SelectionInfoText = $"选择：{objName}-待保存的面组";
+            ModeInfoText = "模式：物体模式";
+            SelectionInfoText = SelectedNode == null ? string.Empty : $"选择：{SelectedNode.Name}";
         }
 
         // ══════════════════════════════════════
@@ -1420,9 +1066,9 @@ namespace AMLabSlicer.Views
         private bool RequestConfirm(string message, string title, ref bool prefFlag)
         {
             if (!prefFlag) return true;
-            var dlg = new Window
+            var dlg = new ThemedWindow
             {
-                Title = title, Width = 420, Height = 190,
+                Title = title, Width = 420, SizeToContent = SizeToContent.Height, MinHeight = 190,
                 WindowStartupLocation = WindowStartupLocation.CenterOwner,
                 Owner = Window.GetWindow(this),
                 ResizeMode = ResizeMode.NoResize
@@ -1436,6 +1082,13 @@ namespace AMLabSlicer.Views
             bool ok = false;
             var yes = new Button { Content = "确定", Width = 72, Margin = new Thickness(0,0,8,0), IsDefault = true };
             var no  = new Button { Content = "取消", Width = 72, IsCancel = true };
+            AMLabSlicer.Plugin.Wpf.Localization.UiText.SetText(dlg, Window.TitleProperty, title);
+            AMLabSlicer.Plugin.Wpf.Localization.UiText.SetText(txt, TextBlock.TextProperty, message);
+            AMLabSlicer.Plugin.Wpf.Localization.UiText.SetText(chk, ContentControl.ContentProperty, "不再显示此提示");
+            AMLabSlicer.Plugin.Wpf.Localization.UiText.SetText(yes, ContentControl.ContentProperty, "确定");
+            AMLabSlicer.Plugin.Wpf.Localization.UiText.SetText(no, ContentControl.ContentProperty, "取消");
+            yes.SetResourceReference(StyleProperty, "PrimaryActionButtonStyle");
+            no.SetResourceReference(StyleProperty, "SecondaryActionButtonStyle");
             yes.Click += (_,__) => { ok = true; dlg.Close(); };
             no.Click  += (_,__) => dlg.Close();
             btns.Children.Add(yes); btns.Children.Add(no);
@@ -1537,7 +1190,7 @@ namespace AMLabSlicer.Views
             var parts = MeshComponentSplitter.Split(meshNode);
             if (parts.Count == 0)
             {
-                MessageBox.Show("该模型只有一个连通分量，无需拆分。", "拆分", MessageBoxButton.OK);
+                MessageDialogWindow.ShowMessage(Window.GetWindow(this), "该模型只有一个连通分量，无需拆分。", "拆分");
                 return;
             }
 
@@ -1570,207 +1223,6 @@ namespace AMLabSlicer.Views
             if (_prefs != null) _prefs.EnableArrangeConfirm = flag;
 
             GetVM()?.AutoArrangeCommand.Execute(null);
-        }
-
-        // ══════════════════════════════════════
-        // 面模式操作
-        // ══════════════════════════════════════
-        private void SetFaceTool(string tool)
-        {
-            _faceSelTool = tool;
-            _isFaceBrushing = false;
-            _isFaceRangeSelecting = false;
-            _isLassoSelecting = false;
-            MainViewport.ReleaseMouseCapture();
-            SetFaceToolActive(tool);
-            BrushPanel.Visibility = tool == "E" ? Visibility.Visible : Visibility.Collapsed;
-            LinkedPanel.Visibility = tool == "L" ? Visibility.Visible : Visibility.Collapsed;
-            FaceRectSelection.Visibility = Visibility.Collapsed;
-            FaceLassoPath.Visibility = Visibility.Collapsed;
-            BrushPreviewCircle.Visibility = tool == "E" ? Visibility.Visible : Visibility.Collapsed;
-            Cursor = tool == "E" ? Cursors.None : Cursors.Arrow;
-            if (tool == "E")
-            {
-                var p = Mouse.GetPosition(MainViewport);
-                _lastFaceBrushPos = p;
-                UpdateBrushPreview(p);
-            }
-        }
-        private void SelectAllFaces()
-        {
-            if (_halfEdge == null) return;
-            for (int i = 0; i < _halfEdge.FaceCount; i++) _selectedFaces.Add(i);
-            _faceGroupDirty = true;
-            RefreshFaceHighlight();
-        }
-        private void SelectLinkedFaces()
-        {
-            var pos = Mouse.GetPosition(MainViewport);
-            if (_halfEdge == null) return;
-            int triCount = _editingMeshNode?.Geometry?.Indices?.Count / 3 ?? 0;
-            if (triCount <= 0) return;
-            var hits = GetMeshHitsAt(pos);
-            if (hits.Count == 0) return;
-            int fi = MapHitToFaceIndex(hits[0], triCount);
-            if (fi < 0) return;
-            if (_linkedSelectObjectMode)
-            {
-                _selectedFaces.Clear();
-                for (int i = 0; i < triCount; i++) _selectedFaces.Add(i);
-            }
-            else
-            {
-                var comp = _halfEdge.GetConnectedComponent(fi);
-                if (Keyboard.Modifiers.HasFlag(ModifierKeys.Shift)) _selectedFaces.ExceptWith(comp);
-                else _selectedFaces.UnionWith(comp);
-            }
-            _faceGroupDirty = true;
-            RefreshFaceHighlight();
-        }
-        private void ToggleXRay(bool on)
-        {
-            _isXRay = on;
-            FBtnXRay.Tag = on ? "active" : null;
-            if (_editingMeshNode?.Material is HelixToolkit.SharpDX.Model.PhongMaterialCore mc)
-            {
-                var c = mc.DiffuseColor;
-                mc.DiffuseColor = new HelixToolkit.Maths.Color4(c.Red, c.Green, c.Blue, on ? 0.3f : 1f);
-                TrySetBooleanProperty(mc, "RenderBackFace", on);
-                TrySetCullNone(mc, on);
-            }
-            RefreshFaceOverlay();
-        }
-
-        private static void TrySetBooleanProperty(object target, string propertyName, bool value)
-        {
-            var p = target.GetType().GetProperty(propertyName);
-            if (p == null || p.PropertyType != typeof(bool) || !p.CanWrite) return;
-            p.SetValue(target, value);
-        }
-
-        private static void TrySetCullNone(object target, bool on)
-        {
-            var p = target.GetType().GetProperty("CullMode");
-            if (p == null || !p.CanWrite) return;
-            var enumType = p.PropertyType;
-            var wanted = on ? "None" : "Back";
-            var names = Enum.GetNames(enumType);
-            var name = names.FirstOrDefault(n => string.Equals(n, wanted, StringComparison.OrdinalIgnoreCase));
-            if (name == null) return;
-            var value = Enum.Parse(enumType, name);
-            p.SetValue(target, value);
-        }
-        private void RefreshFaceHighlight()
-        {
-            if (_editingMeshNode?.Geometry is not HxMesh geo)
-            {
-                FaceSelectionGeometry = null;
-                FaceSelectionEdgeGeometry = null;
-                IsFaceSelectionVisible = false;
-                UpdateStatusInfo();
-                return;
-            }
-
-            var positions = geo.Positions;
-            var indices = geo.Indices;
-            if (positions == null || indices == null || _selectedFaces.Count == 0)
-            {
-                FaceSelectionGeometry = null;
-                FaceSelectionEdgeGeometry = null;
-                IsFaceSelectionVisible = false;
-                UpdateStatusInfo();
-                return;
-            }
-
-            var world = GetWorldModelMatrix(_editingMeshNode);
-            var facePositions = new List<Vector3>();
-            var faceIndices = new List<int>();
-            var edgeBuilder = new LineBuilder();
-
-            foreach (var faceIdx in _selectedFaces)
-            {
-                int baseIdx = faceIdx * 3;
-                if (baseIdx + 2 >= indices.Count) continue;
-                int i0 = indices[baseIdx];
-                int i1 = indices[baseIdx + 1];
-                int i2 = indices[baseIdx + 2];
-                if (i0 < 0 || i1 < 0 || i2 < 0 || i0 >= positions.Count || i1 >= positions.Count || i2 >= positions.Count) continue;
-
-                var p0 = Vector3.Transform(positions[i0], world);
-                var p1 = Vector3.Transform(positions[i1], world);
-                var p2 = Vector3.Transform(positions[i2], world);
-
-                int baseVertex = facePositions.Count;
-                facePositions.Add(p0);
-                facePositions.Add(p1);
-                facePositions.Add(p2);
-                faceIndices.Add(baseVertex);
-                faceIndices.Add(baseVertex + 1);
-                faceIndices.Add(baseVertex + 2);
-                edgeBuilder.AddLine(p0, p1);
-                edgeBuilder.AddLine(p1, p2);
-                edgeBuilder.AddLine(p2, p0);
-            }
-
-            FaceSelectionGeometry = facePositions.Count == 0
-                ? null
-                : new HxMesh
-                {
-                    Positions = new HelixToolkit.Vector3Collection(facePositions),
-                    Indices = new HelixToolkit.IntCollection(faceIndices)
-                };
-            FaceSelectionEdgeGeometry = edgeBuilder.ToLineGeometry3D();
-            IsFaceSelectionVisible = FaceSelectionGeometry != null;
-            UpdateStatusInfo();
-        }
-
-        private void ClearFaceHighlight()
-        {
-            _selectedFaces.Clear();
-            FaceSelectionGeometry = null;
-            FaceSelectionEdgeGeometry = null;
-            IsFaceSelectionVisible = false;
-            UpdateStatusInfo();
-        }
-        private void SaveFaceGroup(bool over)
-        {
-            if (_selectedFaces.Count == 0) { MessageBox.Show("请先选择面片。"); return; }
-            var vm = GetVM();
-            if (vm == null || _editingMeshNode == null) return;
-            if (over && _editingFaceGroup != null)
-            {
-                _editingFaceGroup.FaceIndices!.Clear();
-                _editingFaceGroup.FaceIndices.AddRange(_selectedFaces);
-                _faceGroupDirty = false;
-            }
-            else
-            {
-                // Find the top level Pivot node representing the object
-                var rootObjectNode = FindRootNode(_editingMeshNode, vm.LoadedModel as SceneNodeGroupModel3D);
-                if (rootObjectNode == null) return;
-                
-                var p = vm.OutlinerItems.FirstOrDefault(n => n.Node == rootObjectNode);
-                if (p == null) return;
-                
-                int gi = p.Children.Count(c => c.IsFaceGroup) + 1;
-                string baseName = "面片组";
-                string newName = $"{baseName} {gi}";
-                
-                // Ensure unique name by checking existing children
-                while (p.Children.Any(c => c.Name == newName))
-                {
-                    gi++;
-                    newName = $"{baseName} {gi}";
-                }
-                
-                var fv = new OutlinerNodeViewModel(_editingMeshNode, newName)
-                    { FaceIndices = new List<int>(_selectedFaces) };
-                fv.Name = newName;
-                p.Children.Add(fv);
-                _editingFaceGroup = fv;
-                _faceGroupDirty = false;
-            }
-            UpdateStatusInfo();
         }
 
         // ══════════════════════════════════════
@@ -1807,29 +1259,7 @@ namespace AMLabSlicer.Views
                 }
 
                 var vm = GetVM();
-                if (vm?.IsFaceMode == true)
-                {
-                    if (_faceSelTool == "W")
-                    {
-                        BeginRangeSelection(pos, false);
-                        return;
-                    }
-                    if (_faceSelTool == "R")
-                    {
-                        BeginRangeSelection(pos, true);
-                        return;
-                    }
-                    if (_faceSelTool == "E")
-                    {
-                        _isFaceBrushing = true;
-                        _lastFaceBrushPos = pos;
-                        UpdateBrushPreview(pos);
-                        HandleFaceClick(pos);
-                        return;
-                    }
-                    HandleFaceClick(pos);
-                    return;
-                }
+
 
                 // 物体模式：点选（排除 Gizmo 子树，防止点 Gizmo 时清空 SelectedNode）
                 var hits = MainViewport.FindHits(pos);
@@ -1921,34 +1351,7 @@ namespace AMLabSlicer.Views
                 SyncGizmoToSelectedNode();
                 // 实时更新蓝色包围盒（不重置 Gizmo 位置，避免干扰正在进行的拖拽）
                 RefreshBoundingBoxOnly();
-                // 不 return：后续相机/面模式逻辑仍需运行（但 _isDragging 为 false 时不进入相机逻辑）
-            }
-
-            var vm = GetVM();
-            if (vm?.IsFaceMode == true)
-            {
-                var fp = e.GetPosition(MainViewport);
-                if (_faceSelTool == "E") UpdateBrushPreview(fp);
-
-                if (_isFaceRangeSelecting && e.LeftButton == MouseButtonState.Pressed)
-                {
-                    UpdateRangeSelection(fp);
-                    e.Handled = true;
-                    return;
-                }
-
-                if (_isFaceBrushing && e.LeftButton == MouseButtonState.Pressed && _faceSelTool == "E")
-                {
-                    var bdx = fp.X - _lastFaceBrushPos.X;
-                    var bdy = fp.Y - _lastFaceBrushPos.Y;
-                    if (bdx * bdx + bdy * bdy >= 9)
-                    {
-                        _lastFaceBrushPos = fp;
-                        HandleFaceClick(fp);
-                    }
-                    e.Handled = true;
-                    return;
-                }
+                // 不 return：后续相机逻辑仍需运行（但 _isDragging 为 false 时不进入相机逻辑）
             }
 
             if (!_isDragging) return;
@@ -1962,16 +1365,7 @@ namespace AMLabSlicer.Views
 
         private void MainViewport_PreviewMouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (e.ChangedButton == MouseButton.Left)
-            {
-                _isFaceBrushing = false;
-                if (_isFaceRangeSelecting)
-                {
-                    EndRangeSelection();
-                    e.Handled = true;
-                    return;
-                }
-            }
+
 
             if (e.ChangedButton == MouseButton.Middle)
             {
@@ -2046,288 +1440,6 @@ namespace AMLabSlicer.Views
                 cam.Position = cam.Position + look * (e.Delta > 0 ? 20.0 : -20.0);
             }
             e.Handled = true;
-        }
-
-        // ══════════════════════════════════════
-        // 面模式点选
-        // ══════════════════════════════════════
-        private void HandleFaceClick(Point pos)
-        {
-            if (_halfEdge == null) return;
-            int triCount = _editingMeshNode?.Geometry?.Indices?.Count / 3 ?? 0;
-            if (triCount <= 0) return;
-            var hits = GetMeshHitsAt(pos);
-            if (hits.Count == 0) return;
-            bool sub = Keyboard.Modifiers.HasFlag(ModifierKeys.Shift);
-            bool alt = Keyboard.Modifiers.HasFlag(ModifierKeys.Alt);
-            var before = _selectedFaces.Count;
-
-            if (alt)
-            {
-                int fi = ResolveFaceFromHits(hits, triCount);
-                if (fi < 0) return;
-                var loop = _halfEdge.GetFaceLoop(fi);
-                if (sub) foreach (var f in loop) _selectedFaces.Remove(f);
-                else     foreach (var f in loop) _selectedFaces.Add(f);
-            }
-            else if (!_isXRay)
-            {
-                int fi = ResolveFaceFromHits(hits, triCount);
-                if (fi < 0) return;
-                if (sub) _selectedFaces.Remove(fi); else _selectedFaces.Add(fi);
-            }
-            else
-            {
-                if (StrictCenterPickInXRay && _faceSelTool == "Q")
-                {
-                    int fi = ResolveFaceFromHits(hits, triCount);
-                    if (fi < 0) return;
-                    if (sub) _selectedFaces.Remove(fi); else _selectedFaces.Add(fi);
-                    if (_selectedFaces.Count != before) _faceGroupDirty = true;
-                    RefreshFaceHighlight();
-                    return;
-                }
-                foreach (var hit in hits)
-                {
-                    int fi = MapHitToFaceIndex(hit, triCount);
-                    if (fi < 0) continue;
-                    if (StrictCenterPickInXRay && !IsHitNearFaceCenter(hit, fi)) continue;
-                    if (sub) _selectedFaces.Remove(fi); else _selectedFaces.Add(fi);
-                }
-            }
-
-            if (_selectedFaces.Count != before) _faceGroupDirty = true;
-            RefreshFaceHighlight();
-        }
-
-        private void BeginRangeSelection(Point startPos, bool lasso)
-        {
-            _isFaceRangeSelecting = true;
-            _isLassoSelecting = lasso;
-            _rangeStartPos = startPos;
-            _rangeCurrentPos = startPos;
-            _lassoPoints.Clear();
-            _lassoPoints.Add(startPos);
-            MainViewport.CaptureMouse();
-            if (lasso)
-            {
-                FaceLassoPath.Visibility = Visibility.Visible;
-                FaceRectSelection.Visibility = Visibility.Collapsed;
-                FaceLassoPath.Points = new PointCollection(_lassoPoints);
-            }
-            else
-            {
-                FaceRectSelection.Visibility = Visibility.Visible;
-                FaceLassoPath.Visibility = Visibility.Collapsed;
-                UpdateRectVisual(startPos, startPos);
-            }
-        }
-
-        private void UpdateRangeSelection(Point currentPos)
-        {
-            _rangeCurrentPos = currentPos;
-            if (_isLassoSelecting)
-            {
-                if (_lassoPoints.Count == 0 || DistanceSquared(_lassoPoints[^1], currentPos) > 9)
-                {
-                    _lassoPoints.Add(currentPos);
-                    FaceLassoPath.Points = new PointCollection(_lassoPoints);
-                }
-            }
-            else
-            {
-                UpdateRectVisual(_rangeStartPos, currentPos);
-            }
-        }
-
-        private void EndRangeSelection()
-        {
-            var rect = MakeRect(_rangeStartPos, _rangeCurrentPos);
-            var lasso = _lassoPoints.ToList();
-            bool useLasso = _isLassoSelecting && lasso.Count >= 3;
-
-            _isFaceRangeSelecting = false;
-            _isLassoSelecting = false;
-            MainViewport.ReleaseMouseCapture();
-            HideSelectionOverlays();
-
-            int triCount = _editingMeshNode?.Geometry?.Indices?.Count / 3 ?? 0;
-            if (triCount <= 0) return;
-            var result = CollectFacesInArea(rect, useLasso ? lasso : null, triCount);
-            if (result.Count == 0) return;
-
-            bool sub = Keyboard.Modifiers.HasFlag(ModifierKeys.Shift);
-            int before = _selectedFaces.Count;
-            foreach (var fi in result)
-            {
-                if (sub) _selectedFaces.Remove(fi); else _selectedFaces.Add(fi);
-            }
-            if (_selectedFaces.Count != before) _faceGroupDirty = true;
-            RefreshFaceHighlight();
-        }
-
-        private HashSet<int> CollectFacesInArea(Rect rect, List<Point>? lasso, int triCount)
-        {
-            var picked = new HashSet<int>();
-            if (rect.Width < 2 || rect.Height < 2) return picked;
-            double step = Math.Clamp(Math.Min(rect.Width, rect.Height) / 10.0, 6.0, 18.0);
-            int maxSamples = 2000;
-            int sampled = 0;
-
-            for (double y = rect.Top; y <= rect.Bottom; y += step)
-            {
-                for (double x = rect.Left; x <= rect.Right; x += step)
-                {
-                    var p = new Point(x, y);
-                    if (lasso != null && !IsPointInPolygon(p, lasso)) continue;
-                    var hs = GetMeshHitsAt(p);
-                    if (hs.Count == 0) continue;
-                    if (_isXRay)
-                    {
-                        foreach (var h in hs)
-                        {
-                            int fi = MapHitToFaceIndex(h, triCount);
-                            if (StrictCenterPickInXRay && fi >= 0 && !IsHitNearFaceCenter(h, fi)) continue;
-                            if (fi >= 0) picked.Add(fi);
-                        }
-                    }
-                    else
-                    {
-                        int fi = MapHitToFaceIndex(hs[0], triCount);
-                        if (fi >= 0) picked.Add(fi);
-                    }
-                    sampled++;
-                    if (sampled > maxSamples) return picked;
-                }
-            }
-            return picked;
-        }
-
-        private void HideSelectionOverlays()
-        {
-            FaceRectSelection.Visibility = Visibility.Collapsed;
-            FaceLassoPath.Visibility = Visibility.Collapsed;
-            BrushPreviewCircle.Visibility = Visibility.Collapsed;
-        }
-
-        private void UpdateBrushPreview(Point pos)
-        {
-            _lastFaceBrushPos = pos;
-            if (_faceSelTool != "E")
-            {
-                BrushPreviewCircle.Visibility = Visibility.Collapsed;
-                return;
-            }
-            BrushPreviewCircle.Visibility = Visibility.Visible;
-            BrushPreviewCircle.Width = _brushRadiusPx * 2;
-            BrushPreviewCircle.Height = _brushRadiusPx * 2;
-            Canvas.SetLeft(BrushPreviewCircle, pos.X - _brushRadiusPx);
-            Canvas.SetTop(BrushPreviewCircle, pos.Y - _brushRadiusPx);
-        }
-
-        private static Rect MakeRect(Point a, Point b)
-        {
-            return new Rect(new Point(Math.Min(a.X, b.X), Math.Min(a.Y, b.Y)),
-                            new Point(Math.Max(a.X, b.X), Math.Max(a.Y, b.Y)));
-        }
-
-        private void UpdateRectVisual(Point a, Point b)
-        {
-            var r = MakeRect(a, b);
-            Canvas.SetLeft(FaceRectSelection, r.Left);
-            Canvas.SetTop(FaceRectSelection, r.Top);
-            FaceRectSelection.Width = r.Width;
-            FaceRectSelection.Height = r.Height;
-        }
-
-        private static bool IsPointInPolygon(Point p, List<Point> polygon)
-        {
-            bool inside = false;
-            int j = polygon.Count - 1;
-            for (int i = 0; i < polygon.Count; i++)
-            {
-                var pi = polygon[i];
-                var pj = polygon[j];
-                bool intersect = ((pi.Y > p.Y) != (pj.Y > p.Y)) &&
-                                 (p.X < (pj.X - pi.X) * (p.Y - pi.Y) / ((pj.Y - pi.Y) + 1e-6) + pi.X);
-                if (intersect) inside = !inside;
-                j = i;
-            }
-            return inside;
-        }
-
-        private static double DistanceSquared(Point a, Point b)
-        {
-            double dx = a.X - b.X;
-            double dy = a.Y - b.Y;
-            return dx * dx + dy * dy;
-        }
-
-        private List<HxHit> GetMeshHitsAt(Point pos)
-        {
-            var raw = MainViewport.FindHits(pos);
-            if (raw == null || raw.Count == 0) return new List<HxHit>();
-            return raw.OfType<HxHit>()
-                      .Where(IsHitOnEditingMesh)
-                      .OrderBy(h => h.Distance)
-                      .ToList();
-        }
-
-        private bool IsHitOnEditingMesh(HxHit hit)
-        {
-            if (_editingMeshNode == null) return false;
-            return hit.ModelHit is SceneNode sn && ReferenceEquals(sn, _editingMeshNode);
-        }
-
-        private int MapHitToFaceIndex(HxHit hit, int faceCount)
-        {
-            int v = hit.IndiceStartLocation;
-            if (v < 0 || faceCount <= 0) return -1;
-            if (v % 3 == 0 && v / 3 < faceCount) return v / 3;
-            if (v < faceCount) return v;
-            int by3 = v / 3;
-            return by3 >= 0 && by3 < faceCount ? by3 : -1;
-        }
-
-        private int ResolveFaceFromHits(List<HxHit> hits, int triCount)
-        {
-            if (_isXRay && StrictCenterPickInXRay)
-            {
-                foreach (var h in hits)
-                {
-                    int fi = MapHitToFaceIndex(h, triCount);
-                    if (fi < 0) continue;
-                    if (IsHitNearFaceCenter(h, fi)) return fi;
-                }
-                return -1;
-            }
-            return hits.Count > 0 ? MapHitToFaceIndex(hits[0], triCount) : -1;
-        }
-
-        private bool IsHitNearFaceCenter(HxHit hit, int fi)
-        {
-            if (_editingMeshNode?.Geometry is not HxMesh geo) return false;
-            var positions = geo.Positions;
-            var indices = geo.Indices;
-            if (positions == null || indices == null) return false;
-            int b = fi * 3;
-            if (b + 2 >= indices.Count) return false;
-            int i0 = indices[b];
-            int i1 = indices[b + 1];
-            int i2 = indices[b + 2];
-            if (i0 < 0 || i1 < 0 || i2 < 0 || i0 >= positions.Count || i1 >= positions.Count || i2 >= positions.Count) return false;
-
-            var world = GetWorldModelMatrix(_editingMeshNode);
-            var p0 = Vector3.Transform(positions[i0], world);
-            var p1 = Vector3.Transform(positions[i1], world);
-            var p2 = Vector3.Transform(positions[i2], world);
-            var c = (p0 + p1 + p2) / 3f;
-            var hp = hit.PointHit;
-            var h = new Vector3(hp.X, hp.Y, hp.Z);
-
-            var avgEdge = (Vector3.Distance(p0, p1) + Vector3.Distance(p1, p2) + Vector3.Distance(p2, p0)) / 3f;
-            if (avgEdge <= 1e-6f) return false;
-            return Vector3.Distance(c, h) <= avgEdge * CenterPickRatio;
         }
 
         // ══════════════════════════════════════
@@ -2577,12 +1689,12 @@ namespace AMLabSlicer.Views
             {
                 var basePoly = new System.Windows.Shapes.Polygon
                 {
-                    Fill = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(120, 240, 240, 240)), // 半透明偏白材质
-                    Stroke = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.White), // 纯白描边框线
+                    Fill = System.Windows.Media.Brushes.Transparent,
                     StrokeThickness = 1.0,
                     StrokeLineJoin = PenLineJoin.Round, // 防止锐角产生突出毛刺
                     IsHitTestVisible = false // 基础面不接收点击
                 };
+                basePoly.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty, "ViewCubeStrokeBrush");
                 _baseFaces.Add(new BaseFace { Normal = faceNormals[i], Shape = basePoly, Corners = faceCorners[i] });
                 ViewCubeCanvas.Children.Add(basePoly);
             }
@@ -2648,6 +1760,7 @@ namespace AMLabSlicer.Views
             TextBlock CreateLabel(string text, System.Windows.Media.Color c, bool bold = false)
             {
                 var tb = new TextBlock { Text = text, Foreground = new System.Windows.Media.SolidColorBrush(c), FontSize = 12, IsHitTestVisible = false, TextAlignment = TextAlignment.Center, Width = 40, Height = 16 };
+                AMLabSlicer.Plugin.Wpf.Localization.UiText.SetText(tb, TextBlock.TextProperty, text);
                 if (bold) tb.FontWeight = FontWeights.Bold;
                 ViewCubeCanvas.Children.Add(tb);
                 return tb;
@@ -2664,6 +1777,8 @@ namespace AMLabSlicer.Views
             _faceTexts[new Vector3D(0, -1, 0)] = CreateLabel("前面", faceColor, true);
             _faceTexts[new Vector3D(0, 0, 1)] = CreateLabel("顶部", faceColor, true);
             _faceTexts[new Vector3D(0, 0, -1)] = CreateLabel("底部", faceColor, true);
+            foreach (var label in _faceTexts.Values)
+                label.SetResourceReference(TextBlock.ForegroundProperty, "ViewCubeTextBrush");
 
         }
 
@@ -2692,7 +1807,7 @@ namespace AMLabSlicer.Views
             foreach (var bf in _baseFaces)
             {
                 double dot = Vector3D.DotProduct(bf.Normal, look);
-                if (dot > -0.001)
+                if (dot > -0.001 || _prefs?.ShowViewCube == false)
                 {
                     bf.Shape.Visibility = Visibility.Collapsed;
                     continue;
@@ -2709,7 +1824,7 @@ namespace AMLabSlicer.Views
             foreach (var zp in _zonePolys)
             {
                 double dot = Vector3D.DotProduct(zp.ZoneDir, look);
-                if (dot > -0.001) // 同步隐藏判定
+                if (dot > -0.001 || _prefs?.ShowViewCube == false) // 同步隐藏判定
                 {
                     zp.Shape.Visibility = Visibility.Collapsed;
                     continue;
@@ -2725,8 +1840,8 @@ namespace AMLabSlicer.Views
             // 将 XYZ 坐标系彻底依附于 ViewCube 真实映射的 3D 原点 (-1, -1, -1)
             var origin3D = new Vector3D(-1, -1, -1);
             
-            _axisX.Visibility = _axisY.Visibility = _axisZ.Visibility = Visibility.Visible;
-            _lblX.Visibility = _lblY.Visibility = _lblZ.Visibility = Visibility.Visible;
+            _axisX.Visibility = _axisY.Visibility = _axisZ.Visibility = _prefs?.ShowCoordinateSystem == false ? Visibility.Collapsed : Visibility.Visible;
+            _lblX.Visibility = _lblY.Visibility = _lblZ.Visibility = _prefs?.ShowCoordinateSystem == false ? Visibility.Collapsed : Visibility.Visible;
             
             var pO = Project(origin3D);
             _axisX.X1 = pO.X; _axisX.Y1 = pO.Y; 
@@ -2749,7 +1864,7 @@ namespace AMLabSlicer.Views
             foreach (var kvp in _faceTexts)
             {
                 double dot = Vector3D.DotProduct(kvp.Key, look);
-                if (dot > -0.001)
+                if (dot > -0.001 || _prefs?.ShowViewCube == false)
                 {
                     kvp.Value.Visibility = Visibility.Collapsed;
                 }
@@ -2813,7 +1928,7 @@ namespace AMLabSlicer.Views
                     }
                 }
                 
-                // 获取基于全局模型或选区的完美框显中心点和视距
+                // 获取基于全局模型或选中物体的完美框显中心点和视距
                 GetTargetCenterAndDistance(out Point3D targetCenter, out double distance, out double width);
                 _pivotPoint = targetCenter;
                 

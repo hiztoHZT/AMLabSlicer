@@ -4,7 +4,7 @@ using System.Numerics;
 namespace AMLabSlicer.Core.Topology
 {
     /// <summary>
-    /// 轻量级半边数据结构，用于面模式的高级拓扑选择（连通分量、环选等）
+    /// 轻量级半边数据结构，用于模型连通分量拆分
     /// </summary>
     public class HalfEdgeMesh
     {
@@ -80,7 +80,7 @@ namespace AMLabSlicer.Core.Topology
         }
 
         /// <summary>
-        /// BFS 获取从 startFace 出发的连通分量（用于 L 键）
+        /// BFS 获取从 startFace 出发的连通分量
         /// </summary>
         public HashSet<int> GetConnectedComponent(int startFace)
         {
@@ -122,38 +122,6 @@ namespace AMLabSlicer.Core.Topology
                 }
             }
             return result;
-        }
-
-        /// <summary>
-        /// Face Loop 环选：从一个面出发，沿"对边"方向找到循环带。
-        /// 简化实现：返回从指定面穿越孪生边可访问的一排面。
-        /// </summary>
-        public List<int> GetFaceLoop(int startFace, int localEdge = 0)
-        {
-            var loop = new List<int>();
-            var visited = new HashSet<int>();
-
-            int curFace = startFace;
-            int curEdge = localEdge;
-
-            while (curFace >= 0 && visited.Add(curFace))
-            {
-                loop.Add(curFace);
-
-                // 取当前半边的孪生，跳到相邻面
-                int twinHe = _twin[curFace * 3 + curEdge];
-                if (twinHe < 0) break; // 到达边界
-
-                int nextFace = twinHe / 3;
-                int nextLocEdge = twinHe % 3;
-                // 继续沿下一条边前进（取 loop 对边）
-                int continueEdge = (nextLocEdge + 2) % 3;
-
-                curFace = nextFace;
-                curEdge = continueEdge;
-            }
-
-            return loop;
         }
 
         /// <summary>

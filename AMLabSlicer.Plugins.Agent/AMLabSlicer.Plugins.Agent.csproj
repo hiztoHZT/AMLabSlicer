@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework><UseWPF>true</UseWPF>
+    <ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <AgentPackageOutput>$(MSBuildThisFileDirectory)bin/$(Configuration)/package/</AgentPackageOutput>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../AMLabSlicer.Plugin.Wpf/AMLabSlicer.Plugin.Wpf.csproj" Private="false" ExcludeAssets="runtime"/>
+    <ProjectReference Include="../AMLabSlicer.Plugin.Abstractions/AMLabSlicer.Plugin.Abstractions.csproj" Private="false" ExcludeAssets="runtime"/>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2"/>
+    <Content Include="extension.json" CopyToOutputDirectory="PreserveNewest"/>
+  </ItemGroup>
+  <Target Name="StageAgentPackage" AfterTargets="Build">
+    <ItemGroup>
+      <AgentPackageFiles Include="$(TargetPath);$(TargetDir)$(AssemblyName).deps.json;$(TargetDir)$(AssemblyName).pdb;$(MSBuildProjectDirectory)/extension.json"/>
+      <AgentPackageFiles Include="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.Filename)' != 'AMLabSlicer.Plugin.Abstractions' and '%(ReferenceCopyLocalPaths.Filename)' != 'AMLabSlicer.Plugin.Wpf'"/>
+    </ItemGroup>
+    <Copy SourceFiles="@(AgentPackageFiles)" DestinationFolder="$(AgentPackageOutput)" SkipUnchangedFiles="true"/>
+    <Delete Files="$(AgentPackageOutput)AMLabSlicer.Plugin.Abstractions.dll;$(AgentPackageOutput)AMLabSlicer.Plugin.Abstractions.pdb;$(AgentPackageOutput)AMLabSlicer.Plugin.Wpf.dll;$(AgentPackageOutput)AMLabSlicer.Plugin.Wpf.pdb"/>
+    <ZipDirectory SourceDirectory="$(AgentPackageOutput)" DestinationFile="$(MSBuildThisFileDirectory)bin/$(Configuration)/amlab.agent-1.0.0.zip" Overwrite="true"/>
+  </Target>
+</Project>
