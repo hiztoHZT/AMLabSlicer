@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Globalization;
 using System.Text.Json;
 using System.Windows;
@@ -14,6 +14,16 @@ namespace AMLabSlicer.Views
         public ParameterPanelView()
         {
             InitializeComponent();
+        }
+
+        private void PresetMenu_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button { ContextMenu: { } menu } button)
+            {
+                menu.PlacementTarget = button;
+                menu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+                menu.IsOpen = true;
+            }
         }
 
         private void ScrollCategoriesLeft_Click(object sender, RoutedEventArgs e)

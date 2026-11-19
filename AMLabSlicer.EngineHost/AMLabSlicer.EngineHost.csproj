@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -19,8 +19,14 @@
 
   <ItemGroup>
     <Protobuf Include="..\Protos\slicer.proto" GrpcServices="Both" />
+    <ProjectReference Include="../AMLabSlicer.Engine.Atom/AMLabSlicer.Engine.Atom.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
-  <Target Name="StageEngineHostRuntime" AfterTargets="Build">
+  <Target Name="StageAtomRuntime" AfterTargets="Build">
+    <ItemGroup><AtomRuntime Include="$(MSBuildThisFileDirectory)../AMLabSlicer.Engine.Atom/bin/$(Configuration)/package/**/*" /></ItemGroup>
+    <Copy SourceFiles="@(AtomRuntime)" DestinationFiles="@(AtomRuntime->'$(TargetDir)engines/atom/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(AtomRuntime)" DestinationFiles="@(AtomRuntime->'$(MSBuildThisFileDirectory)bin/$(Configuration)/package/engines/atom/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+  </Target>
+  <Target Name="StageEngineHostRuntime" AfterTargets="Build" DependsOnTargets="StageAtomRuntime">
     <PropertyGroup>
       <EngineHostPackage>$(MSBuildThisFileDirectory)bin/$(Configuration)/package/</EngineHostPackage>
       <FdmRuntimeSource>$(MSBuildThisFileDirectory)../AMLabSlicer.Engine.FDM/build/Release/</FdmRuntimeSource>
@@ -32,5 +38,15 @@
     </ItemGroup>
     <Copy SourceFiles="@(HostRuntimeFiles)" DestinationFolder="$(EngineHostPackage)" SkipUnchangedFiles="true"/>
     <Copy SourceFiles="@(FdmRuntimeFiles)" DestinationFolder="$(EngineHostPackage)engines/fdm/" SkipUnchangedFiles="true"/>
+    <Copy SourceFiles="@(FdmRuntimeFiles)" DestinationFolder="$(TargetDir)engines/fdm/" SkipUnchangedFiles="true"/>
+    <ItemGroup>
+      <EngineIdentityFiles Include="@(HostRuntimeFiles->'%(Filename)%(Extension)')" />
+      <EngineIdentityFiles Include="@(FdmRuntimeFiles->'engines/fdm/%(Filename)%(Extension)')" />
+      <EngineIdentityFiles Include="@(AtomRuntime->'engines/atom/%(RecursiveDir)%(Filename)%(Extension)')" />
+    </ItemGroup>
+    <WriteLinesToFile File="$(TargetDir)engine-runtime-manifest.txt" Lines="@(EngineIdentityFiles)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+    <Copy SourceFiles="$(TargetDir)engine-runtime-manifest.txt" DestinationFolder="$(EngineHostPackage)" SkipUnchangedFiles="true" />
   </Target>
+  <ItemGroup><Compile Include="../Shared/OwnedProcessJob.cs" Link="Processes/OwnedProcessJob.cs" /></ItemGroup>
+  <ItemGroup><Compile Include="../Shared/HostBuildIdentity.cs" Link="Processes/HostBuildIdentity.cs" /></ItemGroup>
 </Project>

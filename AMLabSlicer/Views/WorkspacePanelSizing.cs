@@ -4,7 +4,7 @@ internal readonly record struct PanelWidths(double Left, double Right, double Le
 
 internal static class WorkspacePanelSizing
 {
-    public static PanelWidths Fit(double total, double left, double right, bool leftOpen, bool rightOpen)
+    public static PanelWidths Fit(double total, double left, double right, bool leftOpen, bool rightOpen, double? leftMaximum = null)
     {
         var budget = Math.Max(0, total - 300 - (leftOpen ? 4 : 0) - (rightOpen ? 4 : 0));
         var leftMin = leftOpen ? 280d : 0;
@@ -14,7 +14,8 @@ internal static class WorkspacePanelSizing
             var factor = budget / (leftMin + rightMin);
             leftMin *= factor; rightMin *= factor;
         }
-        left = leftOpen ? Math.Clamp(left, leftMin, Math.Max(leftMin, Math.Min(640, total * .5))) : 0;
+        var leftLimit = leftMaximum ?? Math.Min(640, total * .5);
+        left = leftOpen ? Math.Clamp(left, leftMin, Math.Max(leftMin, leftLimit)) : 0;
         right = rightOpen ? Math.Clamp(right, rightMin, Math.Max(rightMin, 600)) : 0;
         var excess = left + right - budget;
         if (excess > 0)

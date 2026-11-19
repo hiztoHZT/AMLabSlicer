@@ -1,0 +1,5 @@
+{
+  "id": "amlab.tripo", "name": "Tripo AI", "version": "1.0.0", "apiVersion": 1,
+  "targetFramework": "net8.0-windows", "architecture": "x64",
+  "entryAssembly": "AMLabSlicer.Plugins.Tripo.dll", "entryType": "AMLabSlicer.Plugins.Tripo.TripoPlugin", "icon": "T"
+}

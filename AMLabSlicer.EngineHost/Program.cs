@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Diagnostics;
 using AMLabSlicer.Grpc;
 using Grpc.Core;
@@ -11,26 +11,43 @@ namespace AMLabSlicer.EngineHost
         private readonly ConcurrentDictionary<string, EngineRegistration> _algorithms = new();
         private readonly ConcurrentDictionary<string, GrpcChannel> _channels = new();
         private readonly ConcurrentDictionary<string, Process> _processes = new();
+        private readonly ConcurrentDictionary<string, string> _instances = new();
+        private readonly ConcurrentDictionary<string, byte> _ready = new();
+        private readonly AMLabSlicer.Processes.OwnedProcessJob _job = new();
+        private readonly object _registrationGate = new();
 
         public void Register(AlgorithmInfo algorithm, string address)
         {
             if (string.IsNullOrWhiteSpace(algorithm.AlgorithmId))
                 throw new ArgumentException("AlgorithmId is required.", nameof(algorithm));
 
-            _algorithms[algorithm.AlgorithmId] = new EngineRegistration(algorithm.Clone(), address);
+            var uri = new Uri(address);
+            if (!uri.IsLoopback || uri.Scheme != "http") throw new ArgumentException("Engine endpoint must be loopback HTTP.");
+            address = "http://127.0.0.1:" + uri.Port;
+            lock (_registrationGate)
+            {
+                if (_algorithms.ContainsKey(algorithm.AlgorithmId)) throw new ArgumentException("Duplicate algorithm ID: " + algorithm.AlgorithmId);
+                if (_algorithms.Values.Any(r => new Uri(r.Address).Port == uri.Port)) throw new ArgumentException("Duplicate engine port: " + uri.Port);
+                _algorithms[algorithm.AlgorithmId] = new EngineRegistration(algorithm.Clone(), address);
+            }
             Console.WriteLine($"[EngineHost] Registered algorithm: {algorithm.AlgorithmId} ({algorithm.DisplayName}) -> {address}");
         }
 
-        public void RegisterAndLaunch(AlgorithmInfo algorithm, string address, string executablePath)
+        public void RegisterAndLaunch(AlgorithmInfo algorithm, string executablePath)
         {
-            Register(algorithm, address);
-
             if (!File.Exists(executablePath))
             {
-                Console.WriteLine($"[EngineHost] Engine executable not found: {executablePath}");
-                Console.WriteLine($"[EngineHost] Algorithm {algorithm.AlgorithmId} registered in passive mode.");
-                return;
+                throw new FileNotFoundException("Engine executable missing; refusing passive fallback to stale engines.", executablePath);
             }
+            // Managed engines always receive a fresh port from the OS.
+            var reservation = new System.Net.Sockets.TcpListener(System.Net.IPAddress.Loopback, 0);
+            reservation.Start();
+            var port = ((System.Net.IPEndPoint)reservation.LocalEndpoint).Port;
+            var address = "http://127.0.0.1:" + port;
+            try { Register(algorithm, address); }
+            catch { reservation.Stop(); throw; }
+            var instance = Guid.NewGuid().ToString("N");
+            _instances[algorithm.AlgorithmId] = instance;
 
             var processStartInfo = new ProcessStartInfo
             {
@@ -41,17 +58,20 @@ namespace AMLabSlicer.EngineHost
                 RedirectStandardError = true,
                 CreateNoWindow = true,
             };
+            processStartInfo.Environment["AMLAB_ENGINE_PORT"] = port.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            processStartInfo.Environment["AMLAB_ENGINE_INSTANCE"] = instance;
+            reservation.Stop();
 
             try
             {
                 var process = Process.Start(processStartInfo);
                 if (process == null)
                 {
-                    Console.WriteLine($"[EngineHost] Failed to start engine process for {algorithm.AlgorithmId}.");
-                    return;
+                    throw new InvalidOperationException($"Failed to start engine {algorithm.AlgorithmId}.");
                 }
 
                 _processes[algorithm.AlgorithmId] = process;
+                _job.Add(process);
                 process.OutputDataReceived += (_, e) =>
                 {
                     if (!string.IsNullOrEmpty(e.Data))
@@ -71,33 +91,43 @@ namespace AMLabSlicer.EngineHost
             {
                 Console.WriteLine($"[EngineHost] Failed to start engine {algorithm.AlgorithmId}: {ex.Message}");
                 Console.WriteLine($"[EngineHost] Start manually if needed: {executablePath}");
+                throw;
             }
         }
 
         public async Task WaitForEnginesReady(int timeoutMs = 10000, CancellationToken cancellationToken = default)
         {
             Console.WriteLine("[EngineHost] Waiting for registered engines...");
-            var stopwatch = Stopwatch.StartNew();
 
             foreach (var registration in _algorithms.Values)
             {
+                var stopwatch = Stopwatch.StartNew();
                 var ready = false;
                 while (stopwatch.ElapsedMilliseconds < timeoutMs && !ready)
                 {
+                    if (_processes.TryGetValue(registration.Algorithm.AlgorithmId, out var owned) && owned.HasExited)
+                        throw new InvalidOperationException($"Engine {registration.Algorithm.AlgorithmId} exited during startup: {owned.ExitCode}");
                     try
                     {
-                        var client = GetClient(registration.Algorithm.AlgorithmId);
+                        var client = CreateClient(registration);
                         if (client != null)
                         {
-                            await client.GetAvailableAlgorithmsAsync(
+                            using var call = client.GetAvailableAlgorithmsAsync(
                                 new Empty(),
                                 deadline: DateTime.UtcNow.AddSeconds(2), cancellationToken: cancellationToken);
+                            var response = await call.ResponseAsync;
+                            var headers = await call.ResponseHeadersAsync;
+                            if (!response.Algorithms.Any(a => a.AlgorithmId == registration.Algorithm.AlgorithmId))
+                                throw new InvalidDataException("Wrong engine algorithm at " + registration.Address);
+                            if (_instances.TryGetValue(registration.Algorithm.AlgorithmId, out var expected) && headers.GetValue("x-amlab-instance") != expected)
+                                throw new InvalidDataException("Engine instance mismatch; refusing stale/foreign service.");
+                            _ready[registration.Algorithm.AlgorithmId] = 1;
                             ready = true;
                             Console.WriteLine($"[EngineHost] Engine ready: {registration.Algorithm.AlgorithmId} ({stopwatch.ElapsedMilliseconds}ms)");
                         }
                     }
                     catch when (cancellationToken.IsCancellationRequested) { return; }
-                    catch
+                    catch (RpcException)
                     {
                         try { await Task.Delay(300, cancellationToken); }
                         catch (OperationCanceledException) { return; }
@@ -106,11 +136,11 @@ namespace AMLabSlicer.EngineHost
 
                 if (!ready)
                 {
-                    Console.WriteLine($"[EngineHost] Engine timeout: {registration.Algorithm.AlgorithmId} (>{timeoutMs}ms). Requests may retry later.");
+                    throw new TimeoutException($"Engine startup timed out: {registration.Algorithm.AlgorithmId}");
                 }
             }
 
-            Console.WriteLine($"[EngineHost] Engine initialization finished ({stopwatch.ElapsedMilliseconds}ms)");
+            Console.WriteLine("[EngineHost] All engine instances verified.");
         }
 
         public IReadOnlyList<AlgorithmInfo> GetAllAlgorithms()
@@ -125,7 +155,14 @@ namespace AMLabSlicer.EngineHost
         {
             if (!_algorithms.TryGetValue(algorithmId, out var registration))
                 return null;
+            if (!_ready.ContainsKey(algorithmId)) throw new RpcException(new Status(StatusCode.Unavailable, "Engine not ready."));
+            if (_processes.TryGetValue(algorithmId, out var owned) && owned.HasExited)
+                throw new RpcException(new Status(StatusCode.Unavailable, "Owned engine exited."));
+            return CreateClient(registration);
+        }
 
+        private SlicerService.SlicerServiceClient CreateClient(EngineRegistration registration)
+        {
             var channel = _channels.GetOrAdd(registration.Address, address => GrpcChannel.ForAddress(address, new GrpcChannelOptions
             {
                 MaxReceiveMessageSize = null,
@@ -156,6 +193,8 @@ namespace AMLabSlicer.EngineHost
                 }
             }
             _processes.Clear();
+            _ready.Clear();
+            _job.Dispose();
 
             foreach (var channel in _channels.Values)
             {
@@ -314,9 +353,31 @@ namespace AMLabSlicer.EngineHost
     {
         private const string FdmAlgorithmId = "fdm.cartesian.v1";
 
-        private static async Task Main(string[] args)
+        private static void Main(string[] args)
         {
             var builder = Microsoft.AspNetCore.Builder.WebApplication.CreateBuilder(args);
+            var port = builder.Configuration.GetValue<int?>("EngineHost:Port") ?? 50051;
+            // Hold the mutex on this thread while the async server runs on worker threads.
+            using var instance = new Mutex(false, "Local\\AMLabSlicer.EngineHost.Instance." + port);
+            bool acquired;
+            try { acquired = instance.WaitOne(0); }
+            catch (AbandonedMutexException) { acquired = true; }
+            if (!acquired) { Console.WriteLine($"[EngineHost] Port {port} already has an EngineHost instance; duplicate launch skipped."); return; }
+            try
+            {
+                if (System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners()
+                    .Any(endpoint => endpoint.Port == port))
+                {
+                    Console.WriteLine($"[EngineHost] Port {port} is already in use; no engines were launched. Close the existing service before debugging a new host.");
+                    return;
+                }
+                RunAsync(builder).GetAwaiter().GetResult();
+            }
+            finally { instance.ReleaseMutex(); }
+        }
+
+        private static async Task RunAsync(Microsoft.AspNetCore.Builder.WebApplicationBuilder builder)
+        {
 
             builder.WebHost.ConfigureKestrel(options =>
             {
@@ -325,9 +386,6 @@ namespace AMLabSlicer.EngineHost
             });
 
             using var registry = new EngineRegistry();
-            registry.RegisterAndLaunch(CreateFdmAlgorithmInfo(), "http://localhost:50100",
-                builder.Configuration["EngineHost:EngineExecutable"] ?? Environment.GetEnvironmentVariable("AMLAB_FDM_ENGINE") ?? FindFdmEngine());
-
             builder.Services.AddSingleton(registry);
             builder.Services.AddGrpc(options =>
             {
@@ -337,8 +395,16 @@ namespace AMLabSlicer.EngineHost
 
             await using var app = builder.Build();
             app.MapGrpcService<EngineHostService>();
-            app.MapGet("/", () => "AMLabSlicer EngineHost - gRPC engine router");
-            app.MapEngineHostShutdown();
+            var buildId = AMLabSlicer.Processes.HostBuildIdentity.Compute(AppContext.BaseDirectory);
+            var hostInstance = Guid.NewGuid().ToString("N");
+            var enginesReady = false;
+            app.MapGet("/", (Microsoft.AspNetCore.Http.HttpContext context) => {
+                context.Response.Headers["x-amlab-build"] = buildId;
+                context.Response.Headers["x-amlab-host-instance"] = hostInstance;
+                if (!Volatile.Read(ref enginesReady)) context.Response.StatusCode = 503;
+                return "AMLabSlicer EngineHost - gRPC engine router";
+            });
+            app.MapEngineHostShutdown(hostInstance);
 
             app.Lifetime.ApplicationStopping.Register(() =>
             {
@@ -356,7 +422,19 @@ namespace AMLabSlicer.EngineHost
 
             // Listen before engine warm-up so a closing UI can stop a starting host too.
             await app.StartAsync();
+            registry.RegisterAndLaunch(CreateFdmAlgorithmInfo(),
+                builder.Configuration["EngineHost:EngineExecutable"] ?? Environment.GetEnvironmentVariable("AMLAB_FDM_ENGINE") ?? FindFdmEngine());
+            var atom = new AlgorithmInfo { AlgorithmId = "atom.nonplanar.v1", DisplayName = "AtomSlicer 非平面切片",
+                EngineId = "engine.atom", Category = "Non-planar", Version = "3ee70a8" };
+            atom.Capabilities.Add("slice.mesh"); atom.InputKinds.Add("mesh.triangle.float32");
+            atom.OutputKinds.AddRange(new[] { "toolpath.ply", "gcode" });
+            registry.RegisterAndLaunch(atom,
+                builder.Configuration["EngineHost:AtomExecutable"] ?? Path.Combine(AppContext.BaseDirectory,
+                    "engines", "atom", "AMLabSlicer.Engine.Atom.exe"));
+
+
             await registry.WaitForEnginesReady(timeoutMs: 15000, cancellationToken: app.Lifetime.ApplicationStopping);
+            Volatile.Write(ref enginesReady, true);
             await app.WaitForShutdownAsync();
         }
 

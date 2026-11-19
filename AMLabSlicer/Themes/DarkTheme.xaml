@@ -18,6 +18,9 @@
     <sys:Double x:Key="UiParameterPanelMinHeight">150</sys:Double>
     <sys:Double x:Key="UiCardHeaderHeight">30</sys:Double>
     <sys:Double x:Key="UiActionHeight">30</sys:Double>
+    <sys:Double x:Key="UiModelToolWidth">44</sys:Double>
+    <sys:Double x:Key="UiModelToolMinHeight">38</sys:Double>
+    <sys:Double x:Key="UiModelToolIconSize">28</sys:Double>
     <sys:Double x:Key="UiNavigationHeight">30</sys:Double>
     <sys:Double x:Key="UiConfigRowHeight">36</sys:Double>
     <GridLength x:Key="UiConfigRowGridHeight">36</GridLength>
@@ -77,6 +80,42 @@
     <SolidColorBrush x:Key="MutedAccentBrush" Color="#203B56" />
     <SolidColorBrush x:Key="ExpanderHeaderBrush" Color="#2B2B2B" />
     <SolidColorBrush x:Key="MenuItemBackgroundBrush" Color="#2B2B2B" />
+
+    <!-- Tooltips share the application palette instead of the system chrome. -->
+    <Thickness x:Key="UiToolTipPadding">8,5</Thickness>
+    <sys:Double x:Key="UiToolTipMaxWidth">360</sys:Double>
+    <Style TargetType="{x:Type ToolTip}">
+        <Setter Property="Background" Value="{DynamicResource SurfaceElevatedBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource SurfaceBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="{DynamicResource UiToolTipPadding}"/>
+        <Setter Property="MaxWidth" Value="{DynamicResource UiToolTipMaxWidth}"/>
+        <Setter Property="FontFamily" Value="{DynamicResource UiFontFamily}"/>
+        <Setter Property="FontSize" Value="{DynamicResource UiFontSize}"/>
+        <Setter Property="FontWeight" Value="Normal"/>
+        <Setter Property="HasDropShadow" Value="False"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ToolTip}">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{DynamicResource UiCornerRadius}"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter ContentSource="Content">
+                            <ContentPresenter.Resources>
+                                <DataTemplate DataType="{x:Type sys:String}">
+                                    <TextBlock Text="{Binding}" TextWrapping="Wrap"/>
+                                </DataTemplate>
+                            </ContentPresenter.Resources>
+                        </ContentPresenter>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 
     <!-- ════════════════════════════════════════════ -->
     <!--           Window Button Styles              -->
@@ -217,6 +256,37 @@
     <!-- ════════════════════════════════════════════ -->
     <!--           全局暗色 TextBox 样式              -->
     <!-- ════════════════════════════════════════════ -->
+    <Style x:Key="ContextMenuItemStyle" TargetType="MenuItem" BasedOn="{StaticResource SubmenuItemStyle}">
+        <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="MenuItem">
+            <Border x:Name="ItemBorder" Background="Transparent" Padding="10,4" MinHeight="{DynamicResource UiInputHeight}" CornerRadius="{StaticResource UiCornerRadius}">
+                <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <ContentPresenter ContentSource="Header" RecognizesAccessKey="True" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Column="1" Text="{TemplateBinding InputGestureText}" Foreground="{DynamicResource SecondaryTextBrush}" Margin="24,0,0,0" VerticalAlignment="Center"/>
+                </Grid>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsHighlighted" Value="True"><Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource MenuItemHoverBrush}"/></Trigger>
+                <Trigger Property="IsEnabled" Value="False"><Setter TargetName="ItemBorder" Property="Opacity" Value="0.45"/></Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate></Setter.Value></Setter>
+    </Style>
+    <Style TargetType="ContextMenu">
+        <Style.Resources>
+            <Style TargetType="MenuItem" BasedOn="{StaticResource ContextMenuItemStyle}"/>
+            <Style TargetType="Separator" BasedOn="{StaticResource {x:Static MenuItem.SeparatorStyleKey}}"/>
+        </Style.Resources>
+        <Setter Property="Foreground" Value="{DynamicResource MenuItemTextBrush}"/>
+        <Setter Property="FontFamily" Value="{DynamicResource UiFontFamily}"/>
+        <Setter Property="FontSize" Value="{DynamicResource UiFontSize}"/>
+
+        <Setter Property="OverridesDefaultStyle" Value="True"/>
+        <Setter Property="HasDropShadow" Value="False"/>
+        <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ContextMenu">
+            <Border Background="{DynamicResource MenuPopupBackgroundBrush}" BorderBrush="{DynamicResource MenuPopupBorderBrush}" BorderThickness="1" CornerRadius="{StaticResource UiCornerRadius}" Padding="4" SnapsToDevicePixels="True">
+                <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Cycle"/>
+            </Border>
+        </ControlTemplate></Setter.Value></Setter>
+    </Style>
     <Style TargetType="TextBox">
         <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}"/>
         <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
@@ -354,7 +424,8 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="CheckBox">
-                    <StackPanel Orientation="Horizontal">
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                         <Border x:Name="Box" Width="16" Height="16" CornerRadius="4"
                                 Background="{DynamicResource ControlBackgroundBrush}" 
                                 BorderBrush="{DynamicResource ControlBorderBrush}" BorderThickness="1"
@@ -362,8 +433,8 @@
                             <Path x:Name="Check" Data="M 2 5 L 5.5 9 L 12 2" Stroke="White" StrokeThickness="2"
                                   Visibility="Collapsed" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                         </Border>
-                        <ContentPresenter x:Name="CheckBoxContent" Margin="6,0,0,0" VerticalAlignment="Center" RecognizesAccessKey="True"/>
-                    </StackPanel>
+                        <ContentPresenter x:Name="CheckBoxContent" Grid.Column="1" Margin="6,0,0,0" VerticalAlignment="Center" RecognizesAccessKey="True"/>
+                    </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="Content" Value="{x:Null}">
                             <Setter TargetName="CheckBoxContent" Property="Visibility" Value="Collapsed"/>
@@ -703,17 +774,32 @@
     </Style>
 
     <Style x:Key="ExtensionRailButtonStyle" TargetType="Button">
-        <Setter Property="Width" Value="28"/><Setter Property="Height" Value="30"/>
+        <Setter Property="Width" Value="35"/><Setter Property="Height" Value="30"/>
         <Setter Property="Margin" Value="0,0,0,4"/><Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
         <Setter Property="FontSize" Value="{DynamicResource UiTitleFontSize}"/>
         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
         <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Button">
-            <Border x:Name="RailButton" Background="{TemplateBinding Background}" CornerRadius="{StaticResource UiCornerRadius}">
-                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-            </Border>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="28"/>
+                    <ColumnDefinition Width="4"/>
+                    <ColumnDefinition Width="3"/>
+                </Grid.ColumnDefinitions>
+                <Border x:Name="RailButton" Background="{TemplateBinding Background}" CornerRadius="{StaticResource UiCornerRadius}">
+                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+                <Border x:Name="SelectionIndicator" Grid.Column="2" Width="3" Margin="0,5,0,5" CornerRadius="1.5"
+                        HorizontalAlignment="Right" Background="{DynamicResource AccentBrush}"
+                        Visibility="Collapsed" IsHitTestVisible="False"/>
+            </Grid>
             <ControlTemplate.Triggers>
-                <Trigger Property="Tag"><Trigger.Value><sys:Boolean>True</sys:Boolean></Trigger.Value><Setter TargetName="RailButton" Property="Background" Value="{DynamicResource MutedAccentBrush}"/><Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/></Trigger>
+                <Trigger Property="Tag">
+                    <Trigger.Value><sys:Boolean>True</sys:Boolean></Trigger.Value>
+                    <Setter TargetName="RailButton" Property="Background" Value="{DynamicResource ButtonHoverBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+                    <Setter TargetName="SelectionIndicator" Property="Visibility" Value="Visible"/>
+                </Trigger>
                 <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="RailButton" Property="Background" Value="{DynamicResource ButtonHoverBrush}"/></Trigger>
             </ControlTemplate.Triggers>
         </ControlTemplate></Setter.Value></Setter>
@@ -777,7 +863,9 @@
             <Trigger Property="Orientation" Value="Horizontal"><Setter Property="Height" Value="12"/><Setter Property="Width" Value="Auto"/></Trigger>
         </Style.Triggers>
     </Style>
+    <SolidColorBrush x:Key="ObjectLockedBrush" Color="#E69A42"/>
     <SolidColorBrush x:Key="WarningBrush" Color="#E0A642"/>
+    <SolidColorBrush x:Key="StopActionBrush" Color="#F05A64"/>
     <Style x:Key="ThemedWindowStyle" TargetType="Window">
         <Setter Property="WindowStyle" Value="None"/>
         <Setter Property="Background" Value="{DynamicResource WindowBackgroundBrush}"/>

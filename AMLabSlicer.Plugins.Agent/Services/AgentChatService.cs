@@ -1,3 +1,4 @@
+using AMLabSlicer.Plugin.Abstractions;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -14,7 +15,7 @@ public interface IAgentChatService
     Task<IReadOnlyList<string>> ListModelsAsync(AgentSettings settings, CancellationToken cancellationToken);
 }
 
-// Provider transport is independent from the UI and future tool/extension implementations.
+public sealed record AgentReply(string Text, IReadOnlyList<SliceParameterChange>? Changes = null);
 public sealed class OpenAiCompatibleChatService(HttpClient client) : IAgentChatService
 {
     public static Uri ResolveEndpoint(string endpoint, string resource)
@@ -40,14 +41,38 @@ public sealed class OpenAiCompatibleChatService(HttpClient client) : IAgentChatS
         return request;
     }
 
-    public async Task<string> SendAsync(AgentSettings settings, IReadOnlyList<AgentMessage> conversation, CancellationToken cancellationToken)
+    public async Task<string> SendAsync(AgentSettings settings, IReadOnlyList<AgentMessage> conversation, CancellationToken cancellationToken) =>
+        (await SendWithParametersAsync(settings, conversation, null, cancellationToken)).Text;
+
+    public async Task<AgentReply> SendWithParametersAsync(AgentSettings settings, IReadOnlyList<AgentMessage> conversation,
+        SliceParameterSnapshot? snapshot, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(settings.AgentModel)) throw new InvalidOperationException("请先在“插件 → Agent”中填写模型名称，或在插件设置中读取模型列表。");
         using var request = Request(settings, HttpMethod.Post, "chat/completions");
         var messages = new List<object>();
-        if (!string.IsNullOrWhiteSpace(settings.AgentSystemPrompt)) messages.Add(new { role = "system", content = settings.AgentSystemPrompt });
+        var prompt = settings.AgentSystemPrompt == AgentSettings.LegacySystemPrompt
+            ? AgentSettings.DefaultSystemPrompt : settings.AgentSystemPrompt;
+        if (!string.IsNullOrWhiteSpace(prompt)) messages.Add(new { role = "system", content = prompt });
+        if (snapshot != null)
+        {
+            var parameters = JsonSerializer.Serialize(new { snapshot.Algorithm, snapshot.Parameters });
+            messages.Add(new
+            {
+                role = "system",
+                content = "以下是宿主当前切片算法和参数。回答切片设置请求时优先结合实际值，不要假设有未列出的参数。" +
+                    "用户希望提高打印或切片精细度时，优先考虑减小当前算法的层高或层高与喷嘴直径的比值。" +
+                    "如果用户想调整设置，调用 propose_slice_parameters 建议可编辑参数的新值；应用由用户在界面确认。" +
+                    "不得在文字回复里输出修改 JSON，也不得声称建议已经应用。普通参数查询直接回答。\n" + parameters
+            });
+        }
         messages.AddRange(conversation.Select(m => (object)new { role = m.Role, content = m.Content }));
-        request.Content = JsonContent.Create(new { model = settings.AgentModel.Trim(), messages, stream = false });
+        var body = new Dictionary<string, object>
+        {
+            ["model"] = settings.AgentModel.Trim(), ["messages"] = messages, ["stream"] = false
+        };
+        if (snapshot?.Parameters.Any(p => p.Editable) == true)
+            body["tools"] = new[] { ParameterProposalTool };
+        request.Content = JsonContent.Create(body);
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         timeout.CancelAfter(TimeSpan.FromSeconds(settings.AgentTimeoutSeconds));
         using var response = await client.SendAsync(request, timeout.Token);
@@ -57,8 +82,65 @@ public sealed class OpenAiCompatibleChatService(HttpClient client) : IAgentChatS
             throw new InvalidOperationException("服务未返回有效的对话结果。");
         var message = choices[0].GetProperty("message");
         var text = message.TryGetProperty("content", out var content) && content.ValueKind == JsonValueKind.String ? content.GetString() : null;
+        if (snapshot != null && message.TryGetProperty("tool_calls", out var calls) &&
+            calls.ValueKind == JsonValueKind.Array && calls.GetArrayLength() > 0)
+            return new AgentReply("", ReadProposal(snapshot, calls));
+
         if (string.IsNullOrWhiteSpace(text)) throw new InvalidOperationException("服务返回空内容。请检查模型是否支持 Chat Completions 文本对话。");
-        return text;
+        return new AgentReply(text);
+    }
+
+    private static readonly JsonElement ParameterProposalTool = JsonSerializer.Deserialize<JsonElement>("""
+        {
+          "type": "function",
+          "function": {
+            "name": "propose_slice_parameters",
+            "description": "Propose changes to editable slice parameters. Does not apply them.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "changes": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": { "key": { "type": "string" }, "value": { "type": "number" } },
+                    "required": ["key", "value"],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": ["changes"],
+              "additionalProperties": false
+            }
+          }
+        }
+        """);
+
+    private static IReadOnlyList<SliceParameterChange> ReadProposal(SliceParameterSnapshot snapshot, JsonElement calls)
+    {
+        var updates = new Dictionary<string, SliceParameterChange>(StringComparer.Ordinal);
+        foreach (var call in calls.EnumerateArray())
+        {
+            var function = call.GetProperty("function");
+            if (function.GetProperty("name").GetString() != "propose_slice_parameters")
+                throw new InvalidOperationException("模型请求了未知的参数工具。");
+            using var arguments = JsonDocument.Parse(function.GetProperty("arguments").GetString() ?? "");
+            foreach (var item in arguments.RootElement.GetProperty("changes").EnumerateArray())
+            {
+                var key = item.GetProperty("key").GetString() ?? "";
+                var number = item.GetProperty("value");
+                var parameter = snapshot.Parameters.FirstOrDefault(p => p.Key == key && p.Editable);
+                if (parameter == null || number.ValueKind != JsonValueKind.Number ||
+                    !number.TryGetDouble(out var value) || !double.IsFinite(value) ||
+                    value < parameter.Minimum || value > parameter.Maximum)
+                    throw new InvalidOperationException("模型建议的参数不可修改或超出范围。");
+                if (Equals(parameter.Value, value)) continue;
+                if (!updates.TryAdd(key, new(key, value)))
+                    throw new InvalidOperationException("模型对同一个参数提出了多次修改。");
+            }
+        }
+        if (updates.Count == 0) throw new InvalidOperationException("模型没有提出有效的参数改动。");
+        return updates.Values.ToArray();
     }
 
     public async Task<IReadOnlyList<string>> ListModelsAsync(AgentSettings settings, CancellationToken cancellationToken)

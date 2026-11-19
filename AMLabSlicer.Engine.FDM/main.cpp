@@ -1,9 +1,10 @@
-// ================================================================
+﻿// ================================================================
 // AMLabSlicer FDM Engine - C++ gRPC 服务端
 // 监听 :50100，实现 SlicerService 协议
 // ================================================================
 
 #include <iostream>
+#include <cstdlib>
 #include <string>
 #include <sstream>
 #include <memory>
@@ -161,8 +162,9 @@ static ParameterTemplate MakeParam(
 class FdmSlicerService final : public SlicerService::Service
 {
 public:
-    Status GetAvailableAlgorithms(ServerContext*, const Empty*, AlgorithmList* reply) override
+    Status GetAvailableAlgorithms(ServerContext* context, const Empty*, AlgorithmList* reply) override
     {
+        if (const char* instance = std::getenv("AMLAB_ENGINE_INSTANCE")) context->AddInitialMetadata("x-amlab-instance", instance);
         auto* algorithm = reply->add_algorithms();
         algorithm->set_algorithm_id(kFdmAlgorithmId);
         algorithm->set_display_name(kFdmDisplayName);
@@ -258,7 +260,20 @@ public:
             if (clientMsg.msg_case() == SliceClientMessage::kStartRequest)
             {
                 const auto& req = clientMsg.start_request();
-                const auto& pm = req.parameters();
+                auto pm = req.parameters();
+                if (req.has_printer()) {
+                    const auto& printer = req.printer();
+                    if (printer.schema_version() != 1 || printer.is_multi_axis())
+                        return Status(::grpc::StatusCode::INVALID_ARGUMENT, "FDM supports schema v1 Cartesian three-axis printer profiles only");
+                    if (printer.active_extruder() < 0 || printer.active_extruder() >= printer.extruders_size())
+                        return Status(::grpc::StatusCode::INVALID_ARGUMENT, "Invalid active printer extruder");
+                    const auto& extruder = printer.extruders(printer.active_extruder()).parameters();
+                    for (const auto* key : { "machine_nozzle_size", "material_diameter" }) {
+                        const auto value = extruder.find(key);
+                        if (value == extruder.end()) return Status(::grpc::StatusCode::INVALID_ARGUMENT, "Missing printer extruder parameter");
+                        pm[key] = value->second;
+                    }
+                }
 
                 // 解析参数
                 fdm::SliceParams params;
@@ -383,7 +398,8 @@ public:
                 }
 
                 // 进度回调 → 通过 gRPC 流发回
-                auto progressCb = [&stream](float progress, const std::string& stage) {
+                auto progressCb = [&stream, context](float progress, const std::string& stage) {
+                    if (context->IsCancelled()) throw std::runtime_error("Slicing cancelled");
                     SliceServerMessage m;
                     auto* p = m.mutable_progress();
                     p->set_progress(progress);
@@ -404,6 +420,7 @@ public:
                 }
                 catch (const std::exception& error)
                 {
+                    if (context->IsCancelled()) return Status(::grpc::StatusCode::CANCELLED, "Slicing cancelled");
                     return Status(::grpc::StatusCode::INTERNAL, error.what());
                 }
 
@@ -430,7 +447,13 @@ public:
 // ================================================================
 int main(int argc, char** argv)
 {
-    std::string addr = "0.0.0.0:50100";
+    std::string addr = "127.0.0.1:50100";
+    if (const char* port = std::getenv("AMLAB_ENGINE_PORT")) {
+        try { size_t used=0; int number=std::stoi(port,&used);
+            if(used!=std::strlen(port) || number<1 || number>65535) return 2;
+            addr="127.0.0.1:"+std::to_string(number);
+        } catch(...) { return 2; }
+    }
 
     FdmSlicerService service;
     ServerBuilder builder;
@@ -440,6 +463,7 @@ int main(int argc, char** argv)
     builder.RegisterService(&service);
 
     auto server = builder.BuildAndStart();
+    if (!server) { std::cerr << "Failed to bind " << addr << std::endl; return 2; }
     std::cout << "========================================" << std::endl;
     std::cout << "  AMLabSlicer FDM Engine (C++)" << std::endl;
     std::cout << "  gRPC 监听: " << addr << std::endl;

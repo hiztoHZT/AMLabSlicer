@@ -19,6 +19,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "proto", "proto", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 	ProjectSection(SolutionItems) = preProject
 		Protos\slicer.proto = Protos\slicer.proto
+		Protos\amlab_monitor.proto = Protos\amlab_monitor.proto
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AMLabSlicer.Plugin.Abstractions", "AMLabSlicer.Plugin.Abstractions\AMLabSlicer.Plugin.Abstractions.csproj", "{A3A659B7-11CA-4BA6-A467-C9E0C71A369F}"
@@ -26,6 +27,18 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AMLabSlicer.Plugin.Wpf", "AMLabSlicer.Plugin.Wpf\AMLabSlicer.Plugin.Wpf.csproj", "{77C378BC-30C8-42DC-AFB5-CA2613969DD6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AMLabSlicer.Plugins.Agent", "AMLabSlicer.Plugins.Agent\AMLabSlicer.Plugins.Agent.csproj", "{C3680961-2C0F-4B9F-AF1E-D667B34B5EDC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AMLabSlicer.Plugins.Tripo", "AMLabSlicer.Plugins.Tripo\AMLabSlicer.Plugins.Tripo.csproj", "{213308E4-42B4-4A1B-86C5-DD459A125CC0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AMLabSlicer.Engine.Atom", "AMLabSlicer.Engine.Atom\AMLabSlicer.Engine.Atom.csproj", "{419A77E3-8F5B-43E5-8C11-C4D6014D991D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AMLabSlicer.Monitor.Python", "AMLabSlicer.Monitor.Python", "{AC820BE9-4156-43D6-A554-091FA0E041E8}"
+	ProjectSection(SolutionItems) = preProject
+		AMLabSlicer.Engine.Yolo11\prepare.ps1 = AMLabSlicer.Engine.Yolo11\prepare.ps1
+		AMLabSlicer.Monitor.Python\start.ps1 = AMLabSlicer.Monitor.Python\start.ps1
+		AMLabSlicer.Monitor.Python\server.py = AMLabSlicer.Monitor.Python\server.py
+		AMLabSlicer.Monitor.Python\requirements.txt = AMLabSlicer.Monitor.Python\requirements.txt
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -133,6 +146,30 @@ Global
 		{C3680961-2C0F-4B9F-AF1E-D667B34B5EDC}.Release|x64.Build.0 = Release|Any CPU
 		{C3680961-2C0F-4B9F-AF1E-D667B34B5EDC}.Release|x86.ActiveCfg = Release|Any CPU
 		{C3680961-2C0F-4B9F-AF1E-D667B34B5EDC}.Release|x86.Build.0 = Release|Any CPU
+		{213308E4-42B4-4A1B-86C5-DD459A125CC0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{213308E4-42B4-4A1B-86C5-DD459A125CC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{213308E4-42B4-4A1B-86C5-DD459A125CC0}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{213308E4-42B4-4A1B-86C5-DD459A125CC0}.Debug|x64.Build.0 = Debug|Any CPU
+		{213308E4-42B4-4A1B-86C5-DD459A125CC0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{213308E4-42B4-4A1B-86C5-DD459A125CC0}.Debug|x86.Build.0 = Debug|Any CPU
+		{213308E4-42B4-4A1B-86C5-DD459A125CC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{213308E4-42B4-4A1B-86C5-DD459A125CC0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{213308E4-42B4-4A1B-86C5-DD459A125CC0}.Release|x64.ActiveCfg = Release|Any CPU
+		{213308E4-42B4-4A1B-86C5-DD459A125CC0}.Release|x64.Build.0 = Release|Any CPU
+		{213308E4-42B4-4A1B-86C5-DD459A125CC0}.Release|x86.ActiveCfg = Release|Any CPU
+		{213308E4-42B4-4A1B-86C5-DD459A125CC0}.Release|x86.Build.0 = Release|Any CPU
+		{419A77E3-8F5B-43E5-8C11-C4D6014D991D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{419A77E3-8F5B-43E5-8C11-C4D6014D991D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{419A77E3-8F5B-43E5-8C11-C4D6014D991D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{419A77E3-8F5B-43E5-8C11-C4D6014D991D}.Debug|x64.Build.0 = Debug|Any CPU
+		{419A77E3-8F5B-43E5-8C11-C4D6014D991D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{419A77E3-8F5B-43E5-8C11-C4D6014D991D}.Debug|x86.Build.0 = Debug|Any CPU
+		{419A77E3-8F5B-43E5-8C11-C4D6014D991D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{419A77E3-8F5B-43E5-8C11-C4D6014D991D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{419A77E3-8F5B-43E5-8C11-C4D6014D991D}.Release|x64.ActiveCfg = Release|Any CPU
+		{419A77E3-8F5B-43E5-8C11-C4D6014D991D}.Release|x64.Build.0 = Release|Any CPU
+		{419A77E3-8F5B-43E5-8C11-C4D6014D991D}.Release|x86.ActiveCfg = Release|Any CPU
+		{419A77E3-8F5B-43E5-8C11-C4D6014D991D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

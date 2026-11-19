@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -9,6 +9,15 @@
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <EmbeddedResource Include="Printers/cura-printer-settings.json" />
   </ItemGroup>
 
+  <Target Name="BuildKinematicsNative" BeforeTargets="PrepareForBuild"
+          Inputs="../AMLabSlicer.Kinematics.Native/kinematics.h;../AMLabSlicer.Kinematics.Native/kinematics.cpp;../AMLabSlicer.Kinematics.Native/build.ps1"
+          Outputs="../AMLabSlicer.Kinematics.Native/bin/amlab_kinematics.dll" Condition="'$(OS)' == 'Windows_NT'">
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)/../AMLabSlicer.Kinematics.Native/build.ps1&quot;" />
+  </Target>
+  <ItemGroup Condition="'$(OS)' == 'Windows_NT'">
+    <Content Include="../AMLabSlicer.Kinematics.Native/bin/amlab_kinematics.dll" Link="amlab_kinematics.dll" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

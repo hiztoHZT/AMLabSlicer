@@ -48,7 +48,7 @@
 
             <!-- 对象大纲 (Outliner) — 固定高度，可用 GridSplitter 调整 -->
             <Border x:Name="OutlinerHost" Grid.Row="0" Style="{StaticResource WorkspacePanelBorderStyle}" ClipToBounds="True">
-                <views:OutlinerPanelView/>
+                <views:OutlinerPanelView KeyDown="Outliner_TransformKeyDown"/>
             </Border>
 
             <!-- 拖动分隔条 -->
@@ -84,7 +84,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="4"/>
-                    <ColumnDefinition Width="32"/>
+                    <ColumnDefinition Width="39"/>
                 </Grid.ColumnDefinitions>
                 <Border x:Name="AgentContentHost" Style="{StaticResource WorkspacePanelBorderStyle}"
                         ClipToBounds="True">
@@ -107,12 +107,15 @@
         </Border>
 
         <!-- 开始切片按钮 -->
-        <Button Grid.Column="2" 
+        <Grid Grid.Column="2" VerticalAlignment="Bottom" Margin="12,0,22,22">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+        <Button Grid.Column="1"
                 Content="{loc:Text Key='开始切片'}"
                 HorizontalAlignment="Right" 
                 VerticalAlignment="Bottom" 
-                Margin="0,0,22,22"
+                Margin="0"
                 Style="{StaticResource PrimaryActionButtonStyle}"
                 Command="{Binding StartSlicingCommand}" />
+        </Grid>
     </Grid>
 </UserControl>

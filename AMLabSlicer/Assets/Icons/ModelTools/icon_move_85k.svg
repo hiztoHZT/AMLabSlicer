@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="_图层_2" data-name="图层 2" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 141.73 141.73">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #4c4948;
+      }
+
+      .cls-2 {
+        stroke: #4c4948;
+        stroke-miterlimit: 10;
+        stroke-width: 12.5px;
+      }
+
+      .cls-2, .cls-3 {
+        fill: none;
+      }
+
+      .cls-4 {
+        fill: url(#B2G);
+      }
+    </style>
+    <linearGradient id="B2G" x1="45.81" y1="70.87" x2="95.92" y2="70.87" gradientTransform="translate(-29.36 70.87) rotate(-45)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2370b9"/>
+      <stop offset="1" stop-color="#1364b0"/>
+    </linearGradient>
+  </defs>
+  <g id="_图层_1-2" data-name="图层 1">
+    <g>
+      <rect class="cls-3" width="141.73" height="141.73"/>
+      <path class="cls-1" d="M113.39,45.24v17.68l7.95,7.95-7.95,7.95v17.68l25.63-25.63-25.63-25.63ZM45.24,28.35h17.67l7.96-7.96,7.96,7.96h17.67L70.87,2.72l-25.63,25.63ZM78.82,113.39l-7.95,7.95-7.95-7.95h-17.68l25.63,25.63,25.63-25.63h-17.68ZM28.35,96.5v-17.68l-7.95-7.95,7.95-7.95v-17.68L2.72,70.87l25.63,25.63Z"/>
+      <line class="cls-2" x1="70.87" y1="8.66" x2="70.87" y2="130.61"/>
+      <line class="cls-2" x1="12.44" y1="70.87" x2="125.02" y2="70.87"/>
+      <rect class="cls-4" x="53.15" y="53.15" width="35.43" height="35.43" transform="translate(70.87 -29.35) rotate(45)"/>
+    </g>
+  </g>
+</svg>

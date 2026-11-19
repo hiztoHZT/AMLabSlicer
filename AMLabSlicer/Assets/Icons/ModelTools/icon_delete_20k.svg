@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="_图层_2" data-name="图层 2" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 162.9 162.9">
+  <defs>
+    <style>
+      .cls-1, .cls-2, .cls-3 {
+        fill: none;
+      }
+
+      .cls-2 {
+        stroke: url(#B2G);
+      }
+
+      .cls-2, .cls-3 {
+        stroke-miterlimit: 10;
+        stroke-width: 12.5px;
+      }
+
+      .cls-3 {
+        stroke: url(#B2G-2);
+      }
+
+      .cls-4 {
+        fill: #dcdddd;
+      }
+
+      .cls-5 {
+        clip-path: url(#clippath);
+      }
+    </style>
+    <clipPath id="clippath">
+      <rect class="cls-1" x="89.29" y="24" width="49.61" height="49.61"/>
+    </clipPath>
+    <linearGradient id="B2G" x1="65.29" y1="48.81" x2="162.9" y2="48.81" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2370b9"/>
+      <stop offset="1" stop-color="#1364b0"/>
+    </linearGradient>
+    <linearGradient id="B2G-2" data-name="B2G" x1="70.75" y1="48.81" x2="157.44" y2="48.81" xlink:href="#B2G"/>
+  </defs>
+  <g id="_图层_1-2" data-name="图层 1">
+    <g>
+      <rect class="cls-1" y="21.17" width="141.73" height="141.73"/>
+      <path class="cls-4" d="M109.39,53.51v94.06H15.33V53.51h94.06M121.89,41.01H2.83v119.06h119.06V41.01h0Z"/>
+      <g class="cls-5">
+        <g>
+          <line class="cls-2" x1="69.71" y1="4.42" x2="158.48" y2="93.2"/>
+          <line class="cls-3" x1="75.17" y1="87.73" x2="153.02" y2="9.88"/>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

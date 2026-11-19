@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="_图层_2" data-name="图层 2" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 141.73 141.73">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+      }
+
+      .cls-2 {
+        fill: #dcdddd;
+      }
+
+      .cls-3 {
+        fill: url(#B2G);
+      }
+    </style>
+    <linearGradient id="B2G" x1="4.91" y1="125.49" x2="136.82" y2="125.49" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2370b9"/>
+      <stop offset="1" stop-color="#1364b0"/>
+    </linearGradient>
+  </defs>
+  <g id="_图层_1-2" data-name="图层 1">
+    <rect class="cls-1" width="141.73" height="141.73"/>
+    <g>
+      <path class="cls-2" d="M37.29,24.94v80.38l-19.88,11.48V36.41l19.88-11.48M49.79,3.29L4.91,29.2v109.24l44.88-25.91V3.29h0Z"/>
+      <path class="cls-2" d="M124.32,15.79v84.24h-62.02V15.79h62.02M136.82,3.29H49.79v109.24h87.02V3.29h0Z"/>
+      <polygon class="cls-3" points="4.91 138.44 91.94 138.44 136.82 112.53 49.79 112.53 4.91 138.44"/>
+    </g>
+  </g>
+</svg>

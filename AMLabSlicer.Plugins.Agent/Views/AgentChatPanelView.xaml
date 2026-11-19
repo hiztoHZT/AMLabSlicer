@@ -27,7 +27,10 @@
                             <Border.Style>
                                 <Style TargetType="Border">
                                     <Setter Property="Background" Value="{DynamicResource SurfaceElevatedBrush}"/>
-                                    <Style.Triggers><DataTrigger Binding="{Binding IsUser}" Value="True"><Setter Property="Background" Value="{DynamicResource MutedAccentBrush}"/></DataTrigger></Style.Triggers>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsUser}" Value="True"><Setter Property="Background" Value="{DynamicResource MutedAccentBrush}"/></DataTrigger>
+                                        <DataTrigger Binding="{Binding IsProposal}" Value="True"><Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/></DataTrigger>
+                                    </Style.Triggers>
                                 </Style>
                             </Border.Style>
                             <StackPanel>
@@ -39,9 +42,27 @@
                                          BorderThickness="0" Background="Transparent" VerticalContentAlignment="Top">
                                     <TextBox.Style><Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
                                         <Setter Property="Text" Value="{Binding Text, Mode=OneWay}"/>
-                                        <Style.Triggers><DataTrigger Binding="{Binding Role}" Value="system"><Setter Property="Text" Value="{loc:LocalizedBinding Text}"/></DataTrigger></Style.Triggers>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Role}" Value="system"><Setter Property="Text" Value="{loc:LocalizedBinding Text}"/></DataTrigger>
+                                            <DataTrigger Binding="{Binding IsProposal}" Value="True"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger>
+                                        </Style.Triggers>
                                     </Style></TextBox.Style>
                                 </TextBox>
+                                <StackPanel Visibility="{Binding IsProposal, Converter={StaticResource BoolToVis}}">
+                                    <ItemsControl ItemsSource="{Binding ParameterChanges}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Margin="0,4">
+                                                    <TextBlock Text="{Binding Name}" TextWrapping="Wrap"/>
+                                                    <TextBlock Text="{Binding Values}" FontWeight="SemiBold" TextWrapping="Wrap"
+                                                               Foreground="{DynamicResource AccentBrush}"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <Button Content="{loc:Text Key='应用修改'}" Command="{Binding ApplyChanges}"
+                                            HorizontalAlignment="Left" Margin="0,6,0,0" Style="{StaticResource PrimaryActionButtonStyle}"/>
+                                </StackPanel>
                             </StackPanel>
                         </Border>
                     </DataTemplate>

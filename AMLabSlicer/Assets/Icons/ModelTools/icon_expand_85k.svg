@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="_图层_2" data-name="图层 2" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 242.71 145.17">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #4c4948;
+      }
+
+      .cls-2 {
+        fill: none;
+      }
+
+      .cls-3 {
+        fill: url(#B2G-2);
+      }
+
+      .cls-4 {
+        fill: url(#B2G);
+      }
+
+      .cls-5 {
+        clip-path: url(#clippath);
+      }
+    </style>
+    <clipPath id="clippath">
+      <rect class="cls-2" x="161.21" y="2.22" width="35.43" height="129.03" transform="translate(99.59 -106.97) rotate(45)"/>
+    </clipPath>
+    <linearGradient id="B2G" x1="122.88" y1="74.33" x2="219.77" y2="74.33" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2370b9"/>
+      <stop offset="1" stop-color="#1364b0"/>
+    </linearGradient>
+    <linearGradient id="B2G-2" data-name="B2G" x1="0" y1="21.26" x2="42.52" y2="21.26" xlink:href="#B2G"/>
+  </defs>
+  <g id="_图层_1-2" data-name="图层 1">
+    <g>
+      <rect class="cls-2" x="100.98" y="3.44" width="141.73" height="141.73"/>
+      <path class="cls-1" d="M103.81,6.27v60.95h12.5V18.77h111.07v111.07h-48.45v12.5h60.95V6.27H103.81Z"/>
+      <rect class="cls-1" x="103.81" y="74.31" width="68.03" height="68.03"/>
+      <g class="cls-5">
+        <polygon class="cls-4" points="219.77 25.89 219.77 122.78 178.41 122.78 178.41 67.25 122.88 67.25 122.88 25.89 219.77 25.89"/>
+        <circle class="cls-3" cx="21.26" cy="21.26" r="21.26"/>
+      </g>
+    </g>
+  </g>
+</svg>

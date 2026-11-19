@@ -1,0 +1,41 @@
+<Window x:Class="AMLabSlicer.Views.StartupWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:AMLabSlicer.Controls"
+        xmlns:svg="clr-namespace:SharpVectors.Converters;assembly=SharpVectors.Converters.Wpf"
+        xmlns:loc="clr-namespace:AMLabSlicer.Plugin.Wpf.Localization;assembly=AMLabSlicer.Plugin.Wpf"
+        Title="AMLab" Width="480" Height="340"
+        WindowStartupLocation="CenterScreen" WindowStyle="None" ResizeMode="NoResize"
+        AllowsTransparency="True" Background="Transparent"
+        FontFamily="{DynamicResource UiFontFamily}" FontSize="{DynamicResource UiFontSize}"
+        UseLayoutRounding="True" SnapsToDevicePixels="True">
+    <Border x:Name="StartupSurface" Background="{DynamicResource WindowBackgroundBrush}"
+            BorderBrush="{DynamicResource SurfaceBorderBrush}" BorderThickness="1"
+            CornerRadius="{DynamicResource UiCornerRadius}" MouseLeftButtonDown="DragWindow">
+        <Grid Margin="24,16,24,22">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="28"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Button HorizontalAlignment="Right" Width="26" Height="26" Content="×"
+                    Foreground="{DynamicResource SecondaryTextBrush}" Background="Transparent"
+                    BorderThickness="0" Click="CloseStartup" ToolTip="{loc:Text Key='退出'}"
+                    AutomationProperties.Name="{loc:Text Key='退出'}"/>
+            <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <controls:PrintReveal x:Name="LogoReveal" Width="136" Height="105.1"
+                                      Profile="AMLabLogo" Duration="0:0:2" AutoPlay="True"
+                                      IsLooping="True" EasingSpline="0.6,0 0.4,1"
+                                      IsHitTestVisible="False">
+                    <svg:SvgViewbox Source="/Assets/Images/AMLab_logo_rgb.svg" Stretch="Uniform"/>
+                </controls:PrintReveal>
+                <TextBlock Text="AMLab" FontSize="26" FontWeight="SemiBold"
+                           Foreground="{DynamicResource PrimaryTextBrush}"
+                           HorizontalAlignment="Center" Margin="0,20,0,0"/>
+            </StackPanel>
+            <TextBlock x:Name="StatusText" Grid.Row="2" Text="{loc:Text Key='正在启动…'}"
+                       Foreground="{DynamicResource SecondaryTextBrush}" TextAlignment="Center"
+                       TextWrapping="Wrap" Margin="0,16,0,0" AutomationProperties.LiveSetting="Polite"/>
+        </Grid>
+    </Border>
+</Window>

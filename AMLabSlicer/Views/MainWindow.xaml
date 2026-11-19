@@ -5,12 +5,19 @@
         xmlns:svg="clr-namespace:SharpVectors.Converters;assembly=SharpVectors.Converters.Wpf"
         xmlns:viewmodel="clr-namespace:AMLabSlicer.ViewModel"
         xmlns:views="clr-namespace:AMLabSlicer.Views"
+        xmlns:monitor="clr-namespace:AMLabSlicer.Amlab_Monitor"
         FontFamily="{DynamicResource UiFontFamily}" FontSize="{DynamicResource UiFontSize}"
-        Title="AMLab Slicer" Height="720" Width="1280" Background="{DynamicResource WindowBackgroundBrush}" TextElement.Foreground="{DynamicResource PrimaryTextBrush}" MinHeight="600" MinWidth="960"
+        Title="{Binding WindowTitle}" Height="720" Width="1280" Background="{DynamicResource WindowBackgroundBrush}" TextElement.Foreground="{DynamicResource PrimaryTextBrush}" MinHeight="600" MinWidth="960"
         WindowStyle="None" AllowsTransparency="False" ResizeMode="CanResize"
         UseLayoutRounding="True" SnapsToDevicePixels="True">
 
 
+    <Window.InputBindings>
+        <KeyBinding Key="S" Modifiers="Control" Command="{Binding SaveProjectCommand}"/>
+        <KeyBinding Key="S" Modifiers="Control+Shift" Command="{Binding SaveProjectAsCommand}"/>
+        <KeyBinding Key="O" Modifiers="Control" Command="{Binding OpenProjectCommand}"/>
+        <KeyBinding Key="I" Modifiers="Control" Command="{Binding LoadModelCommand}"/>
+    </Window.InputBindings>
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="36" ResizeBorderThickness="6" GlassFrameThickness="0" CornerRadius="{StaticResource UiCornerRadius}"/>
     </WindowChrome.WindowChrome>
@@ -18,6 +25,9 @@
     <Window.Resources>
         <DataTemplate DataType="{x:Type viewmodel:PrepareWorkspaceViewModel}">
             <views:PrepareWorkspaceView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type monitor:Amlab_MonitorViewModel}">
+            <monitor:Amlab_MonitorView/>
         </DataTemplate>
     </Window.Resources>
 
@@ -44,10 +54,17 @@
             <Menu Grid.Column="1" Background="Transparent" FontSize="{DynamicResource UiTitleFontSize}" VerticalAlignment="Center" WindowChrome.IsHitTestVisibleInChrome="True">
 
                 <MenuItem Header="{loc:Text Key='文件'}" Style="{StaticResource TopLevelHeaderStyle}">
-                    <MenuItem Header="{loc:Text Key='载入模型...'}" Command="{Binding LoadModelCommand}" Style="{StaticResource SubmenuItemStyle}"/>
+                    <MenuItem Header="打开工程..." InputGestureText="Ctrl+O" Command="{Binding OpenProjectCommand}" Style="{StaticResource SubmenuItemStyle}"/>
+                    <MenuItem Header="保存" InputGestureText="Ctrl+S" Command="{Binding SaveProjectCommand}" Style="{StaticResource SubmenuItemStyle}"/>
+                    <MenuItem Header="另存为..." InputGestureText="Ctrl+Shift+S" Command="{Binding SaveProjectAsCommand}" Style="{StaticResource SubmenuItemStyle}"/>
+                    <Separator/>
+                    <MenuItem Header="{loc:Text Key='载入模型...'}" InputGestureText="Ctrl+I" Command="{Binding LoadModelCommand}" Style="{StaticResource SubmenuItemStyle}"/>
                 </MenuItem>
 
                 <MenuItem Header="{loc:Text Key='设置'}" Style="{StaticResource TopLevelHeaderStyle}">
+                    <MenuItem Header="{loc:Text Key='打印机'}" Command="{Binding OpenPrintersCommand}" Style="{StaticResource SubmenuItemStyle}"/>
+                    <MenuItem Header="{loc:Text Key='缺陷检测配置'}" Visibility="Collapsed" Command="{Binding OpenAmlab_MonitorSettingsCommand}" Style="{StaticResource SubmenuItemStyle}"/>
+                    <MenuItem Header="{loc:Text Key='设备连接'}" Command="{Binding OpenDeviceCommand}" Style="{StaticResource SubmenuItemStyle}"/>
                     <MenuItem Header="{loc:Text Key='首选项...'}" Command="{Binding OpenPreferencesCommand}" Style="{StaticResource SubmenuItemStyle}"/>
                 </MenuItem>
                 <MenuItem Header="{loc:Text Key='插件'}" Style="{StaticResource TopLevelHeaderStyle}">
@@ -82,22 +99,73 @@
                     <ColumnDefinition Width="44"/>
                 </Grid.ColumnDefinitions>
 
-                <Button Grid.Column="0"
-                        Style="{StaticResource SidebarToggleButtonStyle}"
-                        Command="{Binding CurrentWorkspace.TogglePanelCommand}"
-                        WindowChrome.IsHitTestVisibleInChrome="True"/>
+                <Button Grid.Column="0" WindowChrome.IsHitTestVisibleInChrome="True">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource SidebarToggleButtonStyle}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsPrepareWorkspaceActive}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                    <Setter Property="Command" Value="{Binding PrepareWorkspace.TogglePanelCommand}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsAmlab_MonitorWorkspaceActive}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                    <Setter Property="Command" Value="{Binding CurrentWorkspace.ToggleAmlab_MonitorCameraPanelCommand}"/>
+                                    <Setter Property="ToolTip" Value="{loc:Text Key='展开/收起摄像头面板'}"/>
+                                    <Setter Property="AutomationProperties.Name" Value="{loc:Text Key='展开/收起摄像头面板'}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
 
                 <StackPanel Grid.Column="1"
                             Orientation="Horizontal"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Stretch">
-                    <Button Content="{loc:Text Key='准备'}" Style="{StaticResource WorkspaceNavButtonStyle}" Tag="active"/>
+                    <Button Content="{loc:Text Key='准备'}" Command="{Binding ShowPrepareWorkspaceCommand}">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource WorkspaceNavButtonStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsPrepareWorkspaceActive}" Value="True">
+                                        <Setter Property="Tag" Value="active"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
                     <Button Content="{loc:Text Key='预览'}" Style="{StaticResource WorkspaceNavButtonStyle}"/>
-                    <Button Content="{loc:Text Key='设备'}" Style="{StaticResource WorkspaceNavButtonStyle}"/>
+                    <Button Content="{loc:Text Key='设备'}" Command="{Binding ShowAmlab_MonitorWorkspaceCommand}">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource WorkspaceNavButtonStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsAmlab_MonitorWorkspaceActive}" Value="True">
+                                        <Setter Property="Tag" Value="active"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
                 </StackPanel>
-                <Button Grid.Column="2" Style="{StaticResource SidebarToggleButtonStyle}"
-                        FocusVisualStyle="{x:Null}"
-                        ToolTip="{loc:Text Key='展开/收起插件面板'}" Command="{Binding CurrentWorkspace.ToggleAgentPanelCommand}">
+                <Button Grid.Column="2" FocusVisualStyle="{x:Null}" WindowChrome.IsHitTestVisibleInChrome="True">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource SidebarToggleButtonStyle}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsPrepareWorkspaceActive}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                    <Setter Property="Command" Value="{Binding PrepareWorkspace.ToggleAgentPanelCommand}"/>
+                                    <Setter Property="ToolTip" Value="{loc:Text Key='展开/收起插件面板'}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsAmlab_MonitorWorkspaceActive}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                    <Setter Property="Command" Value="{Binding CurrentWorkspace.ToggleAmlab_MonitorConsolePanelCommand}"/>
+                                    <Setter Property="ToolTip" Value="{loc:Text Key='展开/收起控制台'}"/>
+                                    <Setter Property="AutomationProperties.Name" Value="{loc:Text Key='展开/收起控制台'}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
                     <Button.Template>
                         <ControlTemplate TargetType="Button">
                             <Border x:Name="RightToggleBorder" Background="{TemplateBinding Background}" CornerRadius="{StaticResource UiCornerRadius}">
@@ -112,12 +180,6 @@
                     </Button.Template>
                 </Button>
 
-
-                <!-- Legacy nav removed:
-                <Button Content="准 备" Style="{StaticResource WorkspaceNavButtonStyle}" Tag="active"/>
-                <Button Content="预 览" Style="{StaticResource WorkspaceNavButtonStyle}"/>
-                <Button Content="设 备" Style="{StaticResource WorkspaceNavButtonStyle}"/>
-                -->
             </Grid>
         </Border>
 

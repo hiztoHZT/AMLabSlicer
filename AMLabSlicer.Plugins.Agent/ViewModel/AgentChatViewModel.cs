@@ -1,3 +1,4 @@
+using AMLabSlicer.Plugin.Abstractions;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -5,11 +6,16 @@ using AMLabSlicer.Plugins.Agent.Services;
 
 namespace AMLabSlicer.Plugins.Agent.ViewModel;
 
+public sealed record ParameterChangeRow(string Name, string Values);
+
 public partial class ChatMessageViewModel(string role, string text) : ObservableObject
 {
     public string Role { get; } = role;
-    public string Sender => Role switch { "user" => "你", "assistant" => "Agent", _ => "提示" };
+    public string Sender => Role switch { "user" => "你", "assistant" => "Agent", "proposal" => "切片参数修改建议", _ => "提示" };
     public string Text { get; } = text;
+    public IReadOnlyList<ParameterChangeRow> ParameterChanges { get; init; } = [];
+    public bool IsProposal => Role == "proposal";
+    public IRelayCommand? ApplyChanges { get; set; }
     public bool IsUser => Role == "user";
     [ObservableProperty] private string _deliveryStatus = "";
 }
@@ -18,6 +24,7 @@ public partial class AgentChatViewModel : ObservableObject, IDisposable
 {
     private readonly IAgentChatService _chat;
     private readonly Action _openSettings;
+    private readonly ISliceParameterContext? _parameterContext;
     private bool _disposed;
     private readonly List<AgentMessage> _history = new();
     private string _sessionEndpoint = "";
@@ -39,11 +46,12 @@ public partial class AgentChatViewModel : ObservableObject, IDisposable
     private bool _isSending;
     [ObservableProperty] private string _status = "就绪";
 
-    public AgentChatViewModel(AgentSettingsViewModel preferences, IAgentChatService chat, Action openSettings)
+    public AgentChatViewModel(AgentSettingsViewModel preferences, IAgentChatService chat, Action openSettings, ISliceParameterContext? parameterContext = null)
     {
         Preferences = preferences; _chat = chat; _openSettings = openSettings;
+        _parameterContext = parameterContext;
         Preferences.PropertyChanged += PreferencesChanged;
-        Messages.Add(new("system", "配置服务地址和模型后即可开始对话。支持 OpenAI 兼容接口与本地模型服务。"));
+        Messages.Add(new("system", "配置服务地址和模型后即可开始对话。"));
     }
     private void PreferencesChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
@@ -73,9 +81,23 @@ public partial class AgentChatViewModel : ObservableObject, IDisposable
         try
         {
             var request = _history.Concat(new[] { new AgentMessage("user", prompt) }).ToArray();
-            var answer = await _chat.SendAsync(settings, request, cancellationToken);
-            _history.Add(new("user", prompt)); _history.Add(new("assistant", answer));
-            Messages.Add(new("assistant", answer)); Status = "回复完成";
+            var snapshot = _parameterContext?.ReadSliceParameters();
+            var reply = _chat is OpenAiCompatibleChatService tools
+                ? await tools.SendWithParametersAsync(settings, request, snapshot, cancellationToken)
+                : new AgentReply(await _chat.SendAsync(settings, request, cancellationToken));
+            cancellationToken.ThrowIfCancellationRequested();
+            _history.Add(new("user", prompt));
+            if (snapshot != null && reply.Changes is { Count: > 0 } changes)
+            {
+                ShowParameterProposal(snapshot, changes);
+                Status = "等待应用参数修改";
+            }
+            else
+            {
+                _history.Add(new("assistant", reply.Text));
+                Messages.Add(new("assistant", reply.Text));
+                Status = "回复完成";
+            }
         }
         catch (OperationCanceledException)
         {
@@ -89,6 +111,37 @@ public partial class AgentChatViewModel : ObservableObject, IDisposable
         }
         finally { IsSending = false; }
     }
+    private void ShowParameterProposal(SliceParameterSnapshot snapshot, IReadOnlyList<SliceParameterChange> changes)
+    {
+        var rows = changes.Select(change =>
+        {
+            var parameter = snapshot.Parameters.Single(p => p.Key == change.Key);
+            return new ParameterChangeRow(parameter.Name,
+                $"{parameter.Value} → {change.Value:0.#####} {parameter.Unit}".TrimEnd());
+        }).ToArray();
+        var card = new ChatMessageViewModel("proposal", "") { ParameterChanges = rows };
+        _history.Add(new("assistant", "已生成待用户确认的切片参数建议：" +
+            string.Join("；", rows.Select(row => $"{row.Name} {row.Values}"))));
+        card.ApplyChanges = new RelayCommand(() =>
+        {
+            try
+            {
+                _parameterContext!.ApplySliceParameters(snapshot, changes);
+                card.DeliveryStatus = "已应用";
+                _history.Add(new("assistant", "宿主已确认应用：" +
+                    string.Join("；", rows.Select(row => $"{row.Name} {row.Values}"))));
+                Status = "参数已更新";
+            }
+            catch (InvalidOperationException ex)
+            {
+                card.DeliveryStatus = "未应用";
+                Status = ex.Message;
+            }
+            card.ApplyChanges?.NotifyCanExecuteChanged();
+        }, () => !_disposed && card.DeliveryStatus.Length == 0);
+        Messages.Add(card);
+    }
+
     [RelayCommand(CanExecute = nameof(CanReset))]
     private void NewConversation() { _history.Clear(); Messages.Clear(); Status = "已开始新对话"; }
     [RelayCommand] private void OpenSettings() => _openSettings();

@@ -1,0 +1,41 @@
+<views:ThemedWindow x:Class="AMLabSlicer.Views.SliceProgressWindow"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:views="clr-namespace:AMLabSlicer.Views" xmlns:controls="clr-namespace:AMLabSlicer.Controls"
+ xmlns:svg="clr-namespace:SharpVectors.Converters;assembly=SharpVectors.Converters.Wpf"
+ Title="正在切片" Width="720" Height="420" MinWidth="580" MinHeight="320" WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+ <Grid Margin="16">
+  <Grid.RowDefinitions><RowDefinition Height="*"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+  <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="160"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+   <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+    <controls:PrintReveal x:Name="LogoReveal" Width="128" Height="99" Profile="AMLabLogo" Duration="0:0:2" AutoPlay="True" IsLooping="True" EasingSpline="0.6,0 0.4,1">
+     <svg:SvgViewbox Source="pack://application:,,,/AMLabSlicer.UI;component/Assets/Images/AMLab_logo_rgb.svg" Stretch="Uniform"/>
+    </controls:PrintReveal>
+    <TextBlock Text="AMLab" HorizontalAlignment="Center" FontSize="22" Margin="0,12,0,0"/>
+   </StackPanel>
+   <Grid Grid.Column="1"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+    <TextBlock Text="{Binding MethodName}" FontWeight="SemiBold" Margin="0,0,0,8"/>
+    <Border Grid.Row="1" Background="{DynamicResource SurfaceElevatedBrush}" CornerRadius="5" Padding="8">
+     <ListBox x:Name="LogList" ItemsSource="{Binding Logs}" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+      <ListBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding}" TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource PrimaryTextBrush}"/></DataTemplate></ListBox.ItemTemplate>
+     </ListBox>
+    </Border>
+   </Grid>
+  </Grid>
+  <StackPanel Grid.Row="1" Margin="0,12,0,12">
+   <TextBlock Text="{Binding Stage}" TextTrimming="CharacterEllipsis" Margin="0,0,0,6"/>
+   <ProgressBar Height="8" Minimum="0" Maximum="100" Value="{Binding Progress}" IsIndeterminate="{Binding IsIndeterminate}">
+    <ProgressBar.Template><ControlTemplate TargetType="ProgressBar">
+     <Grid x:Name="PART_Track">
+      <Border Background="{DynamicResource SurfaceElevatedBrush}" CornerRadius="4"/>
+      <Border x:Name="PART_Indicator" HorizontalAlignment="Left" Background="{DynamicResource AccentBrush}" CornerRadius="4"/>
+     </Grid>
+     <ControlTemplate.Triggers><Trigger Property="IsIndeterminate" Value="True">
+      <Trigger.EnterActions><BeginStoryboard x:Name="Pulse"><Storyboard><DoubleAnimation Storyboard.TargetName="PART_Indicator" Storyboard.TargetProperty="Opacity" From="0.3" To="1" Duration="0:0:0.7" AutoReverse="True" RepeatBehavior="Forever"/></Storyboard></BeginStoryboard></Trigger.EnterActions>
+      <Trigger.ExitActions><StopStoryboard BeginStoryboardName="Pulse"/></Trigger.ExitActions>
+     </Trigger></ControlTemplate.Triggers>
+    </ControlTemplate></ProgressBar.Template>
+   </ProgressBar>
+  </StackPanel>
+  <Button Grid.Row="2" HorizontalAlignment="Right" Content="取消切片" Command="{Binding CancelCommand}" Style="{StaticResource SecondaryActionButtonStyle}"/>
+ </Grid>
+</views:ThemedWindow>

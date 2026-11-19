@@ -1,4 +1,4 @@
-using AMLabSlicer.Services;
+﻿using AMLabSlicer.Services;
 using System.ComponentModel;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -49,7 +49,7 @@ namespace AMLabSlicer.Views
 
         public static readonly DependencyProperty ObjectHighlightTransformProperty =
             DependencyProperty.Register(nameof(ObjectHighlightTransform), typeof(System.Windows.Media.Media3D.Transform3D),
-                typeof(ModelPreviewView), new PropertyMetadata(System.Windows.Media.Media3D.Transform3D.Identity));
+                typeof(ModelPreviewView), new PropertyMetadata(System.Windows.Media.Media3D.Transform3D.Identity, OnHighlightBoundsChanged));
 
         public System.Windows.Media.Media3D.Transform3D ObjectHighlightTransform
         {
@@ -59,7 +59,7 @@ namespace AMLabSlicer.Views
 
         public static readonly DependencyProperty ObjectHighlightGeometryProperty =
             DependencyProperty.Register(nameof(ObjectHighlightGeometry), typeof(HxLine),
-                typeof(ModelPreviewView), new PropertyMetadata(null));
+                typeof(ModelPreviewView), new PropertyMetadata(null, OnHighlightBoundsChanged));
 
         public HxLine? ObjectHighlightGeometry
         {
@@ -121,6 +121,12 @@ namespace AMLabSlicer.Views
         private static void OnSelectedNodeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var v = (ModelPreviewView)d;
+            if (!v._syncingSelection && v.GetVM() is { } workspace)
+            {
+                workspace.SelectObject(e.NewValue as SceneNode);
+                if (!ReferenceEquals(workspace.ActiveSelection?.Node, e.NewValue))
+                { v._syncingSelection = true; try { v.SelectedNode = workspace.ActiveSelection?.Node; } finally { v._syncingSelection = false; } return; }
+            }
             bool hasNode = e.NewValue != null;
 
             // 若正在变换，切换/取消选中时先静默还原（不记 Undo）
@@ -177,7 +183,7 @@ namespace AMLabSlicer.Views
         private bool     _suppressInput;
 
         // ── 底面拾取 ──
-        private bool _isFacePickMode;
+
 
         private enum DragMode { None, Rotate, Pan }
 
@@ -237,7 +243,11 @@ namespace AMLabSlicer.Views
         private void OnViewUnloaded(object sender, RoutedEventArgs e)
         {
             CompositionTarget.Rendering -= UpdateViewCubeCanvas;
+            if (_isModalTransformActive) ExitModalTransform(false);
+            DeactivateTransform(false);
+            CancelObjectBox();
             AttachWorkspace(null);
+            ClearSelectionOutline();
         }
 
         private void AttachWorkspace(PrepareWorkspaceViewModel? workspace)
@@ -245,6 +255,8 @@ namespace AMLabSlicer.Views
             if (ReferenceEquals(_attachedWorkspace, workspace)) return;
             if (_attachedWorkspace != null)
             {
+                _attachedWorkspace.SelectionChanged -= WorkspaceSelectionChanged;
+                _attachedWorkspace.PropertyChanged -= BuildVolumeChanged;
                 _attachedWorkspace.History.CommandExecuted -= HistoryChanged;
                 _attachedWorkspace.AppPrefs.PropertyChanged -= PreferencesChanged;
             }
@@ -252,11 +264,14 @@ namespace AMLabSlicer.Views
             _prefs = workspace?.AppPrefs;
             if (workspace != null)
             {
+                workspace.SelectionChanged += WorkspaceSelectionChanged;
+                workspace.PropertyChanged += BuildVolumeChanged;
                 workspace.History.CommandExecuted += HistoryChanged;
                 workspace.AppPrefs.PropertyChanged += PreferencesChanged;
                 workspace.History.MaxDepth = workspace.AppPrefs.UndoStackDepth;
                 ApplyCameraMode();
             }
+            WorkspaceSelectionChanged(workspace, EventArgs.Empty);
             RefreshToolbarEnabled();
             UpdateStatusInfo();
         }
@@ -264,6 +279,9 @@ namespace AMLabSlicer.Views
         private void PreferencesChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(PreferencesViewModel.UseOrthographic)) ApplyCameraMode();
+            if (e.PropertyName == nameof(PreferencesViewModel.ShowSelectionOutline)) RefreshSelectionOutline();
+            if (e.PropertyName == nameof(PreferencesViewModel.ShowSelectionAabb))
+                IsObjectHighlightVisible = (_prefs?.ShowSelectionAabb ?? true) && SelectedNode != null && ObjectHighlightGeometry != null;
             if (e.PropertyName == nameof(PreferencesViewModel.UndoStackDepth) && _prefs != null)
                 CommandDispatcher.MaxDepth = _prefs.UndoStackDepth;
         }
@@ -285,15 +303,15 @@ namespace AMLabSlicer.Views
             bool has = SelectedNode != null;
             foreach (var b in new[] { BtnMove, BtnRotate, BtnScale, BtnFace, BtnSplit, BtnDelete })
                 b.IsEnabled = has;
+            foreach (var b in new[] { BtnMove, BtnRotate, BtnScale, BtnFace }) b.IsEnabled = has && (GetVM()?.CanTransformSelection ?? true);
+            BtnFace.IsEnabled = has && (GetVM()?.CanTransformSelection ?? true) && SelectedObjects().Length == 1;
+            BtnSplit.IsEnabled = has && GetVM()?.ActiveSelection?.IsGroup != true;
         }
 
         /// <summary>设置物体工具栏中的"当前激活"按钮样式（Tag="active"），其余清空</summary>
         private void SetObjectToolActive(string? tag)
         {
-            foreach (var btn in new[] { BtnMove, BtnRotate, BtnScale, BtnFace, BtnSplit, BtnDelete })
-                btn.Tag = (btn.Tag as string ?? string.Empty) != string.Empty &&
-                          btn.Content?.ToString()?.TrimStart().StartsWith(tag ?? "\0", StringComparison.OrdinalIgnoreCase) == true
-                          ? "active" : null;
+            SetActiveToolBtn(tag);
         }
 
         // ══════════════════════════════════════
@@ -301,6 +319,8 @@ namespace AMLabSlicer.Views
         // ══════════════════════════════════════
         private void OnPreviewKeyDown(object sender, KeyEventArgs e)
         {
+            if (HandleObjectSelectionKey(e)) return;
+            if (Keyboard.FocusedElement is TextBox) return;
             // 快捷键和撤销重做
             // Ctrl+Z / Ctrl+Shift+Z
             if (e.Key == Key.Z && Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
@@ -323,9 +343,6 @@ namespace AMLabSlicer.Views
             {
                 if (!string.IsNullOrEmpty(_activeTransformKey))
                     { DeactivateTransform(commit: false); e.Handled = true; return; }
-                if (_isFacePickMode)
-                    { _isFacePickMode = false; Cursor = Cursors.Arrow;
-                      BtnFace.Tag = null; e.Handled = true; return; }
                 if (SelectedNode != null)
                     { SelectedNode = null; e.Handled = true; return; }
             }
@@ -333,9 +350,22 @@ namespace AMLabSlicer.Views
             HandleObjectModeKey(e);
         }
 
+        internal void HandleOutlinerTransformKey(KeyEventArgs e)
+        {
+            if (e.Handled || e.OriginalSource is TextBox || Keyboard.FocusedElement is TextBox
+                || Keyboard.Modifiers != ModifierKeys.None) return;
+            string? mode = e.Key switch { Key.G => "G", Key.R => "R", Key.S => "S", _ => null };
+            if (mode == null || SelectedNode == null || GetVM()?.CanTransformSelection == false) return;
+
+            // Continue axis/numeric input and confirmation in the viewport after a list shortcut.
+            Focus();
+            if (!_isModalTransformActive) EnterModalTransform(mode);
+            e.Handled = true;
+        }
+
         private void HandleObjectModeKey(KeyEventArgs e)
         {
-            if (e.Key == Key.A && !Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
+            if (e.Key == Key.A && Keyboard.Modifiers == ModifierKeys.None)
                 { ConfirmAndAutoArrange(); e.Handled = true; return; }
 
             if (SelectedNode == null) return;
@@ -344,30 +374,33 @@ namespace AMLabSlicer.Views
             {
                 case Key.G:      EnterModalTransform("G"); e.Handled = true; break;
                 case Key.R:      EnterModalTransform("R"); e.Handled = true; break;
-                case Key.S:      EnterModalTransform("S"); e.Handled = true; break;
-                case Key.Delete:
-                case Key.X:      ConfirmAndDelete();     e.Handled = true; break;
-                case Key.F:      EnterFacePickMode();    e.Handled = true; break;
+                case Key.S when Keyboard.Modifiers == ModifierKeys.None:
+                                 EnterModalTransform("S"); e.Handled = true; break;
+                case Key.Delete: ConfirmAndDelete();     e.Handled = true; break;
+                case Key.F:      AutoLayFlatSelection();    e.Handled = true; break;
                 case Key.B:      ConfirmAndSplit();      e.Handled = true; break;
             }
         }
 
         // ══════════════════════════════════════
-        // 工具栏点击：从 Content 字符串取 Tag
+        // 工具栏点击：按稳定按钮身份分派，不依赖图标或翻译文字
         // ══════════════════════════════════════
         private void ToolBtn_Click(object sender, RoutedEventArgs e)
         {
             if (sender is not Button btn) return;
-            // Content starts with the stable transform shortcut (G/R/S/F/A/B/X).
-            string raw = btn.Content?.ToString() ?? string.Empty;
-            string tag = raw.TrimStart().Split(' ')[0];
+            string? tag = btn.Name switch
+            {
+                "BtnMove" => "G", "BtnRotate" => "R", "BtnScale" => "S",
+                "BtnFace" => "F", "BtnArrange" => "A", "BtnSplit" => "B",
+                "BtnDelete" => "X", _ => null
+            };
 
             switch (tag)
             {
                 case "G": ActivateTransform("G"); break;
                 case "R": ActivateTransform("R"); break;
                 case "S": ActivateTransform("S"); break;
-                case "F": EnterFacePickMode(); break;
+                case "F": AutoLayFlatSelection(); break;
                 case "A": ConfirmAndAutoArrange(); break;
                 case "B": ConfirmAndSplit(); break;
                 case "X": ConfirmAndDelete(); break;
@@ -380,7 +413,7 @@ namespace AMLabSlicer.Views
         // ══════════════════════════════════════
         private void EnterModalTransform(string mode)
         {
-            if (SelectedNode == null) return;
+            if (SelectedNode == null || GetVM()?.CanTransformSelection == false) return;
             // 进入模态前，若已有普通 UI 激活状态，先退出
             if (!string.IsNullOrEmpty(_activeTransformKey))
                 DeactivateTransform(commit: true);
@@ -390,10 +423,13 @@ namespace AMLabSlicer.Views
             _modalAxis = "";
             _modalInputBuffer = "";
             _modalInitialMatrix = SelectedNode.ModelMatrix;
+            BeginSelectionTransform();
             
-            _modalPivotCenter = new Vector3(0, 0, 0);
-            if (TryComputeWorldAabb(SelectedNode, out var cmin, out var cmax))
-                _modalPivotCenter = (cmin + cmax) * 0.5f;
+            var cmin = new Vector3(float.PositiveInfinity);
+            var cmax = new Vector3(float.NegativeInfinity);
+            foreach (var node in SelectedObjects())
+                if (TryComputeWorldAabb(node, out var lo, out var hi)) { cmin = Vector3.Min(cmin, lo); cmax = Vector3.Max(cmax, hi); }
+            _modalPivotCenter = float.IsFinite(cmin.X) ? (cmin + cmax) * 0.5f : Vector3.Zero;
                 
             _modalInitialMousePos = Mouse.GetPosition(MainViewport);
             _modalInitialMouseWorld = GetMouseUnprojectedZPlane(_modalInitialMousePos, _modalPivotCenter.Z);
@@ -589,6 +625,7 @@ namespace AMLabSlicer.Views
             }
 
             SelectedNode.ModelMatrix = newMat;
+            UpdateSelectionTransform();
             
             UpdateObjectHighlightTransform(_modalInitialMatrix, newMat, SelectedNode);
         }
@@ -604,6 +641,8 @@ namespace AMLabSlicer.Views
             LblX.Visibility = Visibility.Collapsed; TxfX.Visibility = Visibility.Collapsed;
             LblY.Visibility = Visibility.Collapsed; TxfY.Visibility = Visibility.Collapsed;
             LblZ.Visibility = Visibility.Collapsed; TxfZ.Visibility = Visibility.Collapsed;
+            RelativeInputRow.Visibility = Visibility.Collapsed;
+            ScaleLinkToggle.Visibility = ScaleResetButton.Visibility = Visibility.Collapsed;
         }
         
         private void ExitModalTransform(bool commit)
@@ -613,23 +652,8 @@ namespace AMLabSlicer.Views
             MainViewport.ReleaseMouseCapture();
             var selectedNode = SelectedNode;
 
-            if (!commit && selectedNode != null)
-            {
-                selectedNode.ModelMatrix = _modalInitialMatrix;
-            }
-            else if (selectedNode != null)
-            {
-                if (_modalInitialMatrix != selectedNode.ModelMatrix)
-                {
-                    if (_modalMode == "G" || _modalMode == "S" || _modalMode == "R")
-                    {
-                        // 约束移动后检查贴地
-                        ApplyZFloor(selectedNode);
-                    }
-                    CommandDispatcher.Push(new TransformCommand(selectedNode, _modalInitialMatrix, selectedNode.ModelMatrix, $"模态 {_modalMode} 变换"));
-                }
-            }
-            
+            EndSelectionTransform(commit, $"模态 {_modalMode} 变换");
+
             // 清理状态
             ModalConstraintGeometry = null;
             TransformInputBar.Visibility = Visibility.Collapsed;
@@ -684,7 +708,8 @@ namespace AMLabSlicer.Views
         // ══════════════════════════════════════
         private void ActivateTransform(string mode)
         {
-            if (SelectedNode == null) return;
+            if (SelectedNode == null || GetVM()?.CanTransformSelection == false) return;
+            if (_isModalTransformActive) ExitModalTransform(commit: true);
             if (_activeTransformKey == mode) return; // 再次按相同键则关闭
 
             // 若已有激活状态，先提交
@@ -692,6 +717,7 @@ namespace AMLabSlicer.Views
                 DeactivateTransform(commit: true);
 
             _activeTransformKey = mode;
+            BeginSelectionTransform();
             _snapMatrix = SelectedNode.ModelMatrix; // 快照，用于 Undo 差分 & Escape 还原
 
             // Manipulator 仅显示对应轴
@@ -705,141 +731,17 @@ namespace AMLabSlicer.Views
                 "G" => "移动 (mm)", "R" => "旋转 (°)", "S" => "缩放 (×)", _ => ""
             };
 
-            // G 模式：只有 X/Y（贴地约束），隐藏 Z
-            bool showZ = mode != "G";
-            LblZ.Visibility = showZ ? Visibility.Visible : Visibility.Collapsed;
-            TxfZ.Visibility = showZ ? Visibility.Visible : Visibility.Collapsed;
+            LblZ.Visibility = TxfZ.Visibility = DeltaZLabel.Visibility = DeltaZ.Visibility =
+                mode == "G" ? Visibility.Collapsed : Visibility.Visible;
+            RelativeInputRow.Visibility = mode == "S" ? Visibility.Collapsed : Visibility.Visible;
+            ScaleLinkToggle.Visibility = ScaleResetButton.Visibility = mode == "S" ? Visibility.Visible : Visibility.Collapsed;
+            RelativeTransformLabel.Text = mode == "G" ? "相对位移 (mm)" : "相对旋转 (°)";
 
             PopulateInputBar();
             TransformInputBar.Visibility = Visibility.Visible;
 
             // 激活工具栏按钮
             SetActiveToolBtn(mode);
-        }
-
-        // <summary>把当前 SelectedNode 的值填入输入框（不触发回调）</summary>
-        private void PopulateInputBar()
-        {
-            if (SelectedNode == null || string.IsNullOrEmpty(_activeTransformKey)) return;
-            _suppressInput = true;
-            var m = SelectedNode.ModelMatrix;
-            try
-            {
-                switch (_activeTransformKey)
-                {
-                    case "G":
-                        TxfX.Text = m.Translation.X.ToString("F2");
-                        TxfY.Text = m.Translation.Y.ToString("F2");
-                        // Z 隐藏，不填
-                        break;
-                    case "R":
-                        // 从旋转矩阵提取 Euler 角（ZYX 顺序）
-                        ExtractEulerDeg(m, out float rx, out float ry, out float rz);
-                        TxfX.Text = rx.ToString("F1");
-                        TxfY.Text = ry.ToString("F1");
-                        TxfZ.Text = rz.ToString("F1");
-                        break;
-                    case "S":
-                        // 各轴缩放倍数 = 对应列向量长度
-                        float sx = new Vector3(m.M11, m.M21, m.M31).Length();
-                        float sy = new Vector3(m.M12, m.M22, m.M32).Length();
-                        float sz = new Vector3(m.M13, m.M23, m.M33).Length();
-                        TxfX.Text = sx.ToString("F3");
-                        TxfY.Text = sy.ToString("F3");
-                        TxfZ.Text = sz.ToString("F3");
-                        break;
-                }
-            }
-            finally { _suppressInput = false; }
-        }
-
-        private static void ExtractEulerDeg(Matrix4x4 m, out float rx, out float ry, out float rz)
-        {
-            // 归一化列（去除缩放干扰）
-            float lenC0 = new Vector3(m.M11, m.M21, m.M31).Length();
-            float lenC1 = new Vector3(m.M12, m.M22, m.M32).Length();
-            float lenC2 = new Vector3(m.M13, m.M23, m.M33).Length();
-            if (lenC0 < 1e-6f) lenC0 = 1; if (lenC1 < 1e-6f) lenC1 = 1; if (lenC2 < 1e-6f) lenC2 = 1;
-
-            float r00 = m.M11/lenC0, r10 = m.M21/lenC0, r20 = m.M31/lenC0;
-            float r01 = m.M12/lenC1, r11 = m.M22/lenC1;
-            float r02 = m.M13/lenC2, r12 = m.M23/lenC2, r22 = m.M33/lenC2;
-
-            ry = (float)(Math.Asin(Math.Clamp(-r20, -1.0, 1.0)) * 180.0 / Math.PI);
-            float cosY = MathF.Cos(ry * MathF.PI / 180f);
-            if (Math.Abs(cosY) > 1e-4f)
-            {
-                rx = (float)(Math.Atan2(r10, r00) * 180.0 / Math.PI);
-                rz = (float)(Math.Atan2(r12, r22) * 180.0 / Math.PI);
-            }
-            else { rx = (float)(Math.Atan2(-r01, r11) * 180.0 / Math.PI); rz = 0; }
-        }
-
-        private void TransformBox_Changed(object sender, System.Windows.Controls.TextChangedEventArgs e)
-        {
-            if (_suppressInput || SelectedNode == null || string.IsNullOrEmpty(_activeTransformKey)) return;
-
-            if (!float.TryParse(TxfX.Text, out float x)) return;
-            if (!float.TryParse(TxfY.Text, out float y)) return;
-
-            switch (_activeTransformKey)
-            {
-                case "G":
-                {
-                    // 只修改 X、Y 平移；Z 保持 snap 矩阵的翻译值（贴地由 Commit 时处理）
-                    var newMat = _snapMatrix;
-                    newMat.M41 = x;   // Translation.X
-                    newMat.M42 = y;   // Translation.Y
-                    // Z 不变: newMat.M43 = _snapMatrix.M43
-                    SelectedNode.ModelMatrix = newMat;
-                    break;
-                }
-                case "R":
-                {
-                    if (!float.TryParse(TxfZ.Text, out float z)) return;
-                    // 从 snap 矩阵中提取平移和缩放，应用新 Euler 旋转
-                    var newRot = Matrix4x4.CreateFromYawPitchRoll(
-                        y * MathF.PI / 180f,
-                        x * MathF.PI / 180f,
-                        z * MathF.PI / 180f);
-
-                    // 提取原缩放
-                    float sx = new Vector3(_snapMatrix.M11, _snapMatrix.M21, _snapMatrix.M31).Length();
-                    float sy = new Vector3(_snapMatrix.M12, _snapMatrix.M22, _snapMatrix.M32).Length();
-                    float sz = new Vector3(_snapMatrix.M13, _snapMatrix.M23, _snapMatrix.M33).Length();
-                    if (sx < 1e-6f) sx = 1; if (sy < 1e-6f) sy = 1; if (sz < 1e-6f) sz = 1;
-
-                    var scaleM = Matrix4x4.CreateScale(sx, sy, sz);
-                    var transM = Matrix4x4.CreateTranslation(_snapMatrix.Translation);
-
-                    SelectedNode.ModelMatrix = scaleM * newRot * transM;
-                    break;
-                }
-                case "S":
-                {
-                    if (!float.TryParse(TxfZ.Text, out float z)) return;
-                    if (x < 0.001f || y < 0.001f || z < 0.001f) return; // 避免零缩放
-
-                    // 提取原旋转（去掉旧缩放后重新应用新缩放）
-                    float os1 = new Vector3(_snapMatrix.M11, _snapMatrix.M21, _snapMatrix.M31).Length();
-                    float os2 = new Vector3(_snapMatrix.M12, _snapMatrix.M22, _snapMatrix.M32).Length();
-                    float os3 = new Vector3(_snapMatrix.M13, _snapMatrix.M23, _snapMatrix.M33).Length();
-                    if (os1 < 1e-6f) os1 = 1; if (os2 < 1e-6f) os2 = 1; if (os3 < 1e-6f) os3 = 1;
-
-                    var rotM = _snapMatrix;
-                    // 列向量归一化（得到纯旋转矩阵）
-                    rotM.M11 /= os1; rotM.M21 /= os1; rotM.M31 /= os1;
-                    rotM.M12 /= os2; rotM.M22 /= os2; rotM.M32 /= os2;
-                    rotM.M13 /= os3; rotM.M23 /= os3; rotM.M33 /= os3;
-                    rotM.M41 = 0; rotM.M42 = 0; rotM.M43 = 0; rotM.M44 = 1;
-
-                    var newMat = Matrix4x4.CreateScale(x, y, z) * rotM *
-                                 Matrix4x4.CreateTranslation(_snapMatrix.Translation);
-                    SelectedNode.ModelMatrix = newMat;
-                    break;
-                }
-            }
-            UpdateObjectHighlightTransform(_snapMatrix, SelectedNode.ModelMatrix, SelectedNode);
         }
 
         private void TransformBox_KeyDown(object sender, KeyEventArgs e)
@@ -849,7 +751,10 @@ namespace AMLabSlicer.Views
         }
 
         private void ApplyTransform_Click(object sender, RoutedEventArgs e)
-            => DeactivateTransform(commit: true);
+        {
+            if (_isModalTransformActive) ExitModalTransform(commit: true);
+            else DeactivateTransform(commit: true);
+        }
 
         private void ResetTransform_Click(object sender, RoutedEventArgs e)
         {
@@ -864,10 +769,14 @@ namespace AMLabSlicer.Views
             _suppressInput = false;
             // 手动触发一次变换
             TransformBox_Changed(this, null!);
+            PopulateInputBar();
         }
 
         private void CloseInputBar_Click(object sender, RoutedEventArgs e)
-            => DeactivateTransform(commit: false);
+        {
+            if (_isModalTransformActive) ExitModalTransform(commit: false);
+            else DeactivateTransform(commit: false);
+        }
 
         /// <summary>
         /// commit=true：ApplyZFloor → 记录 Undo；commit=false：还原到 _snapMatrix
@@ -877,24 +786,7 @@ namespace AMLabSlicer.Views
             if (string.IsNullOrEmpty(_activeTransformKey) &&
                 TransformInputBar.Visibility != Visibility.Visible) return;
 
-            if (SelectedNode != null)
-            {
-                if (commit)
-                {
-                    // 无论什么模式，修改完成确认后均对齐地面
-                    ApplyZFloor(SelectedNode);
-                    var after = SelectedNode.ModelMatrix;
-                    if (after != _snapMatrix)
-                        CommandDispatcher.Push(new TransformCommand(
-                            SelectedNode, _snapMatrix, after, $"{LabelFor(_activeTransformKey)}"));
-                }
-                else
-                {
-                    // 还原
-                    if (!string.IsNullOrEmpty(_activeTransformKey))
-                        SelectedNode.ModelMatrix = _snapMatrix;
-                }
-            }
+            EndSelectionTransform(commit, LabelFor(_activeTransformKey));
 
             _activeTransformKey = string.Empty;
             TransformInputBar.Visibility = Visibility.Collapsed;
@@ -924,7 +816,7 @@ namespace AMLabSlicer.Views
         private void RefreshBoundingBoxOnly()
         {
             if (SelectedNode == null) return;
-            if (!TryComputeWorldAabb(SelectedNode, out var min, out var max, fast: true))
+            if (!TryComputeSelectionAabb(out var min, out var max, true))
             {
                 ObjectHighlightGeometry = null;
                 ObjectHighlightTransform = System.Windows.Media.Media3D.Transform3D.Identity;
@@ -945,7 +837,7 @@ namespace AMLabSlicer.Views
             b.AddLine(p000, p100); b.AddLine(p001, p101); b.AddLine(p010, p110); b.AddLine(p011, p111);
 
             ObjectHighlightGeometry = b.ToLineGeometry3D();
-            IsObjectHighlightVisible = true;
+            IsObjectHighlightVisible = _prefs?.ShowSelectionAabb ?? GetVM()?.AppPrefs.ShowSelectionAabb ?? true;
         }
 
         private void UpdateObjectHighlightTransform(Matrix4x4 initialMatrix, Matrix4x4 newMatrix, SceneNode node)
@@ -965,6 +857,7 @@ namespace AMLabSlicer.Views
 
         private void RefreshObjectHighlight(bool fast = false)
         {
+            RefreshSelectionOutline();
             if (SelectedNode == null)
             {
                 ObjectHighlightGeometry = null;
@@ -975,7 +868,7 @@ namespace AMLabSlicer.Views
                 return;
             }
 
-            if (!TryComputeWorldAabb(SelectedNode, out var min, out var max, fast: fast))
+            if (!TryComputeSelectionAabb(out var min, out var max, fast))
             {
                 ObjectHighlightGeometry = null;
                 ObjectHighlightTransform = System.Windows.Media.Media3D.Transform3D.Identity;
@@ -1000,7 +893,7 @@ namespace AMLabSlicer.Views
             b.AddLine(p000, p100); b.AddLine(p001, p101); b.AddLine(p010, p110); b.AddLine(p011, p111);
 
             ObjectHighlightGeometry = b.ToLineGeometry3D();
-            IsObjectHighlightVisible = true;
+            IsObjectHighlightVisible = _prefs?.ShowSelectionAabb ?? GetVM()?.AppPrefs.ShowSelectionAabb ?? true;
 
             // ── 将 GizmoAnchor 定位到 AABB 几何中心，TransformManipulator3D 会自动同步 ──
             var center = (min + max) * 0.5f;
@@ -1029,7 +922,7 @@ namespace AMLabSlicer.Views
         private void UpdateStatusInfo()
         {
             ModeInfoText = "模式：物体模式";
-            SelectionInfoText = SelectedNode == null ? string.Empty : $"选择：{SelectedNode.Name}";
+            SelectionInfoText = SelectedNode == null ? string.Empty : string.Join("、", SelectedObjects().Select(node => GetVM()?.AllOutlinerItems.FirstOrDefault(x => x.Node == node)?.Name ?? node.Name));
         }
 
         // ══════════════════════════════════════
@@ -1102,73 +995,34 @@ namespace AMLabSlicer.Views
         // ══════════════════════════════════════
         // 删除
         // ══════════════════════════════════════
-        private void ConfirmAndDelete()
+        internal void ConfirmAndDelete()
         {
             if (SelectedNode == null) return;
             bool flag = _prefs?.EnableDeleteConfirm ?? true;
             if (!RequestConfirm("确定删除选中的模型对象？", "删除模型", ref flag)) return;
             if (_prefs != null) _prefs.EnableDeleteConfirm = flag;
 
-            var parent = SelectedNode.Parent as GroupNode;
-            if (parent == null) return;
-            parent.RemoveChildNode(SelectedNode);
-
             var vm = GetVM();
-            var flat = vm?.OutlinerItems.SelectMany(FlattenOutliner).ToList();
-            var ovm = flat?.FirstOrDefault(n => n.Node == SelectedNode);
-            if (ovm != null)
+            foreach (var node in SelectedObjects())
             {
-                var parentOvm = flat!.FirstOrDefault(n => n.Children.Contains(ovm));
-                if (parentOvm != null) parentOvm.Children.Remove(ovm);
-                else vm!.OutlinerItems.Remove(ovm);
+                if (node.Parent is not GroupNode parent) continue;
+                parent.RemoveChildNode(node);
+                var item = vm?.AllOutlinerItems.FirstOrDefault(x => x.Node == node);
+                if (item != null) vm!.SiblingsOf(item).Remove(item);
             }
+            vm?.SelectObjects([]);
             SelectedNode = null;
         }
 
         // ══════════════════════════════════════
         // 选择底面 (F)
         // ══════════════════════════════════════
-        private void EnterFacePickMode()
+        private void AutoLayFlatSelection()
         {
-            _isFacePickMode = true;
-            Cursor = Cursors.Cross;
-            BtnFace.Tag = "active";
-        }
-
-        private void ExecuteBottomFacePick(Point pos)
-        {
-            _isFacePickMode = false;
-            Cursor = Cursors.Arrow;
-            BtnFace.Tag = null;
-
-            if (SelectedNode == null) return;
-            var hits = MainViewport.FindHits(pos);
-            if (hits == null || hits.Count == 0) return;
-
-            var hit = hits.OfType<HxHit>().FirstOrDefault(h =>
-                h.ModelHit == SelectedNode ||
-                (h.ModelHit is SceneNode sn && sn.Parent == SelectedNode));
-            if (hit == null) return;
-
-            var n      = hit.NormalAtHit;
-            var normal = new Vector3D(n.X, n.Y, n.Z);
-            var target = new Vector3D(0, 0, -1);
-            double angle = Vector3D.AngleBetween(normal, target);
-            if (angle < 0.01) { ApplyZFloor(SelectedNode); return; }
-
-            var axis = Vector3D.CrossProduct(normal, target);
-            if (axis.Length < 1e-6) axis = new Vector3D(1, 0, 0);
-            axis.Normalize();
-            var rot   = new RotateTransform3D(new AxisAngleRotation3D(axis, angle)).Value;
-            var rotM  = new Matrix4x4(
-                (float)rot.M11,(float)rot.M12,(float)rot.M13,0,
-                (float)rot.M21,(float)rot.M22,(float)rot.M23,0,
-                (float)rot.M31,(float)rot.M32,(float)rot.M33,0, 0,0,0,1);
-            var oldM = SelectedNode.ModelMatrix;
-            SelectedNode.ModelMatrix = SelectedNode.ModelMatrix * rotM;
-            ApplyZFloor(SelectedNode);
-            RefreshObjectHighlight();
-            CommandDispatcher.Push(new TransformCommand(SelectedNode, oldM, SelectedNode.ModelMatrix, "选择底面"));
+            if (_isModalTransformActive) ExitModalTransform(commit: true);
+            if (!string.IsNullOrEmpty(_activeTransformKey)) DeactivateTransform(commit: true);
+            var command = GetVM()?.AutoLayFlatCommand;
+            if (command?.CanExecute(null) == true) command.Execute(null);
         }
 
         // ══════════════════════════════════════
@@ -1176,7 +1030,7 @@ namespace AMLabSlicer.Views
         // ══════════════════════════════════════
         private void ConfirmAndSplit()
         {
-            if (SelectedNode == null) return;
+            if (SelectedNode == null || GetVM()?.ActiveSelection?.IsGroup == true) return;
             bool flag = _prefs?.EnableSplitConfirm ?? true;
             if (!RequestConfirm(
                 "将拆分模型为多个子对象。\n注意：拆分操作默认不可撤销。",
@@ -1219,7 +1073,7 @@ namespace AMLabSlicer.Views
         private void ConfirmAndAutoArrange()
         {
             bool flag = _prefs?.EnableArrangeConfirm ?? true;
-            if (!RequestConfirm("自动重排场景中所有对象。", "自动摆放", ref flag)) return;
+            if (!RequestConfirm("围绕平台中心排列模型，锁定模型及包含锁定成员的组保持原位。", "自动摆放", ref flag)) return;
             if (_prefs != null) _prefs.EnableArrangeConfirm = flag;
 
             GetVM()?.AutoArrangeCommand.Execute(null);
@@ -1231,6 +1085,13 @@ namespace AMLabSlicer.Views
         private void MainViewport_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             this.Focus();
+            if (_boxSelectionArmed && e.ChangedButton == MouseButton.Left)
+            {
+                _boxSelectionDragging = true; _boxStart = e.GetPosition(MainViewport);
+                ObjectSelectionRectangle.Visibility = Visibility.Visible; UpdateObjectBox(_boxStart);
+                MainViewport.CaptureMouse(); e.Handled = true; return;
+            }
+            if (_boxSelectionArmed && e.ChangedButton == MouseButton.Right) { CancelObjectBox(); e.Handled = true; return; }
 
             if (_isModalTransformActive)
             {
@@ -1246,7 +1107,6 @@ namespace AMLabSlicer.Views
             {
                 var pos = e.GetPosition(MainViewport);
 
-                if (_isFacePickMode) { ExecuteBottomFacePick(pos); e.Handled = true; return; }
 
                 // ── 优先判断是否点击了 Gizmo ──
                 if (IsManipulatorVisible && IsGizmoHit(pos))
@@ -1281,7 +1141,7 @@ namespace AMLabSlicer.Views
 
                         if (sn is MeshNode || sn is GroupNode)
                         {
-                            newSel = FindRootNode(sn, vm?.LoadedModel as SceneNodeGroupModel3D);
+                            newSel = vm?.FindSelectableObject(sn)?.Node ?? FindRootNode(sn, vm?.LoadedModel as SceneNodeGroupModel3D);
                             if (newSel != null) break;
                         }
                     }
@@ -1296,8 +1156,9 @@ namespace AMLabSlicer.Views
                     return;
                 }
 
-                if (SelectedNode != newSel)
-                    SelectedNode = newSel;
+                if (newSel != null && vm?.AllOutlinerItems.FirstOrDefault(x => x.Node == newSel) is { IsEffectivelyLocked: true }) return;
+                if (vm != null) vm.SelectObject(newSel, Keyboard.Modifiers.HasFlag(ModifierKeys.Shift));
+                else if (SelectedNode != newSel) SelectedNode = newSel;
                 return;
             }
 
@@ -1333,6 +1194,7 @@ namespace AMLabSlicer.Views
 
         private void MainViewport_PreviewMouseMove(object sender, MouseEventArgs e)
         {
+            if (_boxSelectionDragging) { UpdateObjectBox(e.GetPosition(MainViewport)); e.Handled = true; return; }
             // ── Blender 模态交互接管 ──
             if (_isModalTransformActive)
             {
@@ -1365,6 +1227,13 @@ namespace AMLabSlicer.Views
 
         private void MainViewport_PreviewMouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (_boxSelectionDragging && e.ChangedButton == MouseButton.Left)
+            {
+                var box = new Rect(_boxStart, e.GetPosition(MainViewport));
+                var vm = GetVM();
+                if (vm != null) vm.SelectObjects(vm.OutlinerItems.Where(x => !x.IsEffectivelyLocked && x.IsEffectivelyVisible && ObjectFitsBox(x.Node, box)).ToArray());
+                CancelObjectBox(); e.Handled = true; return;
+            }
 
 
             if (e.ChangedButton == MouseButton.Middle)
@@ -1431,13 +1300,15 @@ namespace AMLabSlicer.Views
 
         private void MainViewport_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
+            if (e.Delta == 0) return;
+            bool zoomIn = (_prefs?.ReverseViewZoom ?? true) ? e.Delta > 0 : e.Delta < 0;
             var cam = MainViewport.Camera;
             if (cam is HxOrtho ortho)
-                ortho.Width = Math.Max(10, ortho.Width * (e.Delta > 0 ? 0.85 : 1.15));
+                ortho.Width = Math.Max(10, ortho.Width * (zoomIn ? 0.85 : 1.15));
             else if (cam is HxPersp)
             {
                 var look = cam.LookDirection; look.Normalize();
-                cam.Position = cam.Position + look * (e.Delta > 0 ? 20.0 : -20.0);
+                cam.Position = cam.Position + look * (zoomIn ? 20.0 : -20.0);
             }
             e.Handled = true;
         }
@@ -1473,15 +1344,52 @@ namespace AMLabSlicer.Views
             _pivotPoint = new Point3D(112.5, 112.5, 0);
         }
 
+        private void SwitchCameraProjection(bool orthographic)
+        {
+            if (MainViewport.Camera is not HelixToolkit.Wpf.SharpDX.ProjectionCamera current) return;
+            if (orthographic && current is HxOrtho || !orthographic && current is HxPersp) return;
+            var direction = current.LookDirection;
+            if (direction.LengthSquared < 0.000001) return;
+            direction.Normalize();
+            var distance = Math.Max((current.Position - _pivotPoint).Length, 0.001);
+            var target = current.Position + direction * distance;
+            var fov = current is HxPersp perspective ? perspective.FieldOfView : 45;
+            var tangent = Math.Tan(fov * Math.PI / 360);
+            if (orthographic)
+            {
+                MainViewport.Camera = new HxOrtho
+                {
+                    Position = current.Position, LookDirection = direction * distance,
+                    UpDirection = current.UpDirection, NearPlaneDistance = current.NearPlaneDistance,
+                    FarPlaneDistance = current.FarPlaneDistance, Width = 2 * distance * tangent,
+                    CreateLeftHandSystem = current.CreateLeftHandSystem
+                };
+            }
+            else
+            {
+                distance = Math.Max(((HxOrtho)current).Width / (2 * tangent), 0.001);
+                MainViewport.Camera = new HxPersp
+                {
+                    Position = target - direction * distance, LookDirection = direction * distance,
+                    UpDirection = current.UpDirection, NearPlaneDistance = current.NearPlaneDistance,
+                    FarPlaneDistance = current.FarPlaneDistance, FieldOfView = fov,
+                    CreateLeftHandSystem = current.CreateLeftHandSystem
+                };
+            }
+        }
+
         private void ApplyRotation(double dx, double dy)
         {
+            if (Math.Abs(dx) + Math.Abs(dy) < 0.0001) return;
+            SwitchCameraProjection(orthographic: false);
             if (MainViewport.Camera is not { } cam) return;
+            var distance = cam.LookDirection.Length;
             var look  = cam.LookDirection; look.Normalize();
             var up    = cam.UpDirection;   up.Normalize();
             var right = Vector3D.CrossProduct(look, up); right.Normalize();
             var matY  = new RotateTransform3D(new AxisAngleRotation3D(up,    -dx * 0.3)).Value;
             var matX  = new RotateTransform3D(new AxisAngleRotation3D(right, -dy * 0.3)).Value;
-            cam.LookDirection = matX.Transform(matY.Transform(look));
+            cam.LookDirection = matX.Transform(matY.Transform(look)) * distance;
             cam.UpDirection   = matX.Transform(matY.Transform(up));
             var off = cam.Position - _pivotPoint;
             cam.Position = _pivotPoint + matX.Transform(matY.Transform(off));
@@ -1556,7 +1464,8 @@ namespace AMLabSlicer.Views
 
         private void SwipeToOrthographicView(System.Windows.Vector delta)
         {
-            if (MainViewport.Camera == null) return;
+            if (MainViewport.Camera == null || delta.LengthSquared < 0.0001) return;
+            SwitchCameraProjection(orthographic: true);
             var cam = MainViewport.Camera;
             
             var look = cam.LookDirection;
@@ -1785,6 +1694,27 @@ namespace AMLabSlicer.Views
         private void UpdateViewCubeCanvas(object? sender, EventArgs e)
         {
             if (MainViewport.Camera == null) return;
+            var machine = GetVM()?.BuildVolumeProfile?.Machine;
+            string Face(string axis, string fallback, bool negative)
+            {
+                var direction = machine?.GetValueOrDefault("machine_" + axis + "_positive_direction");
+                if (string.IsNullOrWhiteSpace(direction)) direction = fallback;
+                return (direction, negative) switch
+                {
+                    ("朝前", false) or ("朝后", true) => "前面",
+                    ("朝后", false) or ("朝前", true) => "后面",
+                    ("朝左", false) or ("朝右", true) => "左面",
+                    _ => "右面"
+                };
+            }
+            foreach (var normal in new[] { new Vector3D(1, 0, 0), new Vector3D(-1, 0, 0), new Vector3D(0, 1, 0), new Vector3D(0, -1, 0) })
+            {
+                if (!_faceTexts.TryGetValue(normal, out var label)) continue;
+                var face = normal.X != 0 ? Face("x", "朝右", normal.X < 0) : Face("y", "朝后", normal.Y < 0);
+                var translated = AMLabSlicer.Plugin.Wpf.Localization.UiText.Current.Translate(face);
+                if (label.Text != translated)
+                    AMLabSlicer.Plugin.Wpf.Localization.UiText.SetText(label, TextBlock.TextProperty, face);
+            }
             var look = MainViewport.Camera.LookDirection;
             look.Normalize();
             var up = MainViewport.Camera.UpDirection;
@@ -1912,6 +1842,7 @@ namespace AMLabSlicer.Views
         {
             if (e.OriginalSource is System.Windows.Shapes.Polygon poly && poly.Tag is Vector3D zone)
             {
+                SwitchCameraProjection(orthographic: true);
                 var targetLook = new Vector3D(-zone.X, -zone.Y, -zone.Z);
                 targetLook.Normalize();
 

@@ -361,3 +361,23 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+# Local references and diagnostics
+/AGENTS.md
+/README.md
+/.vscode/
+/bench.cs
+/test_compiler.cs
+/Cura.proto
+/tests/
+/docs/*
+!/docs/third-party/
+/docs/third-party/*
+!/docs/third-party/lucide/
+/docs/third-party/lucide/*
+!/docs/third-party/lucide/LICENSE
+/AMLabSlicer/Extensions/README.md
+/AMLabSlicer.Engine.Atom/native/upstream/README.md
+/AMLabSlicer.Kinematics.Native/README.md
+
+# CMake-generated FDM engine files
+/AMLabSlicer.Engine.FDM/build/

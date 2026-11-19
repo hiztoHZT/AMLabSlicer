@@ -1,144 +1,66 @@
 <UserControl x:Class="AMLabSlicer.Views.OutlinerPanelView"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:loc="clr-namespace:AMLabSlicer.Plugin.Wpf.Localization;assembly=AMLabSlicer.Plugin.Wpf"
-             xmlns:vm="clr-namespace:AMLabSlicer.ViewModel"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" MinHeight="80" d:DesignHeight="180" MinWidth="280">
-
-    <Border Background="{DynamicResource SurfaceBrush}"
-            BorderBrush="{DynamicResource SurfaceBorderBrush}"
-            BorderThickness="0,0,0,1"
-            CornerRadius="0"
-            ClipToBounds="True">
-            <DockPanel>
-            
-
-            <TreeView FontSize="{DynamicResource UiFontSize}" x:Name="OutlinerTree"
-                      ItemsSource="{Binding OutlinerItems}"
-                      Background="Transparent" BorderThickness="0"
-                      Margin="6">
-
-                <TreeView.ItemContainerStyle>
-                    <Style TargetType="TreeViewItem">
-                        <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
-                        <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
-                        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
-                        <Setter Property="Padding" Value="2,4"/>
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-
-                        <Setter Property="ContextMenu">
-                            <Setter.Value>
-                                <ContextMenu>
-                                    <MenuItem Header="{loc:Text Key='重命名 (F2)'}" Command="{Binding RenameCommand}"/>
-                                    <MenuItem Header="{loc:Text Key='隐藏 / 显示'}" Command="{Binding ToggleVisibilityCommand}"/>
-                                </ContextMenu>
-                            </Setter.Value>
-                        </Setter>
-
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="TreeViewItem">
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="*"/>
-                                        </Grid.RowDefinitions>
-
-                                        <Grid Grid.Row="0">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="20"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <Border x:Name="Bd" Grid.ColumnSpan="2" Background="Transparent" Padding="{TemplateBinding Padding}" CornerRadius="{StaticResource UiCornerRadius}" Margin="2,1"/>
-
-                                            <ToggleButton x:Name="Expander" Grid.Column="0" 
-                                          IsChecked="{Binding Path=IsExpanded, RelativeSource={RelativeSource TemplatedParent}}" 
-                                          ClickMode="Press">
-                                                <ToggleButton.Template>
-                                                    <ControlTemplate TargetType="ToggleButton">
-                                                        <Border Background="Transparent" Width="20" Height="20">
-                                                            <Path x:Name="Arrow" Fill="{TemplateBinding Foreground}" HorizontalAlignment="Center" VerticalAlignment="Center" 
-                                                  Data="M 0 0 L 4 4 L 0 8 Z" Opacity="0.7"/>
-                                                        </Border>
-                                                        <ControlTemplate.Triggers>
-                                                            <Trigger Property="IsChecked" Value="True">
-                                                                <Setter TargetName="Arrow" Property="Data" Value="M 0 0 L 8 0 L 4 4 Z"/>
-                                                            </Trigger>
-                                                            <Trigger Property="IsMouseOver" Value="True">
-                                                                <Setter TargetName="Arrow" Property="Opacity" Value="1"/>
-                                                            </Trigger>
-                                                        </ControlTemplate.Triggers>
-                                                    </ControlTemplate>
-                                                </ToggleButton.Template>
-                                            </ToggleButton>
-
-                                            <ContentPresenter x:Name="PART_Header" Grid.Column="1" 
-                                              ContentSource="Header" MinHeight="{DynamicResource UiParameterRowHeight}" VerticalAlignment="Center"
-                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"/>
-                                        </Grid>
-
-                                        <ItemsPresenter x:Name="ItemsHost" Grid.Row="1" Margin="15,0,0,0" Visibility="Collapsed"/>
-                                    </Grid>
-
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsExpanded" Value="True">
-                                            <Setter TargetName="ItemsHost" Property="Visibility" Value="Visible"/>
-                                        </Trigger>
-                                        <Trigger Property="HasItems" Value="False">
-                                            <Setter TargetName="Expander" Property="Visibility" Value="Hidden"/>
-                                        </Trigger>
-                                        <Trigger Property="IsSelected" Value="True">
-                                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource SelectionHighlightBrush}"/>
-                                            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                </TreeView.ItemContainerStyle>
-
-                <TreeView.ItemTemplate>
-                    <HierarchicalDataTemplate DataType="{x:Type vm:OutlinerNodeViewModel}"
-                                              ItemsSource="{Binding Children}">
-                        <Grid HorizontalAlignment="Stretch">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="20"/>
-                                <ColumnDefinition Width="*"/>
-                                <!-- 显示/隐藏复选框 -->
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-
-                            <!-- 模型对象图标 -->
-                            <TextBlock Grid.Column="0"
-                                       Text="○"
-                                       FontSize="{DynamicResource UiSmallFontSize}" VerticalAlignment="Center"
-                                       Foreground="{DynamicResource AccentBrush}"/>
-
-                            <!-- 名称（正常 / 重命名编辑框 切换） -->
-                            <TextBlock Grid.Column="1" Text="{Binding Name}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Name}"
-                                       VerticalAlignment="Center" Margin="2,0"
-                                       Visibility="{Binding IsRenaming, Converter={x:Static vm:InverseBoolToVisConverter.Instance}}"/>
-                            <TextBox Grid.Column="1" Text="{Binding EditingName, UpdateSourceTrigger=PropertyChanged}"
-                                     VerticalAlignment="Center" Margin="2,0"
-                                     Visibility="{Binding IsRenaming, Converter={x:Static vm:BoolToVisConverter.Instance}}"
-                                     LostFocus="RenameBox_LostFocus"
-                                     KeyDown="RenameBox_KeyDown"/>
-
-                            <!-- 可见性开关 -->
-                            <CheckBox Grid.Column="2"
-                                      IsChecked="{Binding IsVisible, Mode=TwoWay}"
-                                      ToolTip="{loc:Text Key='显示/隐藏'}"
-                                      VerticalAlignment="Center"
-                                      HorizontalAlignment="Right"
-                                      Margin="0,0,4,0"/>
-                        </Grid>
-                    </HierarchicalDataTemplate>
-                </TreeView.ItemTemplate>
-            </TreeView>
-            </DockPanel>
-    </Border>
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:loc="clr-namespace:AMLabSlicer.Plugin.Wpf.Localization;assembly=AMLabSlicer.Plugin.Wpf"
+ xmlns:vm="clr-namespace:AMLabSlicer.ViewModel" MinHeight="80" MinWidth="280" Focusable="True" PreviewKeyDown="Outliner_KeyDown" PreviewMouseMove="Outliner_MouseMove" PreviewMouseLeftButtonUp="Outliner_MouseUp">
+ <!-- Lock and eye paths adapted from Lucide; see docs/third-party/lucide/LICENSE. -->
+ <UserControl.Resources>
+  <Style x:Key="ObjectIconButton" TargetType="Button">
+   <Setter Property="Width" Value="26"/><Setter Property="Height" Value="26"/><Setter Property="Padding" Value="4"/>
+   <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/><Setter Property="Background" Value="Transparent"/>
+   <Setter Property="BorderThickness" Value="0"/><Setter Property="Focusable" Value="False"/>
+   <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Button">
+    <Border x:Name="IconBorder" Background="{TemplateBinding Background}" CornerRadius="{StaticResource UiCornerRadius}" Padding="{TemplateBinding Padding}"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border>
+    <ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="IconBorder" Property="Background" Value="{DynamicResource ButtonHoverBrush}"/></Trigger></ControlTemplate.Triggers>
+   </ControlTemplate></Setter.Value></Setter>
+  </Style>
+ <DataTemplate x:Key="ObjectRowTemplate">
+     <StackPanel>
+     <Border x:Name="Row" Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}" Padding="4,0" Margin="0,1" CornerRadius="{StaticResource UiCornerRadius}" Background="Transparent" MouseLeftButtonDown="ObjectRow_MouseDown" AllowDrop="True" DragOver="ObjectRow_DragOver" DragLeave="ObjectRow_DragLeave" Drop="ObjectRow_Drop">
+      <Border.ContextMenu>
+       <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}" Opened="ObjectMenu_Opened">
+        <MenuItem Header="{loc:Text Key='重命名'}" Tag="rename" InputGestureText="F2" Command="{Binding RenameCommand}"/>
+        <Separator Style="{StaticResource {x:Static MenuItem.SeparatorStyleKey}}"/>
+        <MenuItem Header="编组" Tag="group" InputGestureText="Shift+G" Click="ObjectMenu_Click"/>
+        <MenuItem Header="取消编组" Tag="ungroup" InputGestureText="Ctrl+Shift+G" Click="ObjectMenu_Click"/>
+        <Separator Style="{StaticResource {x:Static MenuItem.SeparatorStyleKey}}"/>
+        <MenuItem Header="隐藏" Tag="hide" InputGestureText="H" Click="ObjectMenu_Click"/>
+        <MenuItem Header="显示" Tag="show" Click="ObjectMenu_Click"/>
+        <MenuItem Header="锁定" Tag="lock" InputGestureText="L" Click="ObjectMenu_Click"/>
+        <MenuItem Header="解锁" Tag="unlock" Click="ObjectMenu_Click"/>
+        <MenuItem Header="显示全部" Tag="showAll" InputGestureText="Shift+H" Click="ObjectMenu_Click"/>
+        <MenuItem Header="解锁全部" Tag="unlockAll" InputGestureText="Shift+L" Click="ObjectMenu_Click"/>
+        <Separator Style="{StaticResource {x:Static MenuItem.SeparatorStyleKey}}"/>
+        <MenuItem Header="删除" Tag="delete" InputGestureText="Delete" Click="ObjectMenu_Click"/>
+       </ContextMenu>
+      </Border.ContextMenu>
+      <Grid MinHeight="{DynamicResource UiInputHeight}">
+       <Grid.ColumnDefinitions><ColumnDefinition Width="12"/><ColumnDefinition Width="10"/><ColumnDefinition Width="*"/><ColumnDefinition Width="26"/><ColumnDefinition Width="26"/></Grid.ColumnDefinitions>
+       <Button Grid.Column="0" Width="12" Padding="0" Command="{Binding ToggleExpandedCommand}" Style="{StaticResource ObjectIconButton}" Visibility="{Binding IsGroup, Converter={x:Static vm:BoolToVisConverter.Instance}}">
+        <Path Stroke="{DynamicResource SecondaryTextBrush}" StrokeThickness="1.2"><Path.Style><Style TargetType="Path"><Setter Property="Data" Value="M1,0 L5,4 L1,8"/><Style.Triggers><DataTrigger Binding="{Binding IsExpanded}" Value="True"><Setter Property="Data" Value="M0,2 L4,6 L8,2"/></DataTrigger></Style.Triggers></Style></Path.Style></Path>
+       </Button>
+       <TextBlock x:Name="ObjectStateMarker" Grid.Column="1" Text="|" Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Center"/>
+       <TextBlock Grid.Column="2" x:Name="NameLabel" MouseLeftButtonDown="NameLabel_MouseDown" Text="{Binding Name}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Name}" VerticalAlignment="Center" Margin="4,0,8,0" Foreground="{DynamicResource PrimaryTextBrush}" Visibility="{Binding IsRenaming, Converter={x:Static vm:InverseBoolToVisConverter.Instance}}"/>
+       <TextBox Grid.Column="2" Text="{Binding EditingName, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding IsRenaming, Converter={x:Static vm:BoolToVisConverter.Instance}}" IsVisibleChanged="RenameBox_IsVisibleChanged" LostFocus="RenameBox_LostFocus" KeyDown="RenameBox_KeyDown"/>
+       <Button Grid.Column="3" Command="{Binding ToggleLockCommand}" IsEnabled="{Binding CanToggleLock}" ToolTip="{loc:Text Key='锁定 / 解锁'}" Style="{StaticResource ObjectIconButton}">
+        <Viewbox Width="16" Height="16"><Path x:Name="LockIcon" Width="24" Height="24" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.7" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="M5,11 H19 Q21,11 21,13 V20 Q21,22 19,22 H5 Q3,22 3,20 V13 Q3,11 5,11 M7,11 V7 A5,5 0 0 1 17,7"/></Viewbox>
+       </Button>
+       <Button Grid.Column="4" Command="{Binding ToggleVisibilityCommand}" IsEnabled="{Binding CanToggleVisibility}" ToolTip="{loc:Text Key='显示/隐藏'}" Style="{StaticResource ObjectIconButton}">
+        <Viewbox Width="16" Height="16"><Path x:Name="EyeIcon" Width="24" Height="24" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.7" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="M2,12 C6,1 18,1 22,12 C18,23 6,23 2,12 M15,12 A3,3 0 1 1 9,12 A3,3 0 1 1 15,12"/></Viewbox>
+       </Button>
+      </Grid>
+     </Border>
+     <ItemsControl ItemsSource="{Binding Children}" Margin="16,0,0,0" ItemTemplate="{DynamicResource ObjectRowTemplate}" Visibility="{Binding IsExpanded, Converter={x:Static vm:BoolToVisConverter.Instance}}"/>
+     </StackPanel>
+     <DataTemplate.Triggers>
+      <DataTrigger Binding="{Binding IsSelected}" Value="True"><Setter TargetName="Row" Property="Background" Value="{DynamicResource SelectionHighlightBrush}"/><Setter TargetName="NameLabel" Property="Foreground" Value="{DynamicResource AccentBrush}"/></DataTrigger>
+      <DataTrigger Binding="{Binding IsEffectivelyLocked}" Value="True"><Setter TargetName="LockIcon" Property="Data" Value="M5,11 H19 Q21,11 21,13 V20 Q21,22 19,22 H5 Q3,22 3,20 V13 Q3,11 5,11 M7,11 V7 A5,5 0 0 1 17,7 V11"/><Setter TargetName="LockIcon" Property="Stroke" Value="{DynamicResource ObjectLockedBrush}"/><Setter TargetName="ObjectStateMarker" Property="Foreground" Value="{DynamicResource ObjectLockedBrush}"/></DataTrigger>
+      <DataTrigger Binding="{Binding IsEffectivelyVisible}" Value="False"><Setter TargetName="EyeIcon" Property="Data" Value="M2,2 L22,22 M9,5 C14,2 19,5 22,12 L19,16 M6,6 C4,8 3,10 2,12 C6,21 13,23 18,18 M10,10 A3,3 0 0 0 14,14"/><Setter TargetName="NameLabel" Property="Opacity" Value="0.45"/><Setter TargetName="ObjectStateMarker" Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/></DataTrigger>
+     </DataTemplate.Triggers>
+    </DataTemplate>
+ </UserControl.Resources>
+ <Border Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource SurfaceBorderBrush}" BorderThickness="0,0,0,1" ClipToBounds="True">
+  <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="6">
+   <ItemsControl x:Name="OutlinerTree" ItemTemplate="{StaticResource ObjectRowTemplate}" ItemsSource="{Binding OutlinerItems}"/>
+  </ScrollViewer>
+ </Border>
 </UserControl>

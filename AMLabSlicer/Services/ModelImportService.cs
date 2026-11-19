@@ -14,6 +14,11 @@ public interface IModelImportService
 
 public sealed class ModelImportService : IModelImportService
 {
+    internal const string ModelFilePattern = "*.stl;*.obj;*.3mf;*.step;*.stp;*.ply;*.glb;*.gltf";
+
+    internal static bool HasSupportedExtension(string path) =>
+        System.IO.Path.GetExtension(path).ToLowerInvariant() is ".stl" or ".obj" or ".3mf" or ".step" or ".stp" or ".ply" or ".glb" or ".gltf";
+
     public Task<SceneNode?> LoadAsync(string filePath) => Task.Run(() =>
     {
         var meshRootNode = OcctInteropService.IsStepFile(filePath) ? LoadStepFile(filePath) : LoadMeshFileViaAssimp(filePath);

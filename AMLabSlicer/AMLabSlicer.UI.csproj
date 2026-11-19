@@ -22,7 +22,6 @@
 
   <ItemGroup>
     <Content Include="Assets\ico\AMLAS.ico" />
-    <Content Include="Extensions\README.md" Link="extensions\README.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
@@ -41,15 +40,18 @@
 
   <ItemGroup>
     <Protobuf Include="..\Protos\slicer.proto" GrpcServices="Client" />
+    <Protobuf Include="..\Protos\amlab_monitor.proto" GrpcServices="Client" />
   </ItemGroup>
 
   <ItemGroup>
     <Resource Include="Assets\Images\AMLab_logo_rgb.svg" />
+    <Resource Include="Assets\Icons\ModelTools\*.svg" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="../AMLabSlicer.Plugin.Wpf/AMLabSlicer.Plugin.Wpf.csproj"/>
     <ProjectReference Include="../AMLabSlicer.Plugins.Agent/AMLabSlicer.Plugins.Agent.csproj" ReferenceOutputAssembly="false"/>
+    <ProjectReference Include="../AMLabSlicer.Plugins.Tripo/AMLabSlicer.Plugins.Tripo.csproj" ReferenceOutputAssembly="false"/>
     <ProjectReference Include="../AMLabSlicer.EngineHost/AMLabSlicer.EngineHost.csproj" ReferenceOutputAssembly="false"/>
     <ProjectReference Include="..\AMLabSlicer.Core\AMLabSlicer.Core.csproj" />
     <ProjectReference Include="..\AMLabSlicer.Occt\AMLabSlicer.Occt.csproj" />
@@ -62,6 +64,24 @@
     <ApplicationIcon>Assets\ico\AMLAS.ico</ApplicationIcon>
   </PropertyGroup>
   
+  <PropertyGroup>
+    <Yolo11RuntimeDir Condition="'$(Yolo11RuntimeDir)' == ''">$(MSBuildThisFileDirectory)../AMLabSlicer.Engine.Yolo11/runtime</Yolo11RuntimeDir>
+  </PropertyGroup>
+  <ItemGroup Condition="Exists('$(Yolo11RuntimeDir)/python/python.exe')">
+    <Content Include="$(Yolo11RuntimeDir)/**/*"
+             Link="engine.yolo11/%(RecursiveDir)%(Filename)%(Extension)"
+             CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../AMLabSlicer.Monitor.Python/server.py" Link="engine.yolo11/server.py"
+             CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../Protos/amlab_monitor.proto" Link="engine.yolo11/amlab_monitor.proto"
+             CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <Target Name="CheckYolo11PublishPackage" BeforeTargets="Publish"
+          Condition="!Exists('$(Yolo11RuntimeDir)/python/python.exe')">
+    <Error Text="Prepare the bundled YOLO11 runtime with AMLabSlicer.Engine.Yolo11/prepare.ps1 before publishing." />
+  </Target>
+
   <Target Name="CopyNativeEngine" AfterTargets="Build">
     <ItemGroup>
       <NativeEngineFiles Include="$(EngineOutputDir)*.dll" />
@@ -76,6 +96,14 @@
     <ItemGroup><AgentPackage Include="$(AgentPackageSource)**/*"/></ItemGroup>
     <Copy SourceFiles="@(AgentPackage)" DestinationFiles="@(AgentPackage->'$(TargetDir)extensions/amlab.agent/1.0.0/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true"/>
   </Target>
+  <Target Name="CopyTripoPlugin" AfterTargets="Build">
+    <ItemGroup><TripoPackage Include="$(MSBuildThisFileDirectory)../AMLabSlicer.Plugins.Tripo/bin/$(Configuration)/package/**/*"/></ItemGroup>
+    <Copy SourceFiles="@(TripoPackage)" DestinationFiles="@(TripoPackage->'$(TargetDir)extensions/amlab.tripo/1.0.0/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true"/>
+  </Target>
+  <Target Name="PublishTripoPlugin" AfterTargets="Publish">
+    <ItemGroup><TripoPublishPackage Include="$(MSBuildThisFileDirectory)../AMLabSlicer.Plugins.Tripo/bin/$(Configuration)/package/**/*"/></ItemGroup>
+    <Copy SourceFiles="@(TripoPublishPackage)" DestinationFiles="@(TripoPublishPackage->'$(PublishDir)extensions/amlab.tripo/1.0.0/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true"/>
+  </Target>
   <Target Name="PublishAgentPlugin" AfterTargets="Publish">
     <ItemGroup><AgentPublishPackage Include="$(MSBuildThisFileDirectory)../AMLabSlicer.Plugins.Agent/bin/$(Configuration)/package/**/*"/></ItemGroup>
     <Copy SourceFiles="@(AgentPublishPackage)" DestinationFiles="@(AgentPublishPackage->'$(PublishDir)extensions/amlab.agent/1.0.0/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true"/>
@@ -88,5 +116,10 @@
     <ItemGroup><EngineHostPublishRuntime Include="$(MSBuildThisFileDirectory)../AMLabSlicer.EngineHost/bin/$(Configuration)/package/**/*"/></ItemGroup>
     <Copy SourceFiles="@(EngineHostPublishRuntime)" DestinationFiles="@(EngineHostPublishRuntime->'$(PublishDir)enginehost/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true"/>
   </Target>
+  <ItemGroup>
+    <Content Include="../docs/third-party/lucide/LICENSE" Link="notices/Lucide/LICENSE" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup><Compile Include="../Shared/OwnedProcessJob.cs" Link="Processes/OwnedProcessJob.cs" /></ItemGroup>
+  <ItemGroup><Compile Include="../Shared/HostBuildIdentity.cs" Link="Processes/HostBuildIdentity.cs" /></ItemGroup>
 </Project>
 

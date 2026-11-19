@@ -10,6 +10,8 @@ namespace AMLabSlicer.Services;
 
 public sealed class SliceRequestFactory : ISliceRequestFactory
 {
+    private readonly AMLabSlicer.Core.Printers.IPrinterProfileProvider? printers;
+    public SliceRequestFactory(AMLabSlicer.Core.Printers.IPrinterProfileProvider? printers = null) { this.printers = printers; }
     public SliceRequest Create(string algorithmId, IEnumerable<SliceParameter> parameters,
         IEnumerable<SceneObject> objects)
     {
@@ -24,6 +26,7 @@ public sealed class SliceRequestFactory : ISliceRequestFactory
         };
         foreach (var parameter in parameters)
             request.Parameters[parameter.Key] = ToGrpcValue(parameter.Value, parameter.ControlType);
+        if (printers != null) PrinterRequestMapper.Apply(request, printers.GetActiveSnapshot());
 
         long objectId = 1;
         foreach (var sceneObject in objects)

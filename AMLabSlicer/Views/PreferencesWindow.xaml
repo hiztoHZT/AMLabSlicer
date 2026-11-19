@@ -1,4 +1,4 @@
-<views:ThemedWindow x:Class="AMLabSlicer.Views.PreferencesWindow"
+﻿<views:ThemedWindow x:Class="AMLabSlicer.Views.PreferencesWindow"
         xmlns:views="clr-namespace:AMLabSlicer.Views"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:loc="clr-namespace:AMLabSlicer.Plugin.Wpf.Localization;assembly=AMLabSlicer.Plugin.Wpf"
@@ -66,6 +66,18 @@
                     </StackPanel>
                     <StackPanel Visibility="{Binding IsViewportSection, Converter={StaticResource BoolToVis}}">
                     <Border Style="{StaticResource SettingsCardStyle}"><StackPanel>
+                        <TextBlock Text="{loc:Text Key='模型选择'}" Style="{StaticResource SettingsHeading}"/>
+                        <Grid Margin="0,4" MinHeight="{DynamicResource UiParameterRowHeight}"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="210"/></Grid.ColumnDefinitions><TextBlock Text="{loc:Text Key='显示选中轮廓'}" Style="{StaticResource SettingsLabel}"/><CheckBox Grid.Column="1" IsChecked="{Binding ShowSelectionOutline}" HorizontalAlignment="Right" VerticalAlignment="Center"/></Grid>
+                        <Grid Margin="0,4" MinHeight="{DynamicResource UiParameterRowHeight}"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="210"/></Grid.ColumnDefinitions><TextBlock Text="{loc:Text Key='显示选中包围框（AABB）'}" Style="{StaticResource SettingsLabel}"/><CheckBox Grid.Column="1" IsChecked="{Binding ShowSelectionAabb}" HorizontalAlignment="Right" VerticalAlignment="Center"/></Grid>
+                        <Grid Margin="0,4" MinHeight="{DynamicResource UiParameterRowHeight}"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="210"/></Grid.ColumnDefinitions><TextBlock Text="{loc:Text Key='显示成型空间顶部轮廓'}" Style="{StaticResource SettingsLabel}"/><CheckBox Grid.Column="1" IsChecked="{Binding ShowBuildVolumeTop}" HorizontalAlignment="Right" VerticalAlignment="Center"/></Grid>
+                        <Grid Margin="0,4" MinHeight="{DynamicResource UiParameterRowHeight}"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="210"/></Grid.ColumnDefinitions><TextBlock Text="{loc:Text Key='显示成型空间四周线'}" Style="{StaticResource SettingsLabel}"/><CheckBox Grid.Column="1" IsChecked="{Binding ShowBuildVolumeSides}" HorizontalAlignment="Right" VerticalAlignment="Center"/></Grid>
+                        <Grid Margin="0,4" MinHeight="{DynamicResource UiParameterRowHeight}">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="210"/></Grid.ColumnDefinitions>
+                            <TextBlock Text="{loc:Text Key='选中轮廓线宽'}" Style="{StaticResource SettingsLabel}"/>
+                            <ComboBox Grid.Column="1" ItemsSource="{Binding SelectionOutlineSizes}" SelectedItem="{Binding SelectionOutlineThickness}" Height="{DynamicResource UiInputHeight}"/>
+                        </Grid>
+                    </StackPanel></Border>
+                    <Border Style="{StaticResource SettingsCardStyle}"><StackPanel>
                         <TextBlock Text="{loc:Text Key='渲染质量'}" Style="{StaticResource SettingsHeading}"/>
                     <Grid Margin="0,4" MinHeight="{DynamicResource UiParameterRowHeight}">
                         <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="210"/></Grid.ColumnDefinitions>
@@ -98,6 +110,12 @@
                     </Grid>
                     <Grid Margin="0,4" MinHeight="{DynamicResource UiParameterRowHeight}">
                         <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="210"/></Grid.ColumnDefinitions>
+                        <TextBlock Text="{loc:Text Key='视角立方体大小'}" Style="{StaticResource SettingsLabel}"/>
+                        <ComboBox Grid.Column="1" ItemsSource="{Binding ViewCubeSizes}" SelectedItem="{Binding ViewCubeSize}"
+                                  ItemStringFormat="{}{0} DIP" Height="{DynamicResource UiInputHeight}"/>
+                    </Grid>
+                    <Grid Margin="0,4" MinHeight="{DynamicResource UiParameterRowHeight}">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="210"/></Grid.ColumnDefinitions>
                         <TextBlock Text="{loc:Text Key='显示模式与选择信息'}" Style="{StaticResource SettingsLabel}"/>
                         <CheckBox Grid.Column="1" IsChecked="{Binding ShowViewportStatus}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                     </Grid>
@@ -105,6 +123,13 @@
                         <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="210"/></Grid.ColumnDefinitions>
                         <TextBlock Text="{loc:Text Key='使用正交视角'}" Style="{StaticResource SettingsLabel}"/>
                         <CheckBox Grid.Column="1" IsChecked="{Binding UseOrthographic}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                    </Grid>
+                    <Grid Margin="0,4" MinHeight="{DynamicResource UiParameterRowHeight}">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="210"/></Grid.ColumnDefinitions>
+                        <TextBlock Text="{loc:Text Key='反向视图缩放'}" Style="{StaticResource SettingsLabel}"/>
+                        <CheckBox Grid.Column="1" IsChecked="{Binding ReverseViewZoom}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                  AutomationProperties.Name="{loc:Text Key='反向视图缩放'}"
+                                  ToolTip="{loc:Text Key='勾选：滚轮向前放大，向后缩小；取消勾选则相反。'}"/>
                     </Grid>
                     </StackPanel></Border>
                     </StackPanel>

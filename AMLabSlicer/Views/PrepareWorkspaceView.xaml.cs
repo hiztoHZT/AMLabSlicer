@@ -46,6 +46,11 @@ namespace AMLabSlicer.Views
             return base.MeasureOverride(constraint);
         }
 
+        private void Outliner_TransformKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            ModelPreview.HandleOutlinerTransformKey(e);
+        }
+
         protected override Size ArrangeOverride(Size arrangeBounds)
         {
             CheckAvailableWidth(arrangeBounds.Width);

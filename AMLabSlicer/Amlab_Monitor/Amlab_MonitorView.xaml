@@ -1,0 +1,609 @@
+<UserControl x:Class="AMLabSlicer.Amlab_Monitor.Amlab_MonitorView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:AMLabSlicer.Plugin.Wpf.Localization;assembly=AMLabSlicer.Plugin.Wpf"
+             Background="{DynamicResource SurfaceBrush}"
+             Foreground="{DynamicResource PrimaryTextBrush}"
+             UseLayoutRounding="True" SnapsToDevicePixels="True">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="Amlab_MonitorPanelVisibility"/>
+        <Style x:Key="Amlab_MonitorCardStyle" TargetType="Border" BasedOn="{StaticResource SettingsCardStyle}">
+            <Setter Property="Padding" Value="{StaticResource UiCardPadding}"/>
+            <Setter Property="Margin" Value="0"/>
+        </Style>
+        <Style x:Key="Amlab_MonitorCardTitleStyle" TargetType="ContentControl">
+            <Setter Property="MinHeight" Value="{DynamicResource UiCardHeaderHeight}"/>
+            <Setter Property="FontSize" Value="{DynamicResource UiTitleFontSize}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ContentControl">
+                        <DockPanel>
+                            <Border DockPanel.Dock="Left" Width="2" Height="12" Margin="0,0,6,0"
+                                    VerticalAlignment="Center" Background="{DynamicResource AccentBrush}"/>
+                            <ContentPresenter VerticalAlignment="Center"/>
+                        </DockPanel>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="Amlab_MonitorStatusTextStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="Amlab_MonitorReadoutStyle" TargetType="TextBlock">
+            <Setter Property="Text" Value="—"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+        </Style>
+        <!-- Lucide paintbrush, image, video, square and focus, ISC. See docs/third-party/lucide. -->
+        <Geometry x:Key="Amlab_MonitorOverlayIcon">M14.622 17.897l-10.68-2.913 M18.376 2.622a1 1 0 1 1 3.002 3.002L17.36 9.643a.5.5 0 0 0 0 .707l.944.944a2.41 2.41 0 0 1 0 3.408l-.944.944a.5.5 0 0 1-.707 0L8.354 7.348a.5.5 0 0 1 0-.707l.944-.944a2.41 2.41 0 0 1 3.408 0l.944.944a.5.5 0 0 0 .707 0z M9 8c-1.804 2.71-3.97 3.46-6.583 3.948a.507.507 0 0 0-.302.819l7.32 8.883a1 1 0 0 0 1.185.204C12.735 20.405 16 16.792 16 15</Geometry>
+        <GeometryGroup x:Key="Amlab_MonitorOpenImageIcon">
+            <RectangleGeometry Rect="3,3,18,18" RadiusX="2" RadiusY="2"/>
+            <EllipseGeometry Center="9,9" RadiusX="2" RadiusY="2"/>
+            <PathGeometry Figures="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+        </GeometryGroup>
+        <GeometryGroup x:Key="Amlab_MonitorStartCameraIcon">
+            <RectangleGeometry Rect="2,6,14,12" RadiusX="2" RadiusY="2"/>
+            <PathGeometry Figures="M16 13l5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5"/>
+        </GeometryGroup>
+        <RectangleGeometry x:Key="Amlab_MonitorStopIcon" Rect="3,3,18,18" RadiusX="2" RadiusY="2"/>
+        <GeometryGroup x:Key="Amlab_MonitorSoloIcon">
+            <EllipseGeometry Center="12,12" RadiusX="3" RadiusY="3"/>
+            <PathGeometry Figures="M3 7V5a2 2 0 0 1 2-2h2 M17 3h2a2 2 0 0 1 2 2v2 M21 17v2a2 2 0 0 1-2 2h-2 M7 21H5a2 2 0 0 1-2-2v-2"/>
+        </GeometryGroup>
+
+        <Style x:Key="Amlab_MonitorIconButtonStyle" TargetType="ButtonBase">
+            <Setter Property="Width" Value="{DynamicResource UiInputHeight}"/>
+            <Setter Property="Height" Value="{DynamicResource UiInputHeight}"/>
+            <Setter Property="Margin" Value="4,2,0,2"/>
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}"/>
+            <Setter Property="ToolTipService.ShowOnDisabled" Value="True"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ButtonBase">
+                        <Border x:Name="ButtonBorder" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1" CornerRadius="{StaticResource UiCornerRadius}">
+                            <Viewbox Width="16" Height="16">
+                                <Canvas Width="24" Height="24">
+                                    <Path Data="{Binding Content, RelativeSource={RelativeSource TemplatedParent}}"
+                                          Stroke="{TemplateBinding Foreground}" StrokeThickness="2"
+                                          StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
+                                </Canvas>
+                            </Viewbox>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource ButtonHoverBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="{DynamicResource ControlFocusBorderBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ButtonBorder" Property="Opacity" Value="0.45"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="Amlab_MonitorOverlayToggleStyle" TargetType="ToggleButton" BasedOn="{StaticResource Amlab_MonitorIconButtonStyle}">
+            <Style.Triggers>
+                <Trigger Property="IsChecked" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+                    <Setter Property="Background" Value="{DynamicResource MutedAccentBrush}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="Amlab_MonitorZoomSliderStyle" TargetType="Slider" BasedOn="{StaticResource {x:Type Slider}}">
+            <Setter Property="Width" Value="{DynamicResource UiInputHeight}"/>
+            <Setter Property="Opacity" Value="0.4"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Slider">
+                        <Grid Background="Transparent">
+                            <Border Width="4" Margin="0,7" CornerRadius="{StaticResource UiCornerRadius}"
+                                    Background="{DynamicResource ParameterSliderFillBrush}"/>
+                            <Track x:Name="PART_Track" Orientation="{TemplateBinding Orientation}"
+                                   Minimum="{TemplateBinding Minimum}" Maximum="{TemplateBinding Maximum}"
+                                   Value="{Binding Value, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}">
+                                <Track.DecreaseRepeatButton>
+                                    <RepeatButton Command="Slider.DecreaseLarge" Focusable="False" Template="{StaticResource ScrollPageButtonTemplate}"/>
+                                </Track.DecreaseRepeatButton>
+                                <Track.Thumb>
+                                    <Thumb Width="14" Height="14">
+                                        <Thumb.Template>
+                                            <ControlTemplate TargetType="Thumb">
+                                                <Ellipse Fill="{DynamicResource ParameterSliderThumbBrush}"
+                                                         Stroke="{DynamicResource SurfaceBorderBrush}" StrokeThickness="1"/>
+                                            </ControlTemplate>
+                                        </Thumb.Template>
+                                    </Thumb>
+                                </Track.Thumb>
+                                <Track.IncreaseRepeatButton>
+                                    <RepeatButton Command="Slider.IncreaseLarge" Focusable="False" Template="{StaticResource ScrollPageButtonTemplate}"/>
+                                </Track.IncreaseRepeatButton>
+                            </Track>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Opacity" Value="1"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid x:Name="Amlab_MonitorLayout" Margin="{StaticResource UiWorkspaceMargin}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition x:Name="Amlab_MonitorCameraColumn" Width="500"/>
+            <ColumnDefinition x:Name="Amlab_MonitorCameraSplitterColumn" Width="4"/>
+            <ColumnDefinition Width="*" MinWidth="300"/>
+            <ColumnDefinition x:Name="Amlab_MonitorConsoleSplitterColumn" Width="4"/>
+            <ColumnDefinition x:Name="Amlab_MonitorConsoleColumn" Width="320"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid Visibility="{Binding Amlab_MonitorCameraPanelOpen, Converter={StaticResource Amlab_MonitorPanelVisibility}}">
+            <Grid.RowDefinitions>
+                <RowDefinition x:Name="Amlab_MonitorCameraRow" Height="300" MinHeight="120"/>
+                <RowDefinition x:Name="Amlab_MonitorCameraHeightSplitterRow" Height="4"/>
+                <RowDefinition x:Name="Amlab_MonitorInspectionRow" Height="*" MinHeight="{StaticResource UiParameterPanelMinHeight}"/>
+            </Grid.RowDefinitions>
+            <Border x:Name="Amlab_MonitorCameraCard" Style="{StaticResource Amlab_MonitorCardStyle}">
+                <DockPanel>
+                    <Grid DockPanel.Dock="Top" Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <ContentControl Content="{loc:Text Key='摄像头'}" Style="{StaticResource Amlab_MonitorCardTitleStyle}"/>
+                        <WrapPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <ToggleButton x:Name="Amlab_MonitorOverlayToggle" IsChecked="{Binding Amlab_MonitorShowOverlay, Mode=TwoWay}"
+                                          Content="{StaticResource Amlab_MonitorOverlayIcon}"
+                                          ToolTip="{loc:LocalizedBinding Amlab_MonitorOverlayLabel}"
+                                          AutomationProperties.Name="{loc:LocalizedBinding Amlab_MonitorOverlayLabel}"
+                                          Style="{StaticResource Amlab_MonitorOverlayToggleStyle}"/>
+                            <Button Content="{StaticResource Amlab_MonitorOpenImageIcon}" Command="{Binding Amlab_MonitorDetectImageCommand}"
+                                    ToolTip="{loc:Text Key='打开检测图像'}" AutomationProperties.Name="{loc:Text Key='打开检测图像'}"
+                                    Style="{StaticResource Amlab_MonitorIconButtonStyle}"/>
+                            <Button Content="{StaticResource Amlab_MonitorStartCameraIcon}" Command="{Binding Amlab_MonitorStartCameraCommand}"
+                                    ToolTip="{loc:Text Key='开始摄像头检测'}" AutomationProperties.Name="{loc:Text Key='开始摄像头检测'}"
+                                    Style="{StaticResource Amlab_MonitorIconButtonStyle}"/>
+                            <Button Content="{StaticResource Amlab_MonitorStopIcon}" Command="{Binding Amlab_MonitorStopCommand}"
+                                    Foreground="{DynamicResource StopActionBrush}"
+                                    ToolTip="{loc:Text Key='停止检测'}" AutomationProperties.Name="{loc:Text Key='停止检测'}"
+                                    Style="{StaticResource Amlab_MonitorIconButtonStyle}"/>
+                        </WrapPanel>
+                    </Grid>
+
+                    <Grid>
+                        <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="{StaticResource UiCornerRadius}"
+                                SizeChanged="CameraSurface_SizeChanged">
+                            <Grid x:Name="Amlab_MonitorImageViewport" Background="Transparent" ClipToBounds="True"
+                                  PreviewMouseWheel="ImageViewport_MouseWheel" SizeChanged="ImageViewport_SizeChanged"
+                                  MouseLeftButtonDown="ImageViewport_MouseLeftButtonDown" MouseMove="ImageViewport_MouseMove"
+                                  MouseLeftButtonUp="ImageViewport_MouseLeftButtonUp" LostMouseCapture="ImageViewport_LostMouseCapture">
+                                <Grid RenderTransformOrigin="0.5,0.5">
+                                    <Grid.RenderTransform>
+                                        <TransformGroup>
+                                            <ScaleTransform x:Name="Amlab_MonitorZoomScale"/>
+                                            <TranslateTransform x:Name="Amlab_MonitorZoomOffset"/>
+                                        </TransformGroup>
+                                    </Grid.RenderTransform>
+                                    <Image x:Name="Amlab_MonitorCameraImage" Source="{Binding Amlab_MonitorCameraFrame}" Stretch="Uniform" SizeChanged="ImageViewport_SizeChanged"/>
+                                    <Image x:Name="Amlab_MonitorDefectImage" Source="{Binding Amlab_MonitorDefectOverlay}" Stretch="Uniform" IsHitTestVisible="False">
+                                        <Image.Style>
+                                            <Style TargetType="Image">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Amlab_MonitorCameraFrame}" Value="{x:Null}">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Amlab_MonitorShowOverlay}" Value="False">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Image.Style>
+                                    </Image>
+                                </Grid>
+                                <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Text="{loc:Text Key='暂无摄像头画面'}">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource Amlab_MonitorStatusTextStyle}">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Amlab_MonitorCameraFrame}" Value="{x:Null}">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Grid>
+                        </Border>
+                        <Border x:Name="Amlab_MonitorZoomBadge" HorizontalAlignment="Left" VerticalAlignment="Top"
+                                Margin="8" Padding="6,2" Opacity="0" IsHitTestVisible="False"
+                                Background="{DynamicResource OverlayPanelBrush}" CornerRadius="{StaticResource UiCornerRadius}">
+                            <TextBlock x:Name="Amlab_MonitorZoomReadout" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                        </Border>
+                        <DockPanel HorizontalAlignment="Right" Margin="0,4,4,4" IsEnabled="{Binding Amlab_MonitorHasFrame}">
+                            <Button DockPanel.Dock="Bottom" Width="{DynamicResource UiInputHeight}" Margin="0,4,0,0" Padding="0"
+                                    Style="{StaticResource SecondaryActionButtonStyle}" Click="ResetZoom_Click"
+                                    AutomationProperties.Name="{loc:Text Key='重置缩放'}" ToolTip="{loc:Text Key='重置缩放'}">
+                                <!-- Lucide rotate-ccw, ISC. See docs/third-party/lucide. -->
+                                <Viewbox Width="16" Height="16">
+                                    <Canvas Width="24" Height="24">
+                                        <Path Data="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8 M3 3v5h5"
+                                              Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                              StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
+                                    </Canvas>
+                                </Viewbox>
+                            </Button>
+                            <Slider x:Name="Amlab_MonitorZoomSlider" Orientation="Vertical" HorizontalAlignment="Center"
+                                    Minimum="1" Maximum="5" Value="1" SmallChange="0.1" LargeChange="0.5"
+                                    IsMoveToPointEnabled="True" ValueChanged="ZoomSlider_ValueChanged" Style="{StaticResource Amlab_MonitorZoomSliderStyle}"
+                                    AutomationProperties.Name="{loc:Text Key='画面缩放'}" ToolTip="{loc:Text Key='画面缩放'}"/>
+                        </DockPanel>
+                    </Grid>
+                </DockPanel>
+            </Border>
+
+            <GridSplitter x:Name="Amlab_MonitorCameraHeightSplitter" Grid.Row="1"
+                          Style="{StaticResource WorkspaceHorizontalSplitterStyle}" ResizeDirection="Rows"
+                          ResizeBehavior="PreviousAndNext" DragCompleted="Amlab_MonitorCameraHeightSplitter_DragCompleted"
+                          KeyUp="Amlab_MonitorCameraHeightSplitter_KeyUp"
+                          AutomationProperties.Name="{loc:Text Key='调节摄像头高度'}"/>
+
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="4"/>
+                    <ColumnDefinition Width="2*"/>
+                </Grid.ColumnDefinitions>
+                <Border x:Name="Amlab_MonitorDetectionCard" Style="{StaticResource Amlab_MonitorCardStyle}">
+                    <DockPanel>
+                        <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,4">
+                            <ContentControl Content="{loc:Text Key='缺陷检测'}" VerticalAlignment="Center"
+                                            Style="{StaticResource Amlab_MonitorCardTitleStyle}"/>
+                            <Button Content="{loc:Text Key='连接视觉服务'}" Command="{Binding Amlab_MonitorConnectCommand}"
+                                    Style="{StaticResource SecondaryActionButtonStyle}" Margin="8,0,0,0"/>
+                        </WrapPanel>
+
+                        <TextBlock DockPanel.Dock="Bottom" Margin="0,4,0,0" MinHeight="{DynamicResource UiInputHeight}"
+                                   Text="{Binding Amlab_MonitorStatus}" Style="{StaticResource Amlab_MonitorStatusTextStyle}"/>
+                        <ScrollViewer x:Name="Amlab_MonitorDetectionScroll" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                            <StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" MaxWidth="108"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition MinHeight="{DynamicResource UiParameterRowHeight}" Height="Auto"/>
+                                        <RowDefinition MinHeight="{DynamicResource UiParameterRowHeight}" Height="Auto"/>
+                                        <RowDefinition MinHeight="{DynamicResource UiParameterRowHeight}" Height="Auto"/>
+                                        <RowDefinition MinHeight="{DynamicResource UiParameterRowHeight}" Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Grid.ColumnSpan="3" Text="{loc:Text Key='检测算法与模型'}" TextWrapping="Wrap"/>
+                                    <ComboBox x:Name="Amlab_MonitorAlgorithmSelector" Grid.Row="1" Grid.ColumnSpan="2" VerticalAlignment="Center"
+                                              ItemsSource="{Binding Amlab_MonitorModels}" SelectedItem="{Binding Amlab_MonitorSelectedModel}"
+                                              AutomationProperties.Name="{loc:Text Key='检测算法与模型'}">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding ModelName}" TextTrimming="CharacterEllipsis"/>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                    <Button x:Name="Amlab_MonitorQuickAddWeightButton" Grid.Row="1" Grid.Column="2" Content="+"
+                                            Command="{Binding Amlab_MonitorQuickAddWeightCommand}"
+                                            Width="{DynamicResource UiInputHeight}" Padding="0" Margin="8,0,0,0" VerticalAlignment="Center"
+                                            ToolTip="{loc:Text Key='添加权重…'}" AutomationProperties.Name="{loc:Text Key='添加权重…'}"
+                                            Style="{StaticResource SecondaryActionButtonStyle}"/>
+                                    <TextBlock Grid.Row="2" Text="{loc:Text Key='置信度阈值'}" VerticalAlignment="Center" Margin="0,0,12,0" TextWrapping="Wrap"/>
+                                    <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Width="80" HorizontalAlignment="Left" VerticalAlignment="Center"
+                                             Text="{Binding Amlab_MonitorConfidence, UpdateSourceTrigger=PropertyChanged}"
+                                             AutomationProperties.Name="{loc:Text Key='置信度阈值'}"/>
+                                    <TextBlock Grid.Row="3" Text="{loc:Text Key='IoU 阈值'}" VerticalAlignment="Center" Margin="0,0,12,0" TextWrapping="Wrap"/>
+                                    <TextBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" Width="80" HorizontalAlignment="Left" VerticalAlignment="Center"
+                                             Text="{Binding Amlab_MonitorIou, UpdateSourceTrigger=PropertyChanged}"
+                                             AutomationProperties.Name="{loc:Text Key='IoU 阈值'}"/>
+                                    <TextBlock Grid.Row="4" Text="{loc:Text Key='摄像头快照地址'}" VerticalAlignment="Center" Margin="0,0,12,0" TextWrapping="Wrap"/>
+                                    <TextBox Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" VerticalAlignment="Center"
+                                             Text="{Binding Amlab_MonitorSnapshotUrl, UpdateSourceTrigger=PropertyChanged}"
+                                             AutomationProperties.Name="{loc:Text Key='摄像头快照地址'}"/>
+                                </Grid>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </DockPanel>
+                </Border>
+                <Border x:Name="Amlab_MonitorReportCard" Grid.Column="2" Style="{StaticResource Amlab_MonitorCardStyle}">
+                    <DockPanel>
+                        <ContentControl DockPanel.Dock="Top" Content="{loc:Text Key='检测报告'}" Style="{StaticResource Amlab_MonitorCardTitleStyle}"/>
+                        <ComboBox DockPanel.Dock="Top" Margin="0,0,0,6" ItemsSource="{Binding Amlab_MonitorLayers}"
+                                  SelectedItem="{Binding Amlab_MonitorSelectedLayer}" AutomationProperties.Name="{loc:Text Key='缺陷图层'}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate><TextBlock Text="{loc:LocalizedBinding Label}" TextTrimming="CharacterEllipsis"/></DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <Grid>
+                            <TextBlock Text="{loc:Text Key='当前图层无检测项'}" TextWrapping="Wrap">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock" BasedOn="{StaticResource Amlab_MonitorStatusTextStyle}">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Amlab_MonitorReport.Count}" Value="0">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                <ItemsControl ItemsSource="{Binding Amlab_MonitorReport}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border x:Name="Amlab_MonitorDefectRow" CornerRadius="{StaticResource UiCornerRadius}" Margin="0,1">
+                                                <Grid MinHeight="{DynamicResource UiInputHeight}">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock x:Name="Amlab_MonitorDefectName" Text="{Binding Label}" ToolTip="{Binding Label}"
+                                                               TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="4,0,4,0"/>
+                                                    <!-- Eye icons adapted from Lucide, matching the object panel. -->
+                                                    <Button Grid.Column="1" Width="{DynamicResource UiInputHeight}" Padding="0"
+                                                            Command="{Binding DataContext.Amlab_MonitorToggleDefectCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                            CommandParameter="{Binding}" ToolTip="{loc:Text Key='显示/隐藏'}"
+                                                            AutomationProperties.Name="{loc:Text Key='显示/隐藏'}"
+                                                            Style="{StaticResource SecondaryActionButtonStyle}">
+                                                        <Viewbox Width="16" Height="16">
+                                                            <Path x:Name="Amlab_MonitorDefectEye" Width="24" Height="24"
+                                                                  Stroke="{DynamicResource SecondaryTextBrush}" StrokeThickness="1.7"
+                                                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                                                  Data="M2,12 C6,1 18,1 22,12 C18,23 6,23 2,12 M15,12 A3,3 0 1 1 9,12 A3,3 0 1 1 15,12"/>
+                                                        </Viewbox>
+                                                    </Button>
+                                                    <Button x:Name="Amlab_MonitorSoloButton" Grid.Column="2" Margin="4,0,0,0"
+                                                            Content="{StaticResource Amlab_MonitorSoloIcon}"
+                                                            ToolTip="{loc:LocalizedBinding SoloLabel}" AutomationProperties.Name="{loc:LocalizedBinding SoloLabel}"
+                                                            Command="{Binding DataContext.Amlab_MonitorSoloDefectCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                            CommandParameter="{Binding}" Style="{StaticResource Amlab_MonitorIconButtonStyle}"/>
+                                                </Grid>
+                                            </Border>
+                                            <DataTemplate.Triggers>
+                                                <DataTrigger Binding="{Binding IsVisible}" Value="False">
+                                                    <Setter TargetName="Amlab_MonitorDefectEye" Property="Data"
+                                                            Value="M2,2 L22,22 M9,5 C14,2 19,5 22,12 L19,16 M6,6 C4,8 3,10 2,12 C6,21 13,23 18,18 M10,10 A3,3 0 0 0 14,14"/>
+                                                    <Setter TargetName="Amlab_MonitorDefectName" Property="Opacity" Value="0.45"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IsSolo}" Value="True">
+                                                    <Setter TargetName="Amlab_MonitorDefectRow" Property="Background" Value="{DynamicResource SelectionHighlightBrush}"/>
+                                                    <Setter TargetName="Amlab_MonitorSoloButton" Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+                                                </DataTrigger>
+                                            </DataTemplate.Triggers>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </Grid>
+                    </DockPanel>
+                </Border>
+            </Grid>
+        </Grid>
+
+        <GridSplitter x:Name="Amlab_MonitorCameraSplitter" Grid.Column="1" Style="{StaticResource WorkspaceVerticalSplitterStyle}" ResizeDirection="Columns"
+                      ResizeBehavior="PreviousAndNext"
+                      Visibility="{Binding Amlab_MonitorCameraPanelOpen, Converter={StaticResource Amlab_MonitorPanelVisibility}}"
+                      DragCompleted="Amlab_MonitorSplitter_DragCompleted" KeyUp="Amlab_MonitorSplitter_KeyUp"/>
+
+        <ScrollViewer x:Name="Amlab_MonitorDeviceScroll" Grid.Column="2"
+                      VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Border x:Name="Amlab_MonitorDeviceStatusCard" VerticalAlignment="Top">
+                    <Border.Style>
+                        <Style TargetType="Border" BasedOn="{StaticResource Amlab_MonitorCardStyle}">
+                            <Setter Property="Grid.ColumnSpan" Value="2"/>
+                            <Setter Property="Margin" Value="0,0,0,4"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Amlab_MonitorDeviceColumns}" Value="2">
+                                    <Setter Property="Grid.ColumnSpan" Value="1"/>
+                                    <Setter Property="Margin" Value="0,0,2,0"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <StackPanel>
+                        <DockPanel>
+                            <Button DockPanel.Dock="Right" Content="{loc:LocalizedBinding DeviceConnectionAction}"
+                                    Command="{Binding ToggleDeviceConnectionCommand}" Margin="8,0,0,0"
+                                    Style="{StaticResource SecondaryActionButtonStyle}"/>
+                            <ContentControl Content="{loc:Text Key='设备状态'}" Style="{StaticResource Amlab_MonitorCardTitleStyle}"/>
+                        </DockPanel>
+                        <Grid Margin="0,4,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition MinHeight="{DynamicResource UiParameterRowHeight}" Height="Auto"/>
+                                <RowDefinition MinHeight="{DynamicResource UiParameterRowHeight}" Height="Auto"/>
+                                <RowDefinition MinHeight="{DynamicResource UiParameterRowHeight}" Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Text="{loc:Text Key='设备地址'}" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                            <TextBox Grid.Column="1" Text="{Binding MoonrakerAddress, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding CanEditDeviceConnection}"
+                                     VerticalAlignment="Center" AutomationProperties.Name="{loc:Text Key='设备地址'}"/>
+                            <TextBlock Grid.Row="1" Text="{loc:Text Key='API Key（可选）'}" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                            <PasswordBox Grid.Row="1" Grid.Column="1" PasswordChanged="MoonrakerKey_Changed" IsEnabled="{Binding CanEditDeviceConnection}"
+                                         VerticalAlignment="Center" MinHeight="{DynamicResource UiInputHeight}"
+                                         Background="{DynamicResource ControlBackgroundBrush}" Foreground="{DynamicResource PrimaryTextBrush}"
+                                         BorderBrush="{DynamicResource ControlBorderBrush}"
+                                         Padding="{DynamicResource UiInputPadding}"
+                                         AutomationProperties.Name="{loc:Text Key='API Key（可选）'}">
+                                <PasswordBox.Template>
+                                    <ControlTemplate TargetType="PasswordBox">
+                                        <Border x:Name="Amlab_MonitorPasswordBorder" Background="{TemplateBinding Background}"
+                                                BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" CornerRadius="{StaticResource UiCornerRadius}">
+                                            <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                                <Setter TargetName="Amlab_MonitorPasswordBorder" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </PasswordBox.Template>
+                            </PasswordBox>
+                            <TextBlock Grid.Row="2" Text="{loc:Text Key='刷新间隔（秒）'}" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                            <DockPanel Grid.Row="2" Grid.Column="1" VerticalAlignment="Center">
+                                <Button DockPanel.Dock="Right" Content="{loc:Text Key='保存'}" Command="{Binding SaveDeviceSettingsCommand}"
+                                        Style="{StaticResource SecondaryActionButtonStyle}" Margin="8,0,0,0"/>
+                                <TextBox Text="{Binding DeviceRefreshSeconds, UpdateSourceTrigger=PropertyChanged}"
+                                         AutomationProperties.Name="{loc:Text Key='刷新间隔（秒）'}"/>
+                            </DockPanel>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition MinHeight="{DynamicResource UiParameterRowHeight}" Height="Auto"/>
+                                <RowDefinition MinHeight="{DynamicResource UiParameterRowHeight}" Height="Auto"/>
+                                <RowDefinition MinHeight="{DynamicResource UiParameterRowHeight}" Height="Auto"/>
+                                <RowDefinition MinHeight="{DynamicResource UiParameterRowHeight}" Height="Auto"/>
+                                <RowDefinition MinHeight="{DynamicResource UiParameterRowHeight}" Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Text="Moonraker" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                            <TextBlock Grid.Column="1" Text="{loc:LocalizedBinding DeviceConnectionStatus}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="1" Text="Klipper" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{loc:LocalizedBinding KlipperStateLabel}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="2" Text="{loc:Text Key='任务状态'}" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{loc:LocalizedBinding PrintStateLabel}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="3" Text="{loc:Text Key='当前任务'}" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding DeviceFilename}" ToolTip="{Binding DeviceFilename}"
+                                       TextAlignment="Right" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="4" Text="{loc:Text Key='打印进度'}" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding DeviceTelemetry.Progress, StringFormat={}{0:P0}, FallbackValue=—, TargetNullValue=—}"
+                                       HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        </Grid>
+                        <TextBlock Text="{Binding DeviceSettingsStatus}" Style="{StaticResource Amlab_MonitorStatusTextStyle}"/>
+                        <TextBlock Text="{Binding DeviceConnectionError}" Foreground="{DynamicResource WarningBrush}" TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+
+                <Border x:Name="Amlab_MonitorTemperatureCard" VerticalAlignment="Top">
+                    <Border.Style>
+                        <Style TargetType="Border" BasedOn="{StaticResource Amlab_MonitorCardStyle}">
+                            <Setter Property="Grid.Row" Value="1"/>
+                            <Setter Property="Grid.ColumnSpan" Value="2"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Amlab_MonitorDeviceColumns}" Value="2">
+                                    <Setter Property="Grid.Row" Value="0"/>
+                                    <Setter Property="Grid.Column" Value="1"/>
+                                    <Setter Property="Grid.ColumnSpan" Value="1"/>
+                                    <Setter Property="Margin" Value="2,0,0,0"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <StackPanel>
+                        <ContentControl Content="{loc:Text Key='温度（°C）'}" Style="{StaticResource Amlab_MonitorCardTitleStyle}"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" MinHeight="{DynamicResource UiParameterRowHeight}"/>
+                                <RowDefinition Height="Auto" MinHeight="{DynamicResource UiParameterRowHeight}"/>
+                                <RowDefinition Height="Auto" MinHeight="{DynamicResource UiParameterRowHeight}"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Column="1" Text="{loc:Text Key='当前温度'}" TextAlignment="Center"
+                                       Style="{StaticResource Amlab_MonitorStatusTextStyle}"/>
+                            <TextBlock Grid.Column="2" Text="{loc:Text Key='目标温度'}" TextAlignment="Center"
+                                       Style="{StaticResource Amlab_MonitorStatusTextStyle}"/>
+                            <TextBlock Grid.Row="1" Text="{loc:Text Key='喷嘴'}" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding DeviceTelemetry.NozzleTemperature, StringFormat={}{0:F1}, FallbackValue=—, TargetNullValue=—}" Style="{StaticResource Amlab_MonitorReadoutStyle}"/>
+                            <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding DeviceTelemetry.NozzleTarget, StringFormat={}{0:F1}, FallbackValue=—, TargetNullValue=—}" Style="{StaticResource Amlab_MonitorReadoutStyle}"/>
+                            <TextBlock Grid.Row="2" Text="{loc:Text Key='热床'}" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding DeviceTelemetry.BedTemperature, StringFormat={}{0:F1}, FallbackValue=—, TargetNullValue=—}" Style="{StaticResource Amlab_MonitorReadoutStyle}"/>
+                            <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding DeviceTelemetry.BedTarget, StringFormat={}{0:F1}, FallbackValue=—, TargetNullValue=—}" Style="{StaticResource Amlab_MonitorReadoutStyle}"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+            </Grid>
+        </ScrollViewer>
+
+        <GridSplitter x:Name="Amlab_MonitorConsoleSplitter" Grid.Column="3" Style="{StaticResource WorkspaceVerticalSplitterStyle}" ResizeDirection="Columns"
+                      ResizeBehavior="PreviousAndNext"
+                      Visibility="{Binding Amlab_MonitorConsolePanelOpen, Converter={StaticResource Amlab_MonitorPanelVisibility}}"
+                      DragCompleted="Amlab_MonitorSplitter_DragCompleted" KeyUp="Amlab_MonitorSplitter_KeyUp"/>
+
+        <Border x:Name="Amlab_MonitorConsoleCard" Grid.Column="4" Style="{StaticResource Amlab_MonitorCardStyle}"
+                Visibility="{Binding Amlab_MonitorConsolePanelOpen, Converter={StaticResource Amlab_MonitorPanelVisibility}}">
+            <DockPanel>
+                <ContentControl DockPanel.Dock="Top" Content="{loc:Text Key='控制台'}" Style="{StaticResource Amlab_MonitorCardTitleStyle}"/>
+                <StackPanel DockPanel.Dock="Bottom" Margin="0,8,0,0">
+                    <TextBlock Text="{loc:LocalizedBinding Amlab_MonitorConsoleHistoryError}" TextWrapping="Wrap"
+                               Foreground="{DynamicResource WarningBrush}"/>
+                    <TextBlock Text="{Binding Amlab_MonitorConsoleStatus}" TextWrapping="Wrap"
+                               Foreground="{DynamicResource SecondaryTextBrush}"/>
+                    <DockPanel>
+                        <Button DockPanel.Dock="Right" Margin="8,0,0,0" Content="{loc:Text Key='发送'}"
+                                Command="{Binding Amlab_MonitorSendConsoleCommand}" Style="{StaticResource SecondaryActionButtonStyle}"/>
+                        <TextBox x:Name="Amlab_MonitorConsoleInput" IsEnabled="{Binding DeviceMonitoring}"
+                                 Text="{Binding Amlab_MonitorConsoleInput, UpdateSourceTrigger=PropertyChanged}"
+                                 AutomationProperties.Name="{loc:Text Key='G-code 命令'}">
+                            <TextBox.InputBindings>
+                                <KeyBinding Key="Enter" Command="{Binding Amlab_MonitorSendConsoleCommand}"/>
+                            </TextBox.InputBindings>
+                        </TextBox>
+                    </DockPanel>
+                </StackPanel>
+                <Border MinHeight="164" Background="{DynamicResource SurfaceBrush}"
+                        CornerRadius="{StaticResource UiCornerRadius}" Padding="{StaticResource UiCardPadding}">
+                    <Grid>
+                        <TextBlock Text="{loc:Text Key='暂无设备消息'}" VerticalAlignment="Top">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock" BasedOn="{StaticResource Amlab_MonitorStatusTextStyle}">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Amlab_MonitorConsoleLog}" Value="">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                                      ScrollChanged="Amlab_MonitorConsole_ScrollChanged">
+                            <TextBlock Text="{Binding Amlab_MonitorConsoleLog}" TextWrapping="Wrap"/>
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
+            </DockPanel>
+        </Border>
+    </Grid>
+</UserControl>

@@ -1,0 +1,16 @@
+<UserControl x:Class="AMLabSlicer.Plugins.Tripo.TripoSettingsPage"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:loc="clr-namespace:AMLabSlicer.Plugin.Wpf.Localization;assembly=AMLabSlicer.Plugin.Wpf"
+ FontFamily="{DynamicResource UiFontFamily}" FontSize="{DynamicResource UiFontSize}"
+ Foreground="{DynamicResource PrimaryTextBrush}" Background="{DynamicResource SurfaceBrush}">
+ <StackPanel><Border Style="{StaticResource SettingsCardStyle}"><StackPanel>
+  <TextBlock Text="Tripo AI" FontWeight="SemiBold" Margin="0,0,0,8"/>
+  <TextBlock Text="{loc:Text Key='API Key 环境变量名称'}"/>
+  <TextBox Text="{Binding KeyVariable, UpdateSourceTrigger=LostFocus}" Margin="0,4,0,8"/>
+  <TextBlock Text="{loc:Text Key='这里填写环境变量名称，不填写密钥本身。更改系统环境变量后需重启软件。'}" TextWrapping="Wrap" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,8"/>
+  <TextBlock Text="{loc:Text Key='模型版本'}"/>
+  <TextBox Text="{Binding Model, UpdateSourceTrigger=LostFocus}" Margin="0,4,0,8"/>
+  <TextBlock Text="{loc:Text Key='使用官方 Tripo API，生成无纹理 GLB。图片 URL 必须可由 Tripo 访问。'}" TextWrapping="Wrap" Foreground="{DynamicResource SecondaryTextBrush}"/>
+ </StackPanel></Border><TextBlock Text="{loc:LocalizedBinding SaveStatus}" TextWrapping="Wrap" Foreground="{DynamicResource SecondaryTextBrush}"/></StackPanel>
+</UserControl>
+

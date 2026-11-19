@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+package amlab.monitor;
+option csharp_namespace = "AMLabSlicer.Amlab_Monitor.Grpc";
+
+service AmlabMonitorVision {
+  rpc ListModels (ListModelsRequest) returns (ListModelsReply);
+  rpc Detect (stream DetectionRequest) returns (stream DetectionResult);
+}
+
+message ListModelsRequest {}
+
+message ListModelsReply {
+  repeated VisionModel models = 1;
+}
+
+message VisionModel {
+  string id = 1;
+  string algorithm_name = 2;
+  string model_name = 3;
+  float default_confidence = 4;
+  float default_iou = 5;
+}
+
+message DetectionOptions {
+  string model_id = 1;
+  float confidence = 2;
+  float iou = 3;
+}
+
+message DetectionRequest {
+  // Send options first, then one or more frames. Settings apply to this call.
+  oneof input {
+    DetectionOptions options = 1;
+    DetectionFrame frame = 2;
+  }
+}
+
+message DetectionFrame {
+  uint64 frame_id = 1;
+  bytes image = 2;
+}
+
+message DetectionResult {
+  uint64 frame_id = 1;
+  int32 width = 2;
+  int32 height = 3;
+  repeated DefectBox defects = 4;
+}
+
+message DefectBox {
+  int32 class_id = 1;
+  string class_name = 2;
+  float confidence = 3;
+  // Original image pixels, origin at the top left.
+  float x_min = 4;
+  float y_min = 5;
+  float x_max = 6;
+  float y_max = 7;
+}

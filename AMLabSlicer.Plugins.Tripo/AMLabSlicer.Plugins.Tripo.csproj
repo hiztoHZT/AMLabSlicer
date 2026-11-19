@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><TargetFramework>net8.0-windows</TargetFramework><UseWPF>true</UseWPF><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable><EnableDynamicLoading>true</EnableDynamicLoading></PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../AMLabSlicer.Plugin.Wpf/AMLabSlicer.Plugin.Wpf.csproj" Private="false" ExcludeAssets="runtime"/>
+    <ProjectReference Include="../AMLabSlicer.Plugin.Abstractions/AMLabSlicer.Plugin.Abstractions.csproj" Private="false" ExcludeAssets="runtime"/>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2"/>
+  </ItemGroup>
+  <Target Name="StageTripoPackage" AfterTargets="Build">
+    <PropertyGroup><PackageDir>$(MSBuildProjectDirectory)/bin/$(Configuration)/package/</PackageDir></PropertyGroup>
+    <ItemGroup>
+      <PackageFiles Include="$(TargetPath);$(TargetDir)$(AssemblyName).deps.json;$(MSBuildProjectDirectory)/extension.json"/>
+      <PackageFiles Include="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.Filename)' != 'AMLabSlicer.Plugin.Abstractions' and '%(ReferenceCopyLocalPaths.Filename)' != 'AMLabSlicer.Plugin.Wpf'"/>
+    </ItemGroup>
+    <Copy SourceFiles="@(PackageFiles)" DestinationFolder="$(PackageDir)" SkipUnchangedFiles="true"/>
+    <ZipDirectory SourceDirectory="$(PackageDir)" DestinationFile="$(MSBuildProjectDirectory)/bin/$(Configuration)/amlab.tripo-1.0.0.zip" Overwrite="true"/>
+  </Target>
+</Project>

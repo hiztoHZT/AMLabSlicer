@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType><TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable>
+    <Platforms>AnyCPU;x64</Platforms>
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../AMLabSlicer.Core/AMLabSlicer.Core.csproj" />
+    <PackageReference Include="Google.Protobuf" Version="3.34.1" />
+    <PackageReference Include="Grpc.AspNetCore" Version="2.76.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.80.0" PrivateAssets="all" />
+    <Protobuf Include="../Protos/slicer.proto" GrpcServices="Both" />
+    <Content Include="native/bin/atom_slicer.exe" Link="native/atom_slicer.exe" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="native/upstream/LICENSE" Link="notices/AtomSlicer/LICENSE" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+  <Target Name="BuildAtomNative" BeforeTargets="PrepareForBuild" Inputs="@(AtomNativeSource);native/build.ps1" Outputs="native/bin/atom_slicer.exe" Condition="'$(OS)' == 'Windows_NT'">
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)/native/build.ps1&quot;" />
+  </Target>
+  <ItemGroup><AtomNativeSource Include="native/upstream/src/*.cpp;native/upstream/src/*.h" /></ItemGroup>
+  <Target Name="StageAtomPackage" AfterTargets="Build">
+    <ItemGroup>
+      <AtomPackageFiles Include="$(TargetPath);$(TargetDir)$(AssemblyName).exe;$(TargetDir)$(AssemblyName).deps.json;$(TargetDir)$(AssemblyName).runtimeconfig.json" />
+      <AtomPackageFiles Include="@(ReferenceCopyLocalPaths)" />
+      <AtomPackageFiles Include="$(TargetDir)amlab_kinematics.dll" />
+      <AtomPackageFiles Include="$(TargetDir)appsettings.json" />
+      <AtomPackageFiles Include="$(TargetDir)native/**/*"><PackageSubdir>native/</PackageSubdir></AtomPackageFiles>
+      <AtomPackageFiles Include="$(TargetDir)notices/**/*"><PackageSubdir>notices/</PackageSubdir></AtomPackageFiles>
+    </ItemGroup>
+    <Copy SourceFiles="@(AtomPackageFiles)" DestinationFiles="@(AtomPackageFiles->'$(MSBuildThisFileDirectory)bin/$(Configuration)/package/%(PackageSubdir)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+  </Target>
+</Project>

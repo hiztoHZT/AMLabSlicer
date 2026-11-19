@@ -14,6 +14,7 @@ namespace AMLabSlicer.ViewModel
     public partial class OutlinerNodeViewModel : ObservableObject
     {
         private readonly SceneNode _node;
+        private readonly HashSet<OutlinerNodeViewModel> _knownChildren = new();
 
         [ObservableProperty]
         private string _name;
@@ -32,6 +33,15 @@ namespace AMLabSlicer.ViewModel
         private bool _isSelected;
 
         [ObservableProperty]
+        private bool _isLocked;
+
+        partial void OnIsLockedChanged(bool value) => RefreshEffectiveState();
+        partial void OnIsSelectedChanged(bool value) { if (value && (IsEffectivelyLocked || !IsEffectivelyVisible)) IsSelected = false; }
+
+        [RelayCommand]
+        private void ToggleLock() { if (CanToggleLock) IsLocked = !IsLocked; }
+
+        [ObservableProperty]
         private bool _isExpanded = true;
 
         public bool IsVisible
@@ -43,8 +53,7 @@ namespace AMLabSlicer.ViewModel
                 {
                     _node.Visible = value;
                     OnPropertyChanged();
-                    foreach (var child in Children)
-                        child.IsVisible = value;
+                    RefreshEffectiveState();
                 }
             }
         }
@@ -52,13 +61,54 @@ namespace AMLabSlicer.ViewModel
         public ObservableCollection<OutlinerNodeViewModel> Children { get; } = new();
 
         public SceneNode Node => _node;
+        private OutlinerNodeViewModel? _parent;
+        public OutlinerNodeViewModel? Parent
+        {
+            get => _parent;
+            internal set { if (SetProperty(ref _parent, value)) RefreshEffectiveState(); }
+        }
+        public bool IsGroup { get; }
+        public bool IsEffectivelyLocked => IsLocked || Parent?.IsEffectivelyLocked == true;
+        public bool IsEffectivelyVisible => IsVisible && (Parent?.IsEffectivelyVisible ?? true);
+        public bool CanToggleLock => Parent?.IsEffectivelyLocked != true;
+        public bool CanToggleVisibility => Parent?.IsEffectivelyVisible != false;
+        public IEnumerable<OutlinerNodeViewModel> DescendantsAndSelf()
+        {
+            yield return this;
+            foreach (var child in Children) foreach (var node in child.DescendantsAndSelf()) yield return node;
+        }
+        public bool IsAncestorOf(OutlinerNodeViewModel other)
+        {
+            for (var parent = other.Parent; parent != null; parent = parent.Parent) if (parent == this) return true;
+            return false;
+        }
+        private void RefreshEffectiveState()
+        {
+            if (IsEffectivelyLocked || !IsEffectivelyVisible) IsSelected = false;
+            OnPropertyChanged(nameof(IsEffectivelyLocked)); OnPropertyChanged(nameof(IsEffectivelyVisible));
+            OnPropertyChanged(nameof(CanToggleLock)); OnPropertyChanged(nameof(CanToggleVisibility));
+            foreach (var child in Children) child.RefreshEffectiveState();
+        }
+        partial void OnNameChanged(string value) => _node.Name = value;
 
-        public OutlinerNodeViewModel(SceneNode node, string defaultName)
+        public OutlinerNodeViewModel(SceneNode node, string defaultName, bool isGroup = false)
         {
             _node = node;
+            IsGroup = isGroup;
+            Children.CollectionChanged += (_, args) =>
+            {
+                if (args.OldItems != null) foreach (OutlinerNodeViewModel old in args.OldItems) if (old.Parent == this) old.Parent = null;
+                // Reset events have no old items; keep a snapshot to detach removed children as well.
+                foreach (var old in _knownChildren.Where(x => !Children.Contains(x)).ToArray()) if (old.Parent == this) old.Parent = null;
+                _knownChildren.Clear();
+                foreach (var child in Children) { child.Parent = this; _knownChildren.Add(child); }
+            };
             _name = string.IsNullOrWhiteSpace(node.Name) ? defaultName : node.Name;
             _editingName = _name;
         }
+
+        [RelayCommand]
+        private void ToggleExpanded() => IsExpanded = !IsExpanded;
 
         [RelayCommand]
         private void Rename()
@@ -83,7 +133,7 @@ namespace AMLabSlicer.ViewModel
         [RelayCommand]
         private void ToggleVisibility()
         {
-            IsVisible = !IsVisible;
+            if (CanToggleVisibility) IsVisible = !IsVisible;
         }
 
         /// <summary>

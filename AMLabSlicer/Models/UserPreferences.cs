@@ -1,4 +1,4 @@
-namespace AMLabSlicer.Models;
+﻿namespace AMLabSlicer.Models;
 
 public sealed class UserPreferences
 {
@@ -6,14 +6,23 @@ public sealed class UserPreferences
     public string Language { get; set; } = "zh-CN";
     public string FontFamilyName { get; set; } = "Microsoft YaHei";
     public double FontSize { get; set; } = 12;
+    public bool ShowSelectionOutline { get; set; } = true;
+    public bool ShowBuildVolumeTop { get; set; } = true;
+    public bool ShowBuildVolumeSides { get; set; } = false;
+    public bool ShowSelectionAabb { get; set; } = true;
+    public double SelectionOutlineThickness { get; set; } = 0.8;
     public bool EnableFXAA { get; set; } = true;
     public bool ShowEngineHostConsole { get; set; }
     public bool EnableSSAO { get; set; }
     public bool ShowCoordinateSystem { get; set; } = true;
     public bool ShowViewCube { get; set; } = true;
+    public double ViewCubeSize { get; set; } = 100;
+    public static IReadOnlyList<double> ViewCubeSizes { get; } = Array.AsReadOnly(new double[] { 70, 85, 100, 115, 130, 150 });
+    internal static double NormalizeViewCubeSize(double size) => ViewCubeSizes.Contains(size) ? size : 100;
     public bool ShowBuildGrid { get; set; } = true;
     public bool ShowViewportStatus { get; set; } = true;
     public bool UseOrthographic { get; set; }
+    public bool ReverseViewZoom { get; set; } = true;
     public bool EnableDeleteConfirm { get; set; } = true;
     public bool EnableArrangeConfirm { get; set; } = true;
     public bool EnableSplitConfirm { get; set; } = true;
@@ -40,6 +49,8 @@ public sealed class UserPreferences
         Language = Language == "en" ? "en" : "zh-CN";
         FontFamilyName = string.IsNullOrWhiteSpace(FontFamilyName) ? "Microsoft YaHei" : FontFamilyName;
         FontSize = double.IsFinite(FontSize) ? Math.Clamp(FontSize, 10, 20) : 12;
+        SelectionOutlineThickness = double.IsFinite(SelectionOutlineThickness) ? Math.Clamp(SelectionOutlineThickness, 0.5, 4) : 0.8;
+        ViewCubeSize = NormalizeViewCubeSize(ViewCubeSize);
         UndoStackDepth = Math.Clamp(UndoStackDepth, 0, 200);
         DeveloperPanelWidth = double.IsFinite(DeveloperPanelWidth) ? Math.Clamp(DeveloperPanelWidth, 300, 600) : 360;
     }

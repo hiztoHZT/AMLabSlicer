@@ -29,13 +29,22 @@ namespace AMLabSlicer.ViewModel
         // 存放细网格数据 (每 1mm 一根)
         [ObservableProperty]
         private Geometry3D? _minorGridGeometry;
+        [ObservableProperty] private Geometry3D? _buildVolumeTopGeometry;
+        [ObservableProperty] private Geometry3D? _buildVolumeSidesGeometry;
+        [ObservableProperty] private Geometry3D? _originXAxisGeometry;
+        [ObservableProperty] private Geometry3D? _originYAxisGeometry;
+        [ObservableProperty] private Geometry3D? _originZAxisGeometry;
+        public AMLabSlicer.Core.Printers.PrinterProfile? BuildVolumeProfile { get; private set; }
+
+        private readonly SlicePresetStore _slicePresets = new();
+        private string _parameterContext = "";
 
         private void CacheCurrentParameterValues()
         {
             if (string.IsNullOrEmpty(_activeParameterAlgorithmId))
                 return;
 
-            _parameterValuesByAlgorithm[_activeParameterAlgorithmId] =
+            _parameterValuesByAlgorithm[_parameterContext] =
                 _parameterStore.GetAllParameters().ToDictionary(p => p.Key, p => p.Value);
         }
 
@@ -151,17 +160,30 @@ namespace AMLabSlicer.ViewModel
         private readonly Dictionary<string, Dictionary<string, object?>> _parameterValuesByAlgorithm = new();
         private readonly Dictionary<string, bool> _subcategoryExpandedStates = new();
         private string _activeParameterAlgorithmId = "";
-        
+
         private readonly ISlicingService _slicingService;
         private readonly ISliceRequestFactory _sliceRequestFactory;
         private readonly IUserDialogService _dialogs;
         private int _parameterRequestVersion;
+        private bool _parametersLoading;
         public AMLabSlicer.Core.Commands.CommandManager History { get; } = new();
         public PreferencesViewModel AppPrefs { get; }
+        private readonly AMLabSlicer.Core.Printers.IPrinterProfileProvider? _printers;
+        public string PrinterSummary
+        {
+            get
+            {
+                try { var p = _printers?.GetActiveSnapshot(); return p == null ? "设置打印机" : $"打印机：{p.Name}"; }
+                catch { return "未选择有效打印机"; }
+            }
+        }
+        [RelayCommand] private void OpenPrinterSettings() => _dialogs.OpenPrinters();
 
         public PrepareWorkspaceViewModel(IParameterStore parameterStore, PreferencesViewModel appPrefs,
-            ISlicingService slicingService, ISliceRequestFactory sliceRequestFactory, IUserDialogService dialogs, PluginManager? plugins = null)
+            ISlicingService slicingService, ISliceRequestFactory sliceRequestFactory, IUserDialogService dialogs, PluginManager? plugins = null,
+            AMLabSlicer.Core.Printers.IPrinterProfileProvider? printers = null)
         {
+            InitializeSelection();
             _parameterStore = parameterStore;
             AppPrefs = appPrefs;
             ExtensionPanels = plugins?.Panels ?? new();
@@ -179,6 +201,13 @@ namespace AMLabSlicer.ViewModel
             _slicingService = slicingService;
             _sliceRequestFactory = sliceRequestFactory;
             _dialogs = dialogs;
+            _printers = printers;
+            if (_printers != null) _printers.Changed += (_, _) =>
+            {
+                OnPropertyChanged(nameof(PrinterSummary));
+                GeneratePlatformGrid();
+                if (SelectedAlgorithm != null) _ = RebuildParametersForAlgorithmAsync(SelectedAlgorithm.AlgorithmId);
+            };
 
 
             // 在工作区初始化时，立刻生成切片平台网格
@@ -211,21 +240,38 @@ namespace AMLabSlicer.ViewModel
         private async Task RebuildParametersForAlgorithmAsync(string algorithm)
         {
             var requestVersion = ++_parameterRequestVersion;
+            _parametersLoading = true;
 
             try
             {
                 CacheCurrentParameterValues();
                 var response = await _slicingService.GetParametersAsync(algorithm);
+                if (_printers != null)
+                {
+                    var machineRows = response.Parameters.Where(p => AMLabSlicer.Core.Printers.PrinterCatalog.IsMachineParameter(p.Key)).ToArray();
+                    foreach (var row in machineRows) response.Parameters.Remove(row);
+                }
                 if (requestVersion != _parameterRequestVersion || SelectedAlgorithm?.AlgorithmId != algorithm)
                     return;
 
                 // 缓存旧参数用于继承
-                _parameterValuesByAlgorithm.TryGetValue(algorithm, out var previousValues);
+                var scope = (_printers?.GetActiveSnapshot().Id ?? "default") + "|" + algorithm;
+                var group = _slicePresets.Group(scope);
+                _loadingPresets = true;
+                ParameterPresets.Clear();
+                foreach (var preset in group.Presets) ParameterPresets.Add(preset);
+                SelectedParameterPreset = ParameterPresets.Single(p => p.Id == group.SelectedId);
+                _presetScope = scope;
+                _loadingPresets = false;
+                var context = scope + "#" + group.SelectedId;
+                _parameterValuesByAlgorithm.TryGetValue(context, out var previousValues);
+                var savedValues = _slicePresets.Read(context);
 
                 _parameterStore.ClearAll();
 
                 foreach (var pDef in response.Parameters)
                 {
+                    var initialValue = savedValues.TryGetValue(pDef.Key, out var saved) ? saved : pDef.DefaultValue;
                     var param = new SliceParameter
                     {
                         Key = pDef.Key,
@@ -257,15 +303,15 @@ namespace AMLabSlicer.ViewModel
                     {
                         if (param.ControlType == UIControlType.CheckBox)
                         {
-                            param.Value = bool.TryParse(pDef.DefaultValue, out bool b) && b;
+                            param.Value = bool.TryParse(initialValue, out bool b) && b;
                         }
                         else if (param.ControlType == UIControlType.NumericBox || param.ControlType == UIControlType.Slider)
                         {
-                            if (double.TryParse(pDef.DefaultValue, NumberStyles.Float, CultureInfo.InvariantCulture, out double d)) param.Value = d;
+                            if (double.TryParse(initialValue, NumberStyles.Float, CultureInfo.InvariantCulture, out double d)) param.Value = d;
                         }
                         else
                         {
-                            param.Value = pDef.DefaultValue;
+                            param.Value = initialValue;
                             if (param.ControlType == UIControlType.ComboBox)
                             {
                                 param.Options = pDef.Options.ToList();
@@ -273,6 +319,13 @@ namespace AMLabSlicer.ViewModel
                         }
                     }
 
+                    if (param.Key == "atom.fixed_pose_confirmed") param.Value = false;
+                    param.PropertyChanged += (_, change) =>
+                    {
+                        if (change.PropertyName != nameof(SliceParameter.Value)) return;
+                        try { _slicePresets.Save(context, param.Key, param.Value); }
+                        catch (Exception ex) { _dialogs.ShowMessage("切片工艺保存失败：" + ex.Message); }
+                    };
                     _parameterStore.RegisterParameter(param);
                 }
 
@@ -291,20 +344,33 @@ namespace AMLabSlicer.ViewModel
                 RebuildParameterGroups(orderedParameters, algorithm);
 
                 _activeParameterAlgorithmId = algorithm;
+                _parameterContext = context;
             }
             catch (Exception ex)
             {
                 if (requestVersion == _parameterRequestVersion)
                     _dialogs.ShowMessage("获取参数列表失败: " + ex.Message);
             }
+            finally { if (requestVersion == _parameterRequestVersion) _parametersLoading = false; }
         }
 
         [RelayCommand]
         private void AutoArrange()
         {
             if (LoadedModel is not SceneNodeGroupModel3D model) return;
-            try { History.ExecuteCommand(SceneArrangement.CreateCommand(model.GroupNode.Items)); }
+            var fixedNodes = model.GroupNode.Items.Where(node => OutlinerItems.Any(item => item.Node == node && item.DescendantsAndSelf().Any(member => member.IsEffectivelyLocked))).ToArray();
+            try { History.ExecuteCommand(SceneArrangement.CreateCommand(model.GroupNode.Items.Except(fixedNodes), _printers?.GetActiveSnapshot(), fixedNodes)); }
             catch (InvalidOperationException ex) { _dialogs.ShowMessage(ex.Message, "自动摆放"); }
+        }
+
+        public void ArrangeImportedModel(SceneNode node)
+        {
+            var existing = (LoadedModel as SceneNodeGroupModel3D)?.GroupNode.Items.Where(item => item != node).ToArray() ?? [];
+            try { SceneArrangement.CreateCommand([node], _printers?.GetActiveSnapshot(), existing).Execute(); }
+            catch (InvalidOperationException ex)
+            {
+                _dialogs.ShowMessage($"模型已导入，但未能自动排列：{ex.Message}\n已有模型位置未改变，请手动调整新模型。", "导入模型");
+            }
         }
 
         [RelayCommand]
@@ -320,7 +386,7 @@ namespace AMLabSlicer.ViewModel
             {
                 var req = _sliceRequestFactory.Create(SelectedAlgorithm.AlgorithmId,
                     _parameterStore.GetAllParameters(),
-                    OutlinerItems.Where(item => item.Node != null)
+                    AllOutlinerItems.Where(item => !item.IsGroup && item.Children.Count == 0)
                         .Select(item => new SceneObject(item.Name, item.Node!)));
 
                 if (req.Objects.Count == 0)
@@ -329,25 +395,17 @@ namespace AMLabSlicer.ViewModel
                     return;
                 }
 
-                await foreach (var response in _slicingService.SliceAsync(req))
+                var result = await _dialogs.SliceWithProgressAsync(_slicingService, req, SelectedAlgorithm.DisplayName);
+                if (result == null) return;
+                var artifact = result.Artifacts.FirstOrDefault(a => a.Kind == "gcode")
+                    ?? result.Artifacts.FirstOrDefault(a => a.Kind == "toolpath.xyzab.json")
+                    ?? result.Artifacts.FirstOrDefault(a => a.Kind == "toolpath.ply");
+                if (artifact == null || artifact.Data.Length == 0)
                 {
-                    if (response.MsgCase != SliceServerMessage.MsgOneofCase.Result) continue;
-                    if (!response.Result.Success)
-                    {
-                        _dialogs.ShowMessage($"切片失败: {response.Result.Message}", "错误");
-                        continue;
-                    }
-                    var artifact = response.Result.Artifacts.FirstOrDefault(a => a.Kind == "gcode");
-                    if (artifact == null || artifact.Data.Length == 0)
-                    {
-                        _dialogs.ShowMessage("切片成功，但后端没有返回 G-code artifact。", "结果缺失");
-                        continue;
-                    }
-                    var path = _dialogs.SelectGCodeDestination();
-                    if (path == null) continue;
-                    await File.WriteAllBytesAsync(path, artifact.Data.ToByteArray());
-                    _dialogs.ShowMessage($"文件已保存至：\n{path}", "切片完成");
+                    _dialogs.ShowMessage("切片成功，但后端没有返回可保存的路径文件。", "结果缺失");
+                    return;
                 }
+                _dialogs.ShowSliceCompletion(artifact, req.Printer?.Name ?? "未选择打印机", result.Message);
             }
             catch (Exception ex)
             {
@@ -360,43 +418,81 @@ namespace AMLabSlicer.ViewModel
         {
             var majorBuilder = new LineBuilder();
             var minorBuilder = new LineBuilder();
+            var topBuilder = new LineBuilder();
+            var sidesBuilder = new LineBuilder();
+            BuildVolumeProfile = null;
 
             // 设定平台尺寸 225
-            int width = 225;
-            int depth = 225;
-            
-
-
-            // 1. 沿着 X 轴画线（平行于 Y 轴的线）
-            for (int x = 0; x <= width; x++)
+            double width = 225, depth = 225, height = 225;
+            bool elliptic = false;
+            bool centered = false;
+            try
             {
-                // 如果能被 10 整除，就是主线（粗线），否则是细线
-                if (x % 10 == 0)
+                if (_printers?.GetActiveSnapshot() is { } printer)
                 {
-                    majorBuilder.AddLine(new Vector3(x, 0, 0), new Vector3(x, depth, 0));
-                }
-                else
-                {
-                    minorBuilder.AddLine(new Vector3(x, 0, 0), new Vector3(x, depth, 0));
+                    width = printer.Number("machine_width"); depth = printer.Number("machine_depth");
+                    BuildVolumeProfile = printer;
+                    height = printer.Number("machine_height");
+                    elliptic = printer.Machine.GetValueOrDefault("machine_shape") == "elliptic";
+                    centered = printer.Machine.GetValueOrDefault("machine_center_is_zero") == "true";
                 }
             }
+            catch (InvalidOperationException) { }
+            float originX = centered ? -(float)width / 2 : 0, originY = centered ? -(float)depth / 2 : 0;
+            // Bound viewport line count independently of the machine dimensions.
+            var spacing = Math.Max(1, (int)Math.Ceiling(Math.Max(width, depth) / 1000));
 
-            // 2. 沿着 Y 轴画线（平行于 X 轴的线）
-            for (int y = 0; y <= depth; y++)
+
+
+            var cx = originX + width / 2;
+            var cy = originY + depth / 2;
+            for (int x = 0; x <= width; x += spacing)
             {
-                if (y % 10 == 0)
+                double half = elliptic ? depth / 2 * Math.Sqrt(Math.Max(0, 1 - Math.Pow((x - width / 2) / (width / 2), 2))) : depth / 2;
+                (x % 10 == 0 ? majorBuilder : minorBuilder).AddLine(new Vector3(x + originX, (float)(cy - half), 0), new Vector3(x + originX, (float)(cy + half), 0));
+            }
+            for (int y = 0; y <= depth; y += spacing)
+            {
+                double half = elliptic ? width / 2 * Math.Sqrt(Math.Max(0, 1 - Math.Pow((y - depth / 2) / (depth / 2), 2))) : width / 2;
+                (y % 10 == 0 ? majorBuilder : minorBuilder).AddLine(new Vector3((float)(cx - half), y + originY, 0), new Vector3((float)(cx + half), y + originY, 0));
+            }
+            var outline = new List<Vector3>();
+            if (elliptic)
+            {
+                for (int i = 0; i < 128; i++)
                 {
-                    majorBuilder.AddLine(new Vector3(0, y, 0), new Vector3(width, y, 0));
+                    double angle = i * Math.PI * 2 / 128;
+                    outline.Add(new Vector3((float)(cx + width / 2 * Math.Cos(angle)), (float)(cy + depth / 2 * Math.Sin(angle)), 0));
                 }
-                else
-                {
-                    minorBuilder.AddLine(new Vector3(0, y, 0), new Vector3(width, y, 0));
-                }
+            }
+            else
+                outline.AddRange(new[] { new Vector3(originX, originY, 0), new Vector3(originX + (float)width, originY, 0), new Vector3(originX + (float)width, originY + (float)depth, 0), new Vector3(originX, originY + (float)depth, 0) });
+            var up = new Vector3(0, 0, (float)height);
+            for (int i = 0; i < outline.Count; i++)
+            {
+                var a = outline[i]; var b = outline[(i + 1) % outline.Count];
+                majorBuilder.AddLine(a, b);
+                topBuilder.AddLine(a + up, b + up);
+                if (!elliptic || i % 32 == 0) sidesBuilder.AddLine(a, a + up);
             }
 
             // 将打包好的线框数据转换为渲染引擎认识的 Geometry3D，并绑定给前台
+            var axisLength = (float)Math.Min(30, Math.Min(width, Math.Min(depth, height)) * 0.12);
+            static Geometry3D BuildAxis(Vector3 endpoint)
+            {
+                var builder = new LineBuilder();
+                builder.AddLine(Vector3.Zero, endpoint);
+                return builder.ToLineGeometry3D();
+            }
+
+            OriginXAxisGeometry = BuildAxis(Vector3.UnitX * axisLength);
+            OriginYAxisGeometry = BuildAxis(Vector3.UnitY * axisLength);
+            OriginZAxisGeometry = BuildAxis(Vector3.UnitZ * axisLength);
             MajorGridGeometry = majorBuilder.ToLineGeometry3D();
             MinorGridGeometry = minorBuilder.ToLineGeometry3D();
+            BuildVolumeTopGeometry = topBuilder.ToLineGeometry3D();
+            BuildVolumeSidesGeometry = sidesBuilder.ToLineGeometry3D();
+            OnPropertyChanged(nameof(BuildVolumeProfile));
         }
     }
 }

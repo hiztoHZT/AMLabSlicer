@@ -120,6 +120,30 @@ message SliceRequest {
     repeated MeshObject objects = 3;
     FiveAxisConfig five_axis_config = 4;
     string request_id = 5;
+    PrinterConfiguration printer = 6;
+}
+
+// Immutable per-request snapshot; all engines receive the same selected printer.
+message PrinterConfiguration {
+    string id = 1;
+    string name = 2;
+    int32 schema_version = 3;
+    int32 revision = 4;
+    map<string, ParameterValue> machine_parameters = 5;
+    repeated PrinterExtruderConfiguration extruders = 6;
+    int32 active_extruder = 7;
+    bool is_multi_axis = 8;
+    map<string, ParameterValue> kinematics_parameters = 9;
+    repeated PrinterAxisConfiguration axes = 10;
+}
+message PrinterExtruderConfiguration {
+    string id = 1;
+    string name = 2;
+    map<string, ParameterValue> parameters = 3;
+}
+message PrinterAxisConfiguration {
+    string id = 1;
+    map<string, ParameterValue> parameters = 2;
 }
 
 message SliceClientMessage {

@@ -24,6 +24,9 @@ public sealed partial class PluginPackage : ObservableObject
 
 public sealed class PluginManager
 {
+    internal Func<SliceParameterSnapshot?>? ReadSliceParameters { private get; set; }
+    internal Action<SliceParameterSnapshot, IReadOnlyList<SliceParameterChange>>? ApplySliceParameters { private get; set; }
+    public Func<string, CancellationToken, Task>? ModelImportHandler { private get; set; }
     public string DirectoryPath { get; }
     public ObservableCollection<PluginPackage> Packages { get; } = new();
     public ObservableCollection<WorkspacePanelEntry> Panels { get; } = new();
@@ -108,7 +111,15 @@ public sealed class PluginManager
             var type = assembly.GetType(manifest.EntryType, throwOnError: true)!;
             if (!typeof(IPlugin).IsAssignableFrom(type) || type.IsAbstract) throw new InvalidDataException("插件必须实现 IPlugin");
             plugin = (IPlugin)Activator.CreateInstance(type)!;
-            await plugin.InitializeAsync(new HostPluginContext(manifest.Id, settings, () => _dialogs.OpenExtensions(manifest.Id)), cancellationToken);
+            await plugin.InitializeAsync(new HostPluginContext(manifest.Id, settings, () => _dialogs.OpenExtensions(manifest.Id),
+                (path, token) => ModelImportHandler?.Invoke(path, token) ?? throw new InvalidOperationException("模型工作区尚未就绪"),
+                () => manifest.Id == "amlab.agent" ? ReadSliceParameters?.Invoke() : null,
+                (snapshot, changes) =>
+                {
+                    if (manifest.Id != "amlab.agent" || ApplySliceParameters == null)
+                        throw new InvalidOperationException("切片参数工作区不可用。");
+                    ApplySliceParameters(snapshot, changes);
+                }), cancellationToken);
             // Panel creation is on the host UI thread. Only this right-side collection displays it.
             if (plugin is IPanelPlugin panelPlugin)
             {
@@ -162,7 +173,7 @@ public sealed class PluginManager
     {
         foreach (var package in Packages.Where(p => p.Instance is not null).ToArray())
         {
-            try { await package.Instance!.StopAsync(cancellationToken).ConfigureAwait(false); }
+            try { await package.Instance!.StopAsync(cancellationToken).WaitAsync(cancellationToken); }
             catch (Exception ex) { Trace.TraceWarning("插件退出：{0}", ex.Message); }
             package.Instance = null;
         }
@@ -250,8 +261,13 @@ public sealed class PluginManager
         public bool SuspendLoading { get; set; }
         public HashSet<string> PendingRemoval { get; set; } = new(StringComparer.Ordinal);
     }
-    private sealed record HostPluginContext(string PluginId, IPluginSettingsStore Settings, Action Navigate) : IPluginContext
+    private sealed record HostPluginContext(string PluginId, IPluginSettingsStore Settings, Action Navigate,
+        Func<string, CancellationToken, Task> Import, Func<SliceParameterSnapshot?> Read,
+        Action<SliceParameterSnapshot, IReadOnlyList<SliceParameterChange>> Apply) : IModelImportContext, ISliceParameterContext
     {
+        public Task ImportModelAsync(string localPath, CancellationToken cancellationToken) => Import(localPath, cancellationToken);
+        public SliceParameterSnapshot? ReadSliceParameters() => Read();
+        public void ApplySliceParameters(SliceParameterSnapshot snapshot, IReadOnlyList<SliceParameterChange> changes) => Apply(snapshot, changes);
         public void OpenSettings() => Navigate();
         public void Log(string message) => Trace.TraceInformation("Plugin {0}: {1}", PluginId, message);
     }

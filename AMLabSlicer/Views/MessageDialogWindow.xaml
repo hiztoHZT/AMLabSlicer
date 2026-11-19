@@ -11,7 +11,13 @@
                 <TextBlock x:Name="MessageText" TextWrapping="Wrap" Margin="0,4,0,12"/>
             </ScrollViewer>
         </Grid>
-        <Button Grid.Row="1" Content="{loc:Text Key='确定'}" IsDefault="True" HorizontalAlignment="Right" MinWidth="72"
-                Style="{StaticResource PrimaryActionButtonStyle}" Click="Confirm_Click"/>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button x:Name="CancelButton" Content="{loc:Text Key='取消'}" Visibility="Collapsed" IsCancel="True"
+                    MinWidth="72" Margin="0,0,8,0" Style="{StaticResource SecondaryActionButtonStyle}"/>
+            <Button x:Name="DeclineButton" Visibility="Collapsed" MinWidth="72" Margin="0,0,8,0"
+                    Style="{StaticResource SecondaryActionButtonStyle}" Click="Decline_Click"/>
+            <Button x:Name="ConfirmButton" Content="{loc:Text Key='确定'}" IsDefault="True" MinWidth="72"
+                    Style="{StaticResource PrimaryActionButtonStyle}" Click="Confirm_Click"/>
+        </StackPanel>
     </Grid>
 </views:ThemedWindow>

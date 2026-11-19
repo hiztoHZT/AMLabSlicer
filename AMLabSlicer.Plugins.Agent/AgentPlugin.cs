@@ -17,7 +17,7 @@ public sealed class AgentPlugin : IPanelPlugin
         cancellationToken.ThrowIfCancellationRequested();
         _settings = new AgentSettingsViewModel(context.Settings);
         _client = new HttpClient { Timeout = Timeout.InfiniteTimeSpan };
-        _chat = new AgentChatViewModel(_settings, new OpenAiCompatibleChatService(_client), context.OpenSettings);
+        _chat = new AgentChatViewModel(_settings, new OpenAiCompatibleChatService(_client), context.OpenSettings, context as ISliceParameterContext);
         _settings.Chat = _chat;
         return Task.CompletedTask;
     }

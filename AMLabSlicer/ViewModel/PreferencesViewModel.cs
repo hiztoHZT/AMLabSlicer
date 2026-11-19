@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HelixToolkit.SharpDX;
 using AMLabSlicer.Models;
@@ -37,9 +37,17 @@ public partial class PreferencesViewModel : ObservableObject
     [ObservableProperty] private bool _enableSSAO = false;
     [ObservableProperty] private bool _showCoordinateSystem = true;
     [ObservableProperty] private bool _showViewCube = true;
+    private double _viewCubeSize = 100;
+    public double ViewCubeSize
+    {
+        get => _viewCubeSize;
+        set => SetProperty(ref _viewCubeSize, UserPreferences.NormalizeViewCubeSize(value));
+    }
+    public IReadOnlyList<double> ViewCubeSizes => UserPreferences.ViewCubeSizes;
     [ObservableProperty] private bool _showBuildGrid = true;
     [ObservableProperty] private bool _showViewportStatus = true;
     [ObservableProperty] private bool _useOrthographic = false;
+    [ObservableProperty] private bool _reverseViewZoom = true;
     [ObservableProperty] private bool _enableDeleteConfirm = true;
     [ObservableProperty] private bool _enableArrangeConfirm = true;
     [ObservableProperty] private bool _enableSplitConfirm = true;
@@ -55,6 +63,13 @@ public partial class PreferencesViewModel : ObservableObject
     private bool _enableFXAA = true;
     public bool EnableFXAA { get => _enableFXAA; set { if (SetProperty(ref _enableFXAA, value)) OnPropertyChanged(nameof(FXAALevel)); } }
     public FXAALevel FXAALevel => EnableFXAA ? FXAALevel.High : FXAALevel.None;
+    [ObservableProperty] private bool _showSelectionOutline = true;
+    [ObservableProperty] private bool _showBuildVolumeTop = true;
+    [ObservableProperty] private bool _showBuildVolumeSides = false;
+    [ObservableProperty] private bool _showSelectionAabb = true;
+    private double _selectionOutlineThickness = 0.8;
+    public double SelectionOutlineThickness { get => _selectionOutlineThickness; set => SetProperty(ref _selectionOutlineThickness, double.IsFinite(value) ? Math.Clamp(value, 0.5, 4) : 0.8); }
+    public double[] SelectionOutlineSizes { get; } = [0.5, 0.8, 1, 1.5, 2, 3, 4];
     private int _undoStackDepth = 25;
     public int UndoStackDepth { get => _undoStackDepth; set => SetProperty(ref _undoStackDepth, Math.Clamp(value, 0, 200)); }
     private double _developerPanelWidth = 360;
@@ -85,12 +100,19 @@ public partial class PreferencesViewModel : ObservableObject
         ShowEngineHostConsole = ShowEngineHostConsole,
         FontFamilyName = FontFamilyName,
         FontSize = FontSize,
+        ShowSelectionOutline = ShowSelectionOutline,
+        ShowSelectionAabb = ShowSelectionAabb,
+        ShowBuildVolumeTop = ShowBuildVolumeTop,
+        ShowBuildVolumeSides = ShowBuildVolumeSides,
+        SelectionOutlineThickness = SelectionOutlineThickness,
         EnableSSAO = EnableSSAO,
         ShowCoordinateSystem = ShowCoordinateSystem,
         ShowViewCube = ShowViewCube,
+        ViewCubeSize = ViewCubeSize,
         ShowBuildGrid = ShowBuildGrid,
         ShowViewportStatus = ShowViewportStatus,
         UseOrthographic = UseOrthographic,
+        ReverseViewZoom = ReverseViewZoom,
         EnableDeleteConfirm = EnableDeleteConfirm,
         EnableArrangeConfirm = EnableArrangeConfirm,
         EnableSplitConfirm = EnableSplitConfirm,
@@ -115,12 +137,19 @@ public partial class PreferencesViewModel : ObservableObject
         ShowEngineHostConsole = settings.ShowEngineHostConsole;
         FontFamilyName = settings.FontFamilyName;
         FontSize = settings.FontSize;
+        ShowSelectionOutline = settings.ShowSelectionOutline;
+        ShowSelectionAabb = settings.ShowSelectionAabb;
+        ShowBuildVolumeTop = settings.ShowBuildVolumeTop;
+        ShowBuildVolumeSides = settings.ShowBuildVolumeSides;
+        SelectionOutlineThickness = settings.SelectionOutlineThickness;
         EnableSSAO = settings.EnableSSAO;
         ShowCoordinateSystem = settings.ShowCoordinateSystem;
         ShowViewCube = settings.ShowViewCube;
+        ViewCubeSize = settings.ViewCubeSize;
         ShowBuildGrid = settings.ShowBuildGrid;
         ShowViewportStatus = settings.ShowViewportStatus;
         UseOrthographic = settings.UseOrthographic;
+        ReverseViewZoom = settings.ReverseViewZoom;
         EnableDeleteConfirm = settings.EnableDeleteConfirm;
         EnableArrangeConfirm = settings.EnableArrangeConfirm;
         EnableSplitConfirm = settings.EnableSplitConfirm;
